@@ -1,0 +1,78 @@
+* {
+    font-family: Nunito,Century Gothic,Arial,Trebuchet MS,Verdana,Open Sans,sans-serif;
+    color: #f0d79e;
+}
+
+body {
+    background: #5C2B20;
+    position: relative;
+}
+
+body > * {
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+  
+button, a, input[type=submit] {
+    background: url(https://myhordes.eu/build/images/assets/img/background/bg_button.209bcd56..gif) 50%/cover no-repeat;
+    border: solid #000;
+    border-top-color: rgb(0, 0, 0);
+    border-top-width: medium;
+    border-right-color: rgb(0, 0, 0);
+    border-right-width: medium;
+    border-bottom-color: rgb(0, 0, 0);
+    border-bottom-width: medium;
+    border-left-color: rgb(0, 0, 0);
+    border-left-width: medium;
+    border-width: 1px 1px 2px;
+    box-shadow: 0 0 2px #000;
+    color: #f0d79e;
+    cursor: pointer;
+    font-variant: small-caps;
+    font-weight: 700;
+    outline: 1px solid transparent;
+    padding: 7px;
+    transition: outline-color .5s;
+    text-decoration: none;
+    text-align: center;
+}
+
+button:hover, a:hover, input[type=submit]:hover {
+    border-color: #f0d79e;
+    color: #fff;
+}
+  
+label {
+    border-bottom: 2px solid #ddab76;
+    color: #ddab76;
+    font-variant: small-caps;
+    font-weight: 700;
+    margin: 15px 0 2px;
+}
+
+.avatar {
+    border: 1px solid #5c2b20;
+    box-shadow: 0 0 5px rgba(0,0,0,.7);
+    height: 30px;
+    width: 90px;
+    vertical-align: middle;
+    object-fit: cover;
+}
+
+.name {
+    text-align:left;
+    margin-left:0.5rem;
+    font-family: 'Courier New', monospace;
+    font-weight: bolder;
+}
+
+select {
+    background-color: #5C2B20;
+    border: 1px solid #EFDBA8;
+    color: #EFDBA8;
+    outline: 1px solid black;
+    cursor: pointer;
+    padding: 0.3em 0.6em;
+}

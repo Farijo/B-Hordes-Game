@@ -1,0 +1,54 @@
+
+
+table {
+    border-collapse: collapse;
+}
+
+th {
+    font-variant: small-caps;
+    background: #0006;
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    cursor: pointer;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+}
+
+.item:hover {
+    background-color: #0002;
+}
+
+td, th {
+    border-bottom: 1px solid #7e4d2a;
+    font-family: Nunito,Century Gothic,Arial,Trebuchet MS,Verdana,Open Sans,sans-serif;
+    text-align: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+td:first-child {
+    text-align: left;
+}
+
+.id_found {
+    background-color: #F902;
+}
+
+table > caption {
+    text-align: start;
+    font-style: italic;
+    font-size: 90%;
+    margin: 0.5rem;
+}
+
+.sortable th span {
+    display: none;
+}
+
+.sortable td select {
+    max-width: 8em;
+}
+  
