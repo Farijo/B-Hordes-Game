@@ -45,7 +45,7 @@
     </tr>
     {{ range $challdata := . }}
     <tr class="item" onclick="document.location='/challenge/{{ $challdata.ID }}'">
-        <td sorttable_customkey="{{ $challdata.Creator.SimplifiedName.String }}" title="{{ $challdata.Role }}"><img class="avatar" src="{{ $challdata.Creator.Avatar.String }}"><span class="name">{{ $challdata.Creator.Name.String }}</span></td>
+        <td sorttable_customkey="{{ $challdata.Creator.SimplifiedName }}" title="{{ $challdata.Role }}"><img class="avatar" src="{{ $challdata.Creator.Avatar.String }}"><span class="name">{{ $challdata.Creator.Name }}</span></td>
         <td style="padding-left: 3em;padding-right: 3em;">{{ $challdata.Name }}</td>
         <td sorttable_customkey="{{ $challdata.Access }}"><img title="{{ index (index $access $challdata.Access) 0 }}" src="data:image/png;base64, {{ index (index $access $challdata.Access) 1 }}"/></td>
         <td>{{ if $challdata.Private }}<img title=Oui src="https://myhordes.eu/build/images/professions/vest.dab68fee.gif" />{{ else }}<img title=Non alt=Non />{{ end }}</td>

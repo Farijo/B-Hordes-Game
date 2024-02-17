@@ -3,30 +3,46 @@ package main
 import (
 	"bhordesgame/dto"
 	"database/sql"
+	"strings"
+	"unicode"
+
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 var instance *sql.DB
 
 func dbConn() (db *sql.DB) {
-	if instance != nil {
-		return instance
-	}
-	dbDriver := "mysql"
-	dbUser := "tvallar"
-	dbPass := ""
-	dbName := "hordes_challenge"
-	instance, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
-	if err != nil {
-		panic(err.Error())
+	if instance == nil {
+		var err error
+
+		dbDriver := "mysql"
+		dbUser := "tvallar"
+		dbPass := ""
+		dbName := "hordes_challenge"
+		instance, err = sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
+		if err != nil {
+			panic(err.Error())
+		}
 	}
 	return instance
 }
 
-func queryPublicChallenges(ch chan<- dto.DetailedChallenge) {
-	defer close(ch)
-	db := dbConn()
+var trsf *transform.Transformer
 
-	rows, err := db.Query(`SELECT user.name as cname, user.simplified_name, user.avatar
+func transformer() *transform.Transformer {
+	if trsf == nil {
+		t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+		trsf = &t
+	}
+	return trsf
+}
+
+func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
+	defer close(ch)
+
+	rows, err := dbConn().Query(`SELECT user.name as cname, user.simplified_name, user.avatar
 	, challenge.id, challenge.name, challenge.flags, challenge.start_date, challenge.end_date
 	, COUNT(participant.user) AS participant_count
 	, challenge.start_date <= NOW() AS started
@@ -61,14 +77,55 @@ func queryPublicChallenges(ch chan<- dto.DetailedChallenge) {
 			&Ended); err != nil {
 			panic(err.Error())
 		}
-		detailedChall.Access = int8(detailedChall.Flags & 0x03)
-		detailedChall.Private = detailedChall.Flags&0x04 == 0
-		detailedChall.Status = int8((detailedChall.Flags & 0x30) >> 4)
-		if Ended.Bool {
-			detailedChall.Status += 2
-		} else if Started.Bool {
-			detailedChall.Status += 1
-		}
-		ch <- detailedChall
+		detailedChall.UpdateDetailedProperties(Started.Bool, Ended.Bool)
+		ch <- &detailedChall
 	}
+}
+
+func queryChallenge(id int) (challenge dto.DetailedChallenge, err error) {
+	var untilStart, untilEnd sql.NullString
+	row := dbConn().QueryRow(`SELECT name, creator, flags, start_date, end_date
+	, TIMEDIFF(start_date,NOW()) as rem_start, TIMEDIFF(end_date,NOW()) as rem_end
+	 FROM challenge
+	 WHERE id=?`, id)
+
+	if err = row.Scan(&challenge.Name, &challenge.Creator.ID, &challenge.Flags, &challenge.StartDate, &challenge.EndDate, &untilStart, &untilEnd); err != nil {
+		return
+	}
+	challenge.UpdateDetailedProperties(untilStart.Valid && untilStart.String[0] == '-', untilEnd.Valid && untilEnd.String[0] == '-')
+
+	return
+}
+
+func insertUser(user *dto.User) error {
+	simplified, _, err := transform.String(*transformer(), user.Name)
+	user.SimplifiedName = strings.ToLower(simplified)
+	if err != nil {
+		return err
+	}
+	_, err = dbConn().Exec(`INSERT INTO user (id, name, simplified_name, avatar) VALUES (?, ?, ?, ?)
+	ON DUPLICATE KEY UPDATE name=?, simplified_name=?, avatar=?`,
+		user.ID, user.Name, user.SimplifiedName, user.Avatar, user.Name, user.SimplifiedName, user.Avatar)
+
+	return err
+}
+
+func insertMilestone(milestone *dto.Milestone) error {
+	rows, err := dbConn().Query(`SELECT typ,descript,goal.id
+	FROM goal
+	JOIN challenge ON goal.challenge = challenge.id
+	JOIN participant ON challenge.id = participant.challenge AND participant.user = ?
+	WHERE challenge.start_date <= NOW()
+	AND (NOW() < challenge.end_date OR challenge.end_date IS NULL)
+	AND ((challenge.flags & 0x30) >> 4) = 2`, milestone.User.ID)
+	if err != nil {
+		return err
+	}
+	rowPresent := rows.Next()
+	rows.Close()
+	if !rowPresent {
+		// not in a challenge, nothing to do
+		return nil
+	}
+	return nil
 }
