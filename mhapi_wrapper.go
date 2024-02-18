@@ -34,7 +34,5 @@ func requestMe(userkey string) (userdata *dto.Milestone, err error) {
 	flat.User = &flat.Milestone.User
 	json.NewDecoder(resp.Body).Decode(&flat)
 
-	fmt.Println(flat)
-
 	return &flat.Milestone, nil
 }

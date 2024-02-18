@@ -3,6 +3,7 @@ package main
 import (
 	"bhordesgame/dto"
 	"database/sql"
+	"encoding/binary"
 	"strings"
 	"unicode"
 
@@ -127,5 +128,71 @@ func insertMilestone(milestone *dto.Milestone) error {
 		// not in a challenge, nothing to do
 		return nil
 	}
+
+	rows, err = dbConn().Query(`SELECT rewards, isGhost, playedMaps, dead, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, custom FROM milestone WHERE user=? ORDER BY dt ASC`, milestone.User.ID)
+	if err != nil {
+		return err
+	}
+	var previousMS dto.Milestone
+	for rows.Next() {
+		if err = rows.Scan(
+			&previousMS.Rewards,
+			&previousMS.IsGhost,
+			&previousMS.PlayedMaps,
+			&previousMS.Dead,
+			&previousMS.Ban,
+			&previousMS.BaseDef,
+			&previousMS.X,
+			&previousMS.Y,
+			&previousMS.Job,
+			&previousMS.Map.Wid,
+			&previousMS.Map.Hei,
+			&previousMS.Map.Days,
+			&previousMS.Map.Conspiracy,
+			&previousMS.Map.Custom); err != nil {
+			rows.Close()
+			return err
+		}
+	}
+	rows.Close()
+
+	mustUpdate := milestone.InvalidateUnchangedFields(&previousMS)
+
+	changements := make([]byte, 0, 120)
+	milestone.Rewards.Valid = false
+	for id, number := range milestone.Rewards.Pictos {
+		if number != previousMS.Rewards.Pictos[id] {
+			changements = binary.LittleEndian.AppendUint16(changements, id)
+			changements = binary.LittleEndian.AppendUint32(changements, number)
+
+			milestone.Rewards.Valid = true
+		}
+	}
+
+	if milestone.Rewards.Valid {
+		milestone.Rewards.String = string(changements)
+	} else if !mustUpdate {
+		return nil
+	}
+
+	if _, err = dbConn().Exec(`INSERT INTO milestone VALUES(?, NOW(2), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		milestone.User.ID,
+		milestone.IsGhost,
+		milestone.PlayedMaps,
+		milestone.Rewards,
+		milestone.Dead,
+		milestone.Ban,
+		milestone.BaseDef,
+		milestone.X,
+		milestone.Y,
+		milestone.Job,
+		milestone.Map.Wid,
+		milestone.Map.Hei,
+		milestone.Map.Days,
+		milestone.Map.Conspiracy,
+		milestone.Map.Custom); err != nil {
+		return err
+	}
+
 	return nil
 }
