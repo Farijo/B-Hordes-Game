@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unicode"
 
+	_ "github.com/go-sql-driver/mysql"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
@@ -172,6 +173,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 	if milestone.Rewards.Valid {
 		milestone.Rewards.String = string(changements)
 	} else if !mustUpdate {
+		// nothing has changed since last milestone
 		return nil
 	}
 
@@ -195,4 +197,85 @@ func insertMilestone(milestone *dto.Milestone) error {
 	}
 
 	return nil
+}
+
+func queryUser(id int) (user dto.User, err error) {
+	row := dbConn().QueryRow(`SELECT name, simplified_name, avatar FROM user WHERE id=?`, id)
+	user.ID = id
+	err = row.Scan(&user.Name, &user.SimplifiedName, &user.Avatar)
+	return
+}
+
+func queryChallengesRelatedTo(userId int, viewer int, ch chan<- *dto.DetailedChallenge) {
+	defer close(ch)
+
+	rows, err := dbConn().Query(`SELECT user.name as cname, user.simplified_name, user.avatar
+	, challenge.id, challenge.name, challenge.flags, challenge.start_date, challenge.end_date
+	, COUNT(participant.user) AS participant_count
+	, challenge.start_date <= NOW() AS started
+	, challenge.end_date < NOW() AS ended
+	, challenge.creator=? AS created
+	, participant.user IS NOT NULL as participate
+	, validator.user IS NOT NULL as validate
+	, invitation.user IS NOT NULL as invited
+	 FROM challenge
+	 LEFT JOIN user        ON challenge.creator = user.id
+	 LEFT JOIN participant ON challenge.id = participant.challenge AND participant.user = ?
+	 LEFT JOIN validator   ON challenge.id = validator.challenge AND validator.user = ?
+	 LEFT JOIN invitation  ON challenge.id = invitation.challenge AND invitation.user = ?
+	 WHERE ? IN (challenge.creator, participant.user, validator.user, invitation.user)
+	 AND (challenge.flags & 0x04 = 0 OR ? in (challenge.creator, participant.user, validator.user))
+	 AND (?=? OR ((challenge.flags & 0x30) >> 4) = 2 AND challenge.flags & 0x03 < 2)
+	 GROUP BY challenge.id, challenge.name, challenge.end_date, created, participate, validate, invited
+	 ORDER BY ended, started, challenge.flags & 0x30`, userId, userId, userId, userId, userId, viewer, userId, viewer)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var detailedChall dto.DetailedChallenge
+		var Started sql.NullBool
+		var Ended sql.NullBool
+		var created, participate, validate, invited bool
+		if err := rows.Scan(
+			&detailedChall.Creator.Name,
+			&detailedChall.Creator.SimplifiedName,
+			&detailedChall.Creator.Avatar,
+			&detailedChall.ID,
+			&detailedChall.Name,
+			&detailedChall.Flags,
+			&detailedChall.StartDate,
+			&detailedChall.EndDate,
+			&detailedChall.ParticipantCount,
+			&Started,
+			&Ended,
+			&created,
+			&participate,
+			&validate,
+			&invited); err != nil {
+			panic(err.Error())
+		}
+		detailedChall.UpdateDetailedProperties(Started.Bool, Ended.Bool)
+
+		tmp := []string{}
+		if created {
+			tmp = append(tmp, "Créateur")
+		}
+		if participate {
+			tmp = append(tmp, "Participant")
+		} else if invited {
+			if detailedChall.Access == 2 {
+				tmp = append(tmp, "Invité")
+			} else {
+				tmp = append(tmp, "Postulant")
+			}
+		}
+		if validate {
+			tmp = append(tmp, "Approbateur")
+		}
+
+		detailedChall.Role = strings.Join(tmp, ", ")
+
+		ch <- &detailedChall
+	}
 }

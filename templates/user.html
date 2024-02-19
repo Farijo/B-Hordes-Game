@@ -5,11 +5,27 @@
     <link rel="stylesheet" href="/style/table.css">
     <script src="/script/sorttable.js"></script>
     <title>B'Hordes Games</title>
+    <style>h2{margin-top: 3em;}</style>
 </head>
 <body>
     {{template "top-bar.html" . }}
+    {{ if eq "" .user.Name }}
+    <h2>Joueur introuvable</h2>
+    {{ else }}
+    {{template "user-table.html" .user }}
+    <h2>Défis en tant que
+        <select id=type>
+            <option>Participant</option>
+            <option>Créateur</option>
+            <option>Approbateur</option>
+            <option>Postulant</option>
+            <option>Invité</option>
+        </select>
+    </h2>
     {{template "challenge-table.html" .challenges }}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
     <script src="/script/table_filter.js"></script>
+    <script src="/script/user.js"></script>
+    {{ end }}
 </body>
 </html>
