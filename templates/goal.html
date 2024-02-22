@@ -1,0 +1,18 @@
+<select name="type{gidx}">
+    <option value="0">Accumuler les pictos</option>
+    <option value="1">Être sur la case</option>
+    <option value="2">Construire</option>
+    <option value="3">Avoir en banque</option>
+    <option value="4">Personnalisé</option>
+    <option value="5">⚠️ Supprimer cet objectif ⚠️</option>
+</select>
+<div style="margin:0.4em 0 1em 0">
+    <input class="eslc" type="number" name="x{gidx}" placeholder="X" min="-25" max="25" step="1" style="margin-bottom:0.4rem"/>
+    <input class="eslc" type="number" name="y{gidx}" placeholder="Y" min="-25" max="25" step="1"/> 
+    <span  class="eslc" style="vertical-align:sub">Avec</span>
+    <br    class="eslc">
+    <input class="alp eslc aeb" type="number" name="count{gidx}" min="1" step="1" title="Si vide : l'objectif est d'en accumuler le maximum"/>
+    <img   class="alp eslc c aeb" id="goal-img"/> 
+    <select class="alp eslc c aeb" id="goal-list{gidx}" style="width:11em"></select>
+    <input class="alp eslc c aeb" id="goal-value" type="hidden" name="val{gidx}"/>
+</div>

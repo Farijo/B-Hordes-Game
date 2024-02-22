@@ -1,9 +1,4 @@
 
-
-table {
-    border-collapse: collapse;
-}
-
 th {
     font-variant: small-caps;
     background: #0006;
@@ -19,14 +14,6 @@ th {
 
 .item:hover {
     background-color: #0002;
-}
-
-td, th {
-    border-bottom: 1px solid #7e4d2a;
-    font-family: Nunito,Century Gothic,Arial,Trebuchet MS,Verdana,Open Sans,sans-serif;
-    text-align: center;
-    padding-top: 5px;
-    padding-bottom: 5px;
 }
 
 td:first-child {

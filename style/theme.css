@@ -76,3 +76,15 @@ select {
     cursor: pointer;
     padding: 0.3em 0.6em;
 }
+
+td, th {
+    border-bottom: 1px solid #7e4d2a;
+    font-family: Nunito,Century Gothic,Arial,Trebuchet MS,Verdana,Open Sans,sans-serif;
+    text-align: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+table {
+    border-collapse: collapse;
+}

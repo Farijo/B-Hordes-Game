@@ -108,6 +108,25 @@ func userHandle(c *gin.Context) {
 	c.HTML(http.StatusOK, "user.html", gin.H{"logged": cookieErr == nil && ok, "challenges": ch, "user": &user})
 }
 
+var serverData template.JS
+
+func getServerData(userkey string) template.JS {
+	if serverData == "" {
+		serverData = requestServerData(userkey)
+	}
+	return serverData
+}
+
+func challengeCreationHandle(c *gin.Context) {
+	key, cookieErr := c.Cookie("user")
+	if cookieErr != nil {
+		c.Redirect(http.StatusSeeOther, "https://myhordes.eu/jx/disclaimer/26")
+		return
+	}
+
+	c.HTML(http.StatusOK, "challenge-creation.html", gin.H{"logged": true, "challenge": nil, "srvData": getServerData(key)})
+}
+
 func challengeHandle(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -136,6 +155,7 @@ func main() {
 	r.POST("/user", refreshHandle)
 	r.GET("/user", selfHandle)
 	r.GET("/user/:id", userHandle)
+	r.GET("/challenge", challengeCreationHandle)
 	r.GET("/challenge/:id", challengeHandle)
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
