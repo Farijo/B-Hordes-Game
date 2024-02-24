@@ -25,13 +25,12 @@ selectOpt = selectOpt.join('');
 const classes = ['.alp', '.eslc', '.c', '.aeb', '.p'];
 
 const goalIndexes = $('[name=goal-indexes]')[0];
-let gidx=0;
 addAGoal = function(deletable) {
-    const agoal = $(goalhtml.replaceAll('{gidx}', ++gidx));
+    const agoal = $(goalhtml);
     const goalTypes = $(agoal[0]);
 
     const target = agoal.children('#goal-img');
-    const selectList = agoal.children('#goal-list'+gidx);
+    const selectList = agoal.children('#goal-list');
     const selectValue = agoal.children('#goal-value');
     selectList.append(selectOpt);
     selectList.on('change', function() {
@@ -41,10 +40,8 @@ addAGoal = function(deletable) {
         selectValue.val(ooo.id);
     });
 
-    const fixedGidx = gidx;
     goalTypes.on('change', function() {
         if(this.value >= classes.length) {
-            goalIndexes.value = goalIndexes.value.replace(` ${fixedGidx}`, '');
             agoal.remove();
             return;
         }
@@ -57,9 +54,7 @@ addAGoal = function(deletable) {
         }
     }).trigger('change');
 
-    if(deletable) {
-        goalIndexes.value += ` ${gidx}`;
-    } else {
+    if(!deletable) {
         goalTypes.children('option[value=5]').remove();
     }
     $('#all-goals').append(agoal);

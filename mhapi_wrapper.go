@@ -62,6 +62,8 @@ func requestServerData(userkey string) template.JS {
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 	var builder strings.Builder
+	builder.Grow(118000)
+
 	queryParams := "?fields=id,img,name" + buildAuthQuery(userkey)
 
 	for _, v := range []string{"pictos", "buildings", "items"} {

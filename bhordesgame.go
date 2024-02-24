@@ -13,7 +13,6 @@ import (
 var sessions map[string]int = make(map[string]int, 10)
 
 func refreshData(key string) error {
-
 	milestone, err := requestMe(key)
 	if err != nil {
 		return err
@@ -43,8 +42,9 @@ func indexHandle(c *gin.Context) {
 
 	go queryPublicChallenges(ch)
 
-	_, err := c.Cookie("user")
-	c.HTML(http.StatusOK, "index.html", gin.H{"logged": err == nil, "challenges": ch})
+	key, err := c.Cookie("user")
+	_, ok := sessions[key]
+	c.HTML(http.StatusOK, "index.html", gin.H{"logged": err == nil && ok, "challenges": ch})
 }
 
 func logoutHandle(c *gin.Context) {
@@ -56,23 +56,14 @@ func logoutHandle(c *gin.Context) {
 }
 
 func refreshHandle(c *gin.Context) {
-	if key, err := c.Cookie("user"); err != nil {
-		fmt.Println(err)
-	} else if err = refreshData(key); err != nil {
+	if err := refreshData(c.GetString("key")); err != nil {
 		fmt.Println(err)
 	}
 	c.Redirect(http.StatusFound, "/user")
 }
 
 func selfHandle(c *gin.Context) {
-	key, cookieErr := c.Cookie("user")
-	currentUser, ok := sessions[key]
-	if cookieErr != nil || !ok {
-		c.Redirect(http.StatusSeeOther, "https://myhordes.eu/jx/disclaimer/26")
-		return
-	}
-
-	c.Redirect(http.StatusFound, "/user/"+strconv.Itoa(currentUser))
+	c.Redirect(http.StatusFound, fmt.Sprintf("/user/%d", c.GetInt("uid")))
 }
 
 func userHandle(c *gin.Context) {
@@ -117,14 +108,75 @@ func getServerData(userkey string) template.JS {
 	return serverData
 }
 
-func challengeCreationHandle(c *gin.Context) {
-	key, cookieErr := c.Cookie("user")
-	if cookieErr != nil {
-		c.Redirect(http.StatusSeeOther, "https://myhordes.eu/jx/disclaimer/26")
-		return
+func pop[T any](a *[]T) T {
+	rv := (*a)[0]
+	*a = (*a)[1:]
+	return rv
+}
+
+func createChallengeHandle(c *gin.Context) {
+	var formChallenge struct {
+		Name          string `form:"name"`
+		Participation int8   `form:"participation"`
+		Private       bool   `form:"privat"`
+		ValidationApi bool   `form:"validation_api"`
+		Act           string `form:"act"`
+	}
+	c.Bind(&formChallenge)
+
+	var challenge dto.Challenge
+	challenge.Name = formChallenge.Name
+	challenge.Creator.ID = c.GetInt("uid")
+	challenge.Flags = byte(formChallenge.Participation)
+	if formChallenge.Private {
+		challenge.Flags |= 0x04
+	}
+	if !formChallenge.ValidationApi {
+		challenge.Flags |= 0x08
 	}
 
-	c.HTML(http.StatusOK, "challenge-creation.html", gin.H{"logged": true, "challenge": nil, "srvData": getServerData(key)})
+	types := c.PostFormArray("type")
+	goals := make([]dto.Goal, len(types))
+	x := c.PostFormArray("x")
+	y := c.PostFormArray("y")
+	count := c.PostFormArray("count")
+	val := c.PostFormArray("val")
+
+	for i := range goals {
+		v := &goals[i]
+		v.Typ = types[i][0] - '0'
+		switch v.Typ {
+		case 0, 3:
+			v.Descript = pop(&count) + ":" + pop(&val)
+		case 1:
+			v.Descript = pop(&x) + ":" + pop(&y) + ":" + pop(&count) + ":" + pop(&val)
+		case 2:
+			v.Descript = pop(&val)
+		}
+	}
+
+	id, err := insertChallenge(&challenge, &goals)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d", id))
+}
+
+func requireAuth(c *gin.Context) {
+	key, cookieErr := c.Cookie("user")
+	uid, ok := sessions[key]
+	if cookieErr != nil || !ok {
+		c.Redirect(http.StatusSeeOther, "https://myhordes.eu/jx/disclaimer/26")
+		c.Abort()
+	} else {
+		c.Set("key", key)
+		c.Set("uid", uid)
+	}
+}
+
+func challengeCreationHandle(c *gin.Context) {
+	c.HTML(http.StatusOK, "challenge-creation.html", gin.H{"logged": true, "challenge": nil, "srvData": getServerData(c.GetString("key"))})
 }
 
 func challengeHandle(c *gin.Context) {
@@ -152,10 +204,17 @@ func main() {
 	r.POST("/", connectionHandle)
 	r.GET("/", indexHandle)
 	r.GET("/logout", logoutHandle)
-	r.POST("/user", refreshHandle)
-	r.GET("/user", selfHandle)
 	r.GET("/user/:id", userHandle)
-	r.GET("/challenge", challengeCreationHandle)
 	r.GET("/challenge/:id", challengeHandle)
+
+	authorized := r.Group("/")
+	authorized.Use(requireAuth)
+	{
+		authorized.POST("/user", refreshHandle)
+		authorized.GET("/user", selfHandle)
+		authorized.POST("/challenge", createChallengeHandle)
+		authorized.GET("/challenge", challengeCreationHandle)
+	}
+
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

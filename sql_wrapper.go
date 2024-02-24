@@ -4,6 +4,7 @@ import (
 	"bhordesgame/dto"
 	"database/sql"
 	"encoding/binary"
+	"errors"
 	"strings"
 	"unicode"
 
@@ -278,4 +279,33 @@ func queryChallengesRelatedTo(userId int, viewer int, ch chan<- *dto.DetailedCha
 
 		ch <- &detailedChall
 	}
+}
+
+func insertChallenge(toInsert *dto.Challenge, associated *[]dto.Goal) (int, error) {
+	if len(*associated) == 0 {
+		return 0, errors.New("cannot create challenge without goals")
+	}
+
+	res, err := dbConn().Exec(`INSERT INTO challenge (name, creator, flags) VALUES (?, ?, ?)`, toInsert.Name, toInsert.Creator.ID, toInsert.Flags)
+	if err != nil {
+		return 0, err
+	}
+
+	challengeId64, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	challengeId := int(challengeId64)
+
+	sqlStmt := "INSERT INTO goal (challenge, typ, descript) VALUES (?, ?, ?)"
+	frstGoal := pop(associated)
+	values := []any{challengeId, frstGoal.Typ, frstGoal.Descript}
+	for _, g := range *associated {
+		sqlStmt += ", (?, ?, ?)"
+		values = append(values, challengeId, g.Typ, g.Descript)
+	}
+
+	_, err = dbConn().Exec(sqlStmt, values...)
+
+	return challengeId, err
 }
