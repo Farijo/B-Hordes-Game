@@ -309,3 +309,21 @@ func insertChallenge(toInsert *dto.Challenge, associated *[]dto.Goal) (int, erro
 
 	return challengeId, err
 }
+
+func queryChallengeGoals(challengeId int, ch chan<- *dto.Goal) {
+	defer close(ch)
+
+	rows, err := dbConn().Query(`SELECT typ, descript FROM goal WHERE challenge=?`, challengeId)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var goal dto.Goal
+		goal.Challenge = challengeId
+		if err := rows.Scan(&goal.Typ, &goal.Descript); err != nil {
+			panic(err.Error())
+		}
+		ch <- &goal
+	}
+}

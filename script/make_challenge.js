@@ -30,7 +30,7 @@ addAGoal = function(deletable) {
     const goalTypes = $(agoal[0]);
 
     const target = agoal.children('#goal-img');
-    const selectList = agoal.children('#goal-list');
+    const selectList = agoal.children('.goal-list');
     const selectValue = agoal.children('#goal-value');
     selectList.append(selectOpt);
     selectList.on('change', function() {
@@ -82,28 +82,26 @@ function bindFormValues(participation, private, goals, api) {
         return val;
     }
 
-    let idx = 0;
     while (i < goals.length) {
-        idx++;
         const gvalue = goals[i];
         i += 2;
-        $(`[name=type${idx}]`).val(gvalue).trigger('change');
+        $(`[name=type]:last`).val(gvalue).trigger('change');
 
         switch (gvalue) {
             case '1': // case
-                $(`[name=x${idx}]`).val(getNextVal()).trigger('change');
-                $(`[name=y${idx}]`).val(getNextVal()).trigger('change');
+                $(`[name=x]:last`).val(getNextVal()).trigger('change');
+                $(`[name=y]:last`).val(getNextVal()).trigger('change');
             case '0': // picto
             case '3': // banque
-                $(`[name=count${idx}]`).val(getNextVal()).trigger('change');
+                $(`[name=count]:last`).val(getNextVal()).trigger('change');
             case '2': // construire
                 const nval = getNextVal();
                 for (var key in pictImg[gvalue]) {
                     if (pictImg[gvalue][key].id == nval) {
-                        $(`#goal-list${idx}`).val(key).trigger('change');
+                        $(`.goal-list:last`).val(key).trigger('change');
                         break;
                     }
-                  }
+                }
                 break;
             case '4': // perso
             default:

@@ -10,7 +10,7 @@
 <body>
     {{ template "top-bar.html" . }}
     <form method="POST" style="width:fit-content">
-        {{ if .challenge }}<input type="hidden" name="id" value="{{ .challenge.Id }}"/>{{ end }}
+        {{ if .challenge }}<input type="hidden" name="id" value="{{ .challenge.ID }}"/>{{ end }}
         <table>
             <tr>
                 <td><label>Nom</label></td>
@@ -68,7 +68,8 @@
 <script src="/script/make_challenge.js"></script>
 <script>
     {{ if .challenge }}
-        bindFormValues({{ .challenge.Access }}, {{ .challenge.Private }}, {{ 3 }}, {{ .challenge.Private }})
+        const goals = '{{ range $goal := .goals }}{{ $goal.Typ }}:{{ templateHTML $goal.Descript }}:{{ end }}';
+        bindFormValues({{ .challenge.Access }}, {{ .challenge.Private }}, goals, {{ .challenge.API }})
         {{ if eq .challenge.Status 0 }}
             $('[value=Modifier]').css('display', 'none');
             $('[value=\"Ouvrir les inscriptions\"]').css('display', 'none');
@@ -83,6 +84,5 @@
         $('[value=Modifier]').css('display', 'none');
         $('[value=\"Ouvrir les inscriptions\"]').css('display', 'none');
     {{ end }}
-
 </script>
 </html>

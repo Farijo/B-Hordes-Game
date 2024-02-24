@@ -185,18 +185,39 @@ func challengeHandle(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	queryChallenge(id)
 
-	// TODO render right page
-	c.JSON(200, gin.H{"e": c.Param("id")})
+	challenge, err := queryChallenge(id)
+	if err != nil {
+		fmt.Println(err.Error())
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	key, cookieErr := c.Cookie("user")
+	uid, ok := sessions[key]
+
+	switch challenge.Status {
+	case 0, 1: // draft, review
+		if challenge.Creator.ID == uid && cookieErr == nil && ok {
+			ch := make(chan *dto.Goal)
+			go queryChallengeGoals(id, ch)
+			c.HTML(http.StatusOK, "challenge-creation.html", gin.H{"logged": true, "challenge": challenge, "goals": ch, "srvData": getServerData(key)})
+		} else {
+			c.Status(http.StatusForbidden)
+			return
+		}
+	case 2: // invite
+
+	}
 }
 
 func main() {
 	r := gin.Default()
 	r.SetFuncMap(template.FuncMap{
-		"getAccess": getAccess,
-		"getStatus": getStatus,
-		"fDate":     fdate,
+		"getAccess":    getAccess,
+		"getStatus":    getStatus,
+		"fDate":        fdate,
+		"templateHTML": func(a string) template.HTML { return template.HTML(a) },
 	})
 	r.LoadHTMLGlob("templates/*")
 	r.Static("/style", "style")
