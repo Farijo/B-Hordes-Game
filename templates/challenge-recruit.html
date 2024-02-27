@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/style/theme.css">
+    <link rel="stylesheet" href="/style/table.css">
+    <link rel="stylesheet" href="/style/recruit.css">
+    <script src="/script/sorttable.js"></script>
+</head>
+<body>
+    {{ template "top-bar.html" . }}
+    <h2>{{ .challenge.Name }}</h2>
+    <div class="container">
+        <a class="box" href="user/{{ .challenge.Creator.ID }}">
+            <div class="line1">Par</div>
+            <div class="line2"><img class="avatar" src="{{ .challenge.Creator.Avatar.String }}"><span class="name">{{ .challenge.Creator.Name }}</span></div>
+        </a>
+        {{ if .selfChallenge }}
+            <form class="box" method="POST" action="/challenge/{{ .challenge.ID }}">
+            <div class="line1">Début</div><input class="line2" name="start_date" step="any" type="datetime-local" value="{{ .challenge.StartDate }}" style="margin:0.5em"/>
+            <input type="submit" name="start_date_validator" value="Valider">
+            </form>
+            <form class="box" method="POST" action="/challenge/{{ .challenge.ID }}">
+            <div class="line1">Fin</div><input class="line2" name="end_date" step="any" type="datetime-local" value="{{ .challenge.EndDate }}" required style="margin:0.5em"/>
+            <input type="submit" name="end_date_validator" value="Valider">
+            </form>
+        {{ else }}
+            {{ if .challenge.StartDate.Valid }}
+                <div class="box">
+                <div class="line1">Début</div>
+                <p>{{ .challenge.StartDate.String }}
+                    {{ if remaining }}
+                    <br><span class="time-remaining" data-rem="{{ remainingsec }}">~{{ remaining }}</span>
+                    {{ end }}
+                </p>
+                </div>
+            {{ end }}
+            {{ if .challenge.EndDate.Valid }}
+                <div class="box">
+                <div class="line1">Début</div>
+                <p>{{ .challenge.EndDate.String }}
+                    {{ if remaining }}
+                    <br><span class="time-remaining" data-rem="{{ remainingsec }}">~{{ remaining }}</span>
+                    {{ end }}
+                </p>
+                </div>
+            {{ end }}
+        {{ end }}
+    </div>
+    <div class="container">
+        {{ $goal := range .goals }}
+            <div class="box">
+                <div class="line1">Accumuler <b>%s</b> pictos</div>
+                <div class="line2"><img src="https://myhordes.eu/build/images/%s">%s</div>
+            </div>
+        {{ end }}
+    </div>
+
+    {{ if .selfChallenge }}
+    $participation = array(false, false, false);
+    $participation[$chall_data['flags'] & 0x03] = true;
+    <form>
+        <h4>Ajouter des approbateurs {{ if $participation[2] }} / Envoyer des invitations {{ end }}</h4>
+        <input type="text" name="ident" placeholder="Nom, ID" title="Entrer une liste de noms ou d\'ids séparés par des espaces" />
+        <input type="hidden" value=', $challenge, ' name="id" />
+         <input style="padding:2px 5px" type="submit" value="Chercher" />
+    </form>
+
+    $htmlform = '<td onclick="childClick(event)"><input form="%s" type="checkbox" name="%d"</td>';
+    $form = '<th class="sorttable_nosort"><form id="%s" class="search-result" method="POST" action="?ident='.$_GET['ident'].'"><input name="action" type=submit value="+ Approbateur" disabled />'.($participation[2] ? '<br><input name="action" type=submit value="+ Invité" disabled/>':'').'</form></th>';
+
+    if(!empty($_GET['ident'])) {
+        $values = explode(' ', $_GET['ident']);
+        $result1 = get_all_users_with_id($values);
+        $result2 = get_all_users_like_list($values);
+
+        $name = 'Résultats';
+
+        $htmlform = '<td onclick="childClick(event)"><form class="search-result" method="POST" action="?ident='.$_GET['ident'].'"><input name="%d" type=submit value="+ Approbateur"/>'.($participation[2] ? '<br><input name="%d" type=submit value="+ Invité"/>' : '').'</form></td>';
+        $form ='';
+        $name = null;
+
+        foreach ($result1 as $item) {
+            $item['html'] = sprintf($htmlform, isset($name) ? $name : $item['id'], $item['id']);
+            $result[$item['id']] = $item;
+        }
+        foreach ($result2 as $item) {
+            $item['html'] = sprintf($htmlform, isset($name) ? $name : $item['id'], $item['id']);
+            $result[$item['id']] = $item;
+        }
+
+        if(!empty($result)) {
+            $Tables['Résultats'] = array(sprintf($form, $name), $result);
+        }
+    }
+
+    $htmlform = '<td onclick="childClick(event)"><form method="POST" action="?ident='.$_GET['ident'].'"><input name="%d-%s" type=submit value="%s"/></form></td>';
+    $editable_lists = ['validator', 'invitation'];
+    if($participation[2] || $participation[1]) {
+        array_push($editable_lists, 'participant');
+    }
+    foreach ($editable_lists as $key) {
+        $action = ($participation[0] && $key == 'validator' || $participation[2] || $participation[1] && $key != 'invitation') ? 'x' : '✓';
+        foreach ($users[$key] as &$entry) {
+            $entry['html'] = sprintf($htmlform, $entry['id'], $key, $action);
+        }
+    }
+    if($participation[1]) {
+        $Tables['Postulants'] = array('', $users['invitation']);
+    } elseif($participation[2]) {
+        $Tables['Invités'] = array('', $users['invitation']);
+    }
+    $form = '';
+} else {
+    if(is_in_list($users['participant'], $_SESSION['user_data']['id'])) {
+        $val = 'Se retirer';
+    } else {
+        $opt = [
+            function($l, $i) { return 'Rejoindre'; },
+            function($l, $i) { return is_in_list($l, $i) ? 'Annuler la demande' : 'Faire une demande'; },
+            function($l, $i) { return is_in_list($l, $i) ? 'Accepter l\'invitation' : null; }
+        ];
+        $val = $opt[$chall_data['flags'] & 0x03]($users['invitation'], $_SESSION['user_data']['id']);
+    }
+    if(isset($val)) {
+        echo '<form method="POST" action="?id=', $_GET['id'], '">',
+            '<input type="submit" value="', $val, '" name="',$_SESSION['user_data']['id'],'-participant" />',
+            '</form>';
+    }
+    $form = '';
+}
+$Tables['Approbateurs'] = array($form, $users['validator']);
+$Tables['Participants'] = array($form, $users['participant']);
+
+echo_users_table($Tables, true);
+
+?>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
+    <script src="/script/recruit.js"></script>
+</body>
+</html>

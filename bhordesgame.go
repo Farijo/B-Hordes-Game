@@ -207,7 +207,8 @@ func challengeHandle(c *gin.Context) {
 			return
 		}
 	case 2: // invite
-
+	case 3: // started
+	case 4: // ended
 	}
 }
 
