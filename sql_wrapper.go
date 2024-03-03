@@ -327,3 +327,36 @@ func queryChallengeGoals(challengeId int, ch chan<- *dto.Goal) {
 		ch <- &goal
 	}
 }
+
+func updateChallengeStatus(challengeId, creatorId int, newStatus byte) error {
+	_, err := dbConn().Exec(`UPDATE challenge SET flags = (flags & 0x0F) | (? << 4) WHERE id = ? AND creator = ? AND (flags >> 4) < 2`, newStatus, challengeId, creatorId)
+	return err
+}
+
+func updateChallenge(toUpdate *dto.Challenge, associated *[]dto.Goal) error {
+	if len(*associated) == 0 {
+		return errors.New("cannot update challenge without goals")
+	}
+
+	_, err := dbConn().Exec(`UPDATE challenge SET name = ?, flags = ? WHERE id = ? AND creator = ? AND (flags >> 4) < 2`, toUpdate.Name, toUpdate.Flags, toUpdate.ID, toUpdate.Creator.ID)
+	if err != nil {
+		return err
+	}
+
+	_, err = dbConn().Exec(`DELETE FROM goal WHERE challenge = ?`, toUpdate.ID)
+	if err != nil {
+		return err
+	}
+
+	sqlStmt := "INSERT INTO goal (challenge, typ, descript) VALUES (?, ?, ?)"
+	frstGoal := pop(associated)
+	values := []any{toUpdate.ID, frstGoal.Typ, frstGoal.Descript}
+	for _, g := range *associated {
+		sqlStmt += ", (?, ?, ?)"
+		values = append(values, toUpdate.ID, g.Typ, g.Descript)
+	}
+
+	_, err = dbConn().Exec(sqlStmt, values...)
+
+	return err
+}

@@ -24,7 +24,6 @@ selectOpt = selectOpt.join('');
 
 const classes = ['.alp', '.eslc', '.c', '.aeb', '.p'];
 
-const goalIndexes = $('[name=goal-indexes]')[0];
 addAGoal = function(deletable) {
     const agoal = $(goalhtml);
     const goalTypes = $(agoal[0]);

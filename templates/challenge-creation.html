@@ -10,7 +10,6 @@
 <body>
     {{ template "top-bar.html" . }}
     <form method="POST" style="width:fit-content">
-        {{ if .challenge }}<input type="hidden" name="id" value="{{ .challenge.ID }}"/>{{ end }}
         <table>
             <tr>
                 <td><label>Nom</label></td>
@@ -51,7 +50,6 @@
             </tr>
             <tr>
                 <td colspan="2">
-                    <input type="hidden" value="1" name="goal-indexes" />
                     <input type="submit" name="act" value="Enregistrer"/>
                     <input type="submit" name="act" value="Valider"/>
                     <input type="submit" name="act" value="Modifier"/>
