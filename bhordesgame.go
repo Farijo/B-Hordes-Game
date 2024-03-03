@@ -23,6 +23,7 @@ func main() {
 	r.LoadHTMLGlob("templates/*")
 	r.Static("/style", "style")
 	r.Static("/script", "script")
+	r.StaticFile("/favicon.ico", "favicon.ico")
 	r.POST("/", connectionHandle)
 	r.GET("/", indexHandle)
 	r.GET("/logout", logoutHandle)
