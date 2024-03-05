@@ -11,7 +11,7 @@
     {{ template "top-bar.html" . }}
     <h2>{{ .challenge.Name }}</h2>
     <div class="container">
-        <a class="box" href="user/{{ .challenge.Creator.ID }}">
+        <a class="box" href="/user/{{ .challenge.Creator.ID }}">
             <div class="line1">Par</div>
             <div class="line2"><img class="avatar" src="{{ .challenge.Creator.Avatar.String }}"><span class="name">{{ .challenge.Creator.Name }}</span></div>
         </a>
@@ -61,14 +61,20 @@
     $participation[$chall_data['flags'] & 0x03] = true;
     <form>
         <h4>Ajouter des approbateurs {{ if .participation2 }} / Envoyer des invitations {{ end }}</h4>
-        <input type="text" name="ident" placeholder="Nom, ID" title="Entrer une liste de noms ou d\'ids séparés par des espaces" />
-        <input type="hidden" value=', $challenge, ' name="id" />
-         <input style="padding:2px 5px" type="submit" value="Chercher" />
+        <input type="text" name="ident" placeholder="Nom, ID" title="Entrer une liste de noms ou d'ids séparés par des espaces" />
+        <input style="padding:2px 5px" type="submit" value="Chercher" />
     </form>
     {{ end }}
 
-    $htmlform = '<td onclick="childClick(event)"><input form="%s" type="checkbox" name="%d"</td>';
-    $form = '<th class="sorttable_nosort"><form id="%s" class="search-result" method="POST" action="?ident='.$_GET['ident'].'"><input name="action" type=submit value="+ Approbateur" disabled />'.($participation[2] ? '<br><input name="action" type=submit value="+ Invité" disabled/>':'').'</form></th>';
+    $htmlform = '<td onclick="childClick(event)"><input form="%s" type="checkbox" name="%d"></td>';
+    $form = '<th class="sorttable_nosort">
+        <form id="%s" class="search-result" method="POST" action="?ident='.$_GET['ident'].'">
+            <input name="action" type=submit value="+ Approbateur" disabled />
+            $participation[2] ?
+            <br><input name="action" type=submit value="+ Invité" disabled/>
+            ''
+        </form>
+    </th>
 
     if(!empty($_GET['ident'])) {
         $values = explode(' ', $_GET['ident']);
@@ -77,7 +83,14 @@
 
         $name = 'Résultats';
 
-        $htmlform = '<td onclick="childClick(event)"><form class="search-result" method="POST" action="?ident='.$_GET['ident'].'"><input name="%d" type=submit value="+ Approbateur"/>'.($participation[2] ? '<br><input name="%d" type=submit value="+ Invité"/>' : '').'</form></td>';
+        $htmlform = '<td onclick="childClick(event)">
+            <form class="search-result" method="POST" action="?ident='.$_GET['ident'].'">
+                <input name="%d" type=submit value="+ Approbateur"/>
+                $participation[2]
+                <br><input name="%d" type=submit value="+ Invité"/>
+                ''
+            </form>
+        </td>
         $form ='';
         $name = null;
 

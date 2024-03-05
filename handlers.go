@@ -159,9 +159,11 @@ func challengeHandle(c *gin.Context) {
 	key, cookieErr := c.Cookie("user")
 	uid, ok := sessions[key]
 
+	selfChallenge := challenge.Creator.ID == uid && cookieErr == nil && ok
+
 	switch challenge.Status {
 	case 0, 1: // draft, review
-		if challenge.Creator.ID == uid && cookieErr == nil && ok {
+		if selfChallenge {
 			ch := make(chan *dto.Goal)
 			go queryChallengeGoals(id, ch)
 			c.HTML(http.StatusOK, "challenge-creation.html", gin.H{"logged": true, "challenge": challenge, "goals": ch, "srvData": getServerData(key)})
@@ -170,6 +172,12 @@ func challengeHandle(c *gin.Context) {
 			return
 		}
 	case 2: // invite
+		challenge.Creator, err = queryUser(challenge.Creator.ID)
+		if err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		c.HTML(http.StatusOK, "challenge-recruit.html", gin.H{"logged": cookieErr == nil && ok, "selfChallenge": selfChallenge, "challenge": challenge, "goals": nil, "srvData": getServerData(key)})
 	case 3: // started
 	case 4: // ended
 	}
