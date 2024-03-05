@@ -1,7 +1,10 @@
 package main
 
 import (
+	"embed"
 	"html/template"
+	"io/fs"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,18 +15,28 @@ func pop[T any](a *[]T) T {
 	return rv
 }
 
+func Must[T any](t T, e error) T {
+	if e != nil {
+		panic(e.Error())
+	}
+	return t
+}
+
+//go:embed script style templates/* favicon.ico
+var f embed.FS
+
 func main() {
 	r := gin.Default()
-	r.SetFuncMap(template.FuncMap{
+	t := template.Must(template.New("").Funcs(template.FuncMap{
 		"getAccess":    getAccess,
 		"getStatus":    getStatus,
 		"fDate":        fdate,
 		"templateHTML": func(a string) template.HTML { return template.HTML(a) },
-	})
-	r.LoadHTMLGlob("templates/*")
-	r.Static("/style", "style")
-	r.Static("/script", "script")
-	r.StaticFile("/favicon.ico", "favicon.ico")
+	}).ParseFS(f, "templates/*.html"))
+	r.SetHTMLTemplate(t)
+	r.StaticFS("/style", http.FS(Must(fs.Sub(f, "style"))))
+	r.StaticFS("/script", http.FS(Must(fs.Sub(f, "script"))))
+	r.StaticFileFS("/favicon.ico", "favicon.ico", http.FS(f))
 	r.POST("/", connectionHandle)
 	r.GET("/", indexHandle)
 	r.GET("/logout", logoutHandle)
