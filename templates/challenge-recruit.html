@@ -66,6 +66,10 @@
     </form>
 
     <form method="POST" action="{{ .challenge.ID }}/members" style="width: fit-content;">
+        {{ $uid := .selfID }}
+        {{ range $act := .action }}
+            <input type="submit" value="{{ $act }}" name="{{ $uid }}-participant" />
+        {{ end }}
         <table class="sortable">
             <tr><th>Résultats</th><th>Défis créés</th><th>Défis participés</th></tr>
             {{ range $result := .searchResults }}
@@ -105,19 +109,11 @@
             {{ end }}
 {{ else }}
     <form method="POST" action="{{ .challenge.ID }}/members" style="width: fit-content;">
-    if(is_in_list($users['participant'], $_SESSION['user_data']['id'])) {
-        $val = 'Se retirer';
-    } else {
-        $opt = [
-            function($l, $i) { return 'Rejoindre'; },
-            function($l, $i) { return is_in_list($l, $i) ? 'Annuler la demande' : 'Faire une demande'; },
-            function($l, $i) { return is_in_list($l, $i) ? 'Accepter l\'invitation' : null; }
-        ];
-        $val = $opt[$chall_data['flags'] & 0x03]($users['invitation'], $_SESSION['user_data']['id']);
-    }
-    if(isset($val)) {
-        <input type="submit" value="', $val, '" name="{{ .selfID }}-participant" />
-    }
+
+        {{ $uid := .selfID }}
+        {{ range $act := .action }}
+            <input type="submit" value="{{ $act }}" name="{{ $uid }}-participant" />
+        {{ end }}
         <table class="sortable">
 {{ end }}
 {{ $selfChall := .selfChallenge }}

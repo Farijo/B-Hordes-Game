@@ -458,3 +458,84 @@ func queryChallengeInvitations(challengeId int, ch chan<- *dto.User) {
 		ch <- &user
 	}
 }
+
+func queryChallengeUserStatus(challengeId, userId int) (invited, participate bool) {
+	rows, err := dbConn().Query(`select 0 from invitation where challenge=? and user=? union select 1 from participant where challenge=? and user=?`,
+		challengeId, userId, challengeId, userId)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var r int
+		if err := rows.Scan(&r); err != nil {
+			panic(err.Error())
+		}
+		switch r {
+		case 0:
+			invited = true
+		case 1:
+			participate = true
+		}
+
+	}
+	return invited, participate
+}
+
+func insertOrDeleteChallengeMember(challengeId, requestorId, userId int, validator, add bool) error {
+	var stmt string
+	if validator {
+		if add {
+			stmt = "INSERT INTO validator SELECT ?,id FROM challenge WHERE id=? AND creator=?"
+		} else {
+			stmt = "DELETE t FROM validator t LEFT JOIN challenge c ON t.challenge=c.id WHERE t.user=? AND c.id=? AND c.creator=?"
+		}
+	} else {
+		stmt = "SET @userid=?, @challenge=?, @requestor=?;"
+	}
+
+	_, err := dbConn().Exec(stmt, userId, challengeId, requestorId)
+
+	if validator || err != nil {
+		return err
+	}
+
+	if add {
+		_, err := dbConn().Exec(`INSERT INTO participant
+		SELECT @userid, id
+		FROM challenge
+		WHERE
+			id = @challenge AND (start_date IS NULL OR NOW() < start_date)
+			AND ((flags & 0x03 = 0 AND @userid = @requestor)
+			OR   (flags & 0x03 = 1 AND creator = @requestor OR flags & 0x03 = 2 AND @requestor = @userid)
+			AND EXISTS (SELECT 1 FROM invitation WHERE user = @userid AND challenge = @challenge))`)
+
+		if err != nil {
+			return err
+		}
+		_, err = dbConn().Exec(`INSERT INTO invitation
+		SELECT @userid, id
+		FROM challenge
+		WHERE
+			id = @challenge AND (start_date IS NULL OR NOW() < start_date)
+			AND ((flags & 0x03 = 1 AND @userid = @requestor)
+			OR   (flags & 0x03 = 2 AND creator = @requestor))`)
+
+		return err
+	} else {
+		_, err := dbConn().Exec(`DELETE p FROM participant p
+		INNER JOIN challenge c ON p.challenge = c.id
+		WHERE c.id = @challenge AND p.user = @userid AND (c.start_date IS NULL OR NOW() < c.start_date)
+		AND (@requestor = p.user OR @requestor = c.creator AND (c.flags & 0x03 > 0))`)
+
+		if err != nil {
+			return err
+		}
+		_, err = dbConn().Exec(`DELETE i FROM invitation i
+		INNER JOIN challenge c ON i.challenge = c.id
+		WHERE c.id = @challenge AND i.user = @userid AND (c.start_date IS NULL OR NOW() < c.start_date)
+		AND (@requestor = i.user AND (c.flags & 0x03 = 1) OR @requestor = c.creator AND (c.flags & 0x03 = 2))`)
+
+		return err
+	}
+}

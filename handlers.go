@@ -147,8 +147,30 @@ func updateChallengeHandle(c *gin.Context) {
 }
 
 func challengeMembersHandle(c *gin.Context) {
-	fmt.Println(c.MultipartForm())
-	fmt.Println(c.Request.PostForm)
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	c.MultipartForm()
+	for id_status, action := range c.Request.PostForm {
+		idst := strings.Split(id_status, "-")
+		if targetId, err := strconv.Atoi(idst[0]); err == nil {
+			add := true
+			switch action[0][0] {
+			// case "✓", "+ Approbateur", "+ Invité", "Rejoindre", "Faire une demande", "Accepter l'invitation":
+			case "Annuler la demande"[0]:
+				if action[0][1] == "Annuler la demande"[1] {
+					add = false
+				}
+			case "x"[0], "Se retirer"[0]:
+				add = false
+			}
+			insertOrDeleteChallengeMember(id, c.GetInt("uid"), targetId, idst[1] == "validator", add)
+		}
+	}
+
+	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d", id))
 }
 
 func challengeHandle(c *gin.Context) {
@@ -227,6 +249,34 @@ func challengeHandle(c *gin.Context) {
 		participantResults := make(chan *dto.User)
 		go queryChallengeParticipants(challenge.ID, participantResults)
 
+		action := make(chan string)
+		if cookieErr == nil && ok {
+			go func() {
+				defer close(action)
+				invited, participate := queryChallengeUserStatus(challenge.ID, uid)
+				if participate {
+					action <- "Se retirer"
+				} else {
+					switch challenge.Access {
+					case 0:
+						action <- "Rejoindre"
+					case 1:
+						if invited {
+							action <- "Annuler la demande"
+						} else {
+							action <- "Faire une demande"
+						}
+					case 2:
+						if invited {
+							action <- "Accepter l'invitation"
+						}
+					}
+				}
+			}()
+		} else {
+			close(action)
+		}
+
 		c.HTML(http.StatusOK, "challenge-recruit.html", gin.H{
 			"logged":        cookieErr == nil && ok,
 			"selfChallenge": selfChallenge,
@@ -238,6 +288,7 @@ func challengeHandle(c *gin.Context) {
 			"invitations":   invitationResults,
 			"validators":    validatorResults,
 			"participants":  participantResults,
+			"action":        action,
 		})
 	case 3: // started
 	case 4: // ended
