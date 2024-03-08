@@ -65,7 +65,7 @@
         <input style="padding:2px 5px" type="submit" value="Chercher" />
     </form>
 
-    <form method="POST" action="{{ .challenge.ID }}/members" style="width: fit-content;">
+    <form method="POST" action="{{ .challenge.ID }}/members{{ .ident }}" style="width: fit-content;">
         {{ $uid := .selfID }}
         {{ range $act := .action }}
             <input type="submit" value="{{ $act }}" name="{{ $uid }}-participant" />
@@ -108,7 +108,7 @@
                 {{ end }}
             {{ end }}
 {{ else }}
-    <form method="POST" action="{{ .challenge.ID }}/members" style="width: fit-content;">
+    <form method="POST" action="{{ .challenge.ID }}/members{{ .ident }}" style="width: fit-content;">
 
         {{ $uid := .selfID }}
         {{ range $act := .action }}

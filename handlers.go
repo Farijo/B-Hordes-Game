@@ -170,7 +170,12 @@ func challengeMembersHandle(c *gin.Context) {
 		}
 	}
 
-	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d", id))
+	ident := c.Query("ident")
+	if len(ident) > 0 {
+		ident = "?ident=" + ident
+	}
+
+	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d%s", id, ident))
 }
 
 func challengeHandle(c *gin.Context) {
@@ -277,6 +282,11 @@ func challengeHandle(c *gin.Context) {
 			close(action)
 		}
 
+		ident := c.Query("ident")
+		if len(ident) > 0 {
+			ident = "?ident=" + ident
+		}
+
 		c.HTML(http.StatusOK, "challenge-recruit.html", gin.H{
 			"logged":        cookieErr == nil && ok,
 			"selfChallenge": selfChallenge,
@@ -289,6 +299,7 @@ func challengeHandle(c *gin.Context) {
 			"validators":    validatorResults,
 			"participants":  participantResults,
 			"action":        action,
+			"ident":         ident,
 		})
 	case 3: // started
 	case 4: // ended
