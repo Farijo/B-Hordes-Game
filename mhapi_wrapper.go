@@ -16,8 +16,9 @@ import (
 const (
 	BASE_URL = "https://myhordes.eu/api/x/json/"
 
-	ME    = "me?fields=id,name,avatar,isGhost,playedMaps,rewards,homeMessage,hero,dead,out,ban,baseDef,x,y,mapId,job,map"
-	OTHER = "user?id=%d&fields=id,name,avatar"
+	ME     = "me?fields=id,name,avatar,isGhost,playedMaps,rewards,homeMessage,hero,dead,out,ban,baseDef,x,y,mapId,job,map"
+	OTHER  = "user?id=%d&fields=id,name,avatar"
+	OTHERS = "users?ids=%s&fields=id,name,avatar"
 )
 
 func buildAuthQuery(userkey string) string {
@@ -57,6 +58,20 @@ func requestUser(userkey string, id int) (*dto.User, error) {
 	var user dto.User
 	return &user, json.NewDecoder(resp.Body).Decode(&user)
 }
+
+// func requestMultipleUsers(userkey string, ids []string) (res []dto.User, e error) {
+// 	resp, err := http.Get(BASE_URL + fmt.Sprintf(OTHERS, strings.Join(ids, ",")) + buildAuthQuery(userkey))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer resp.Body.Close()
+
+// 	if resp.StatusCode != http.StatusOK {
+// 		return nil, errors.New(resp.Status)
+// 	}
+
+// 	return res, json.NewDecoder(resp.Body).Decode(&res)
+// }
 
 func requestServerData(userkey string) template.JS {
 	var mu sync.Mutex

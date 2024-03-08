@@ -95,6 +95,7 @@ func queryChallenge(id int) (challenge dto.DetailedChallenge, err error) {
 	if err = row.Scan(&challenge.Name, &challenge.Creator.ID, &challenge.Flags, &challenge.StartDate, &challenge.EndDate, &untilStart, &untilEnd); err != nil {
 		return
 	}
+	challenge.ID = id
 	challenge.UpdateDetailedProperties(untilStart.Valid && untilStart.String[0] == '-', untilEnd.Valid && untilEnd.String[0] == '-')
 
 	return
@@ -112,6 +113,10 @@ func insertUser(user *dto.User) error {
 
 	return err
 }
+
+// func insertMultipleUsers(user []dto.User) error {
+// 	panic("not implem")
+// }
 
 func insertMilestone(milestone *dto.Milestone) error {
 	rows, err := dbConn().Query(`SELECT typ,descript,goal.id
@@ -207,6 +212,43 @@ func queryUser(id int) (user dto.User, err error) {
 	return
 }
 
+func queryMultipleUsers(idents []string, ch chan<- *dto.User) {
+	defer close(ch)
+	if len(idents) == 0 {
+		return
+	}
+
+	sqlStmt := "SELECT id,name,simplified_name,avatar FROM user WHERE "
+	values := make([]any, 0, 3)
+	for _, ident := range idents {
+		if len(ident) > 1 {
+			sqlStmt += "id = ? OR simplified_name LIKE ? OR "
+			values = append(values, ident, "%"+ident+"%")
+		}
+	}
+	if len(values) == 0 {
+		return
+	}
+	sqlStmt = sqlStmt[:len(sqlStmt)-3]
+
+	rows, err := dbConn().Query(sqlStmt, values...)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user dto.User
+		if err := rows.Scan(
+			&user.ID,
+			&user.Name,
+			&user.SimplifiedName,
+			&user.Avatar); err != nil {
+			panic(err.Error())
+		}
+		ch <- &user
+	}
+}
+
 func queryChallengesRelatedTo(userId int, viewer int, ch chan<- *dto.DetailedChallenge) {
 	defer close(ch)
 
@@ -297,13 +339,13 @@ func insertChallenge(toInsert *dto.Challenge, associated *[]dto.Goal) (int, erro
 	}
 	challengeId := int(challengeId64)
 
-	sqlStmt := "INSERT INTO goal (challenge, typ, descript) VALUES (?, ?, ?)"
-	frstGoal := pop(associated)
-	values := []any{challengeId, frstGoal.Typ, frstGoal.Descript}
+	sqlStmt := "INSERT INTO goal (challenge, typ, descript) VALUES "
+	values := make([]any, 0, 3*len(*associated))
 	for _, g := range *associated {
-		sqlStmt += ", (?, ?, ?)"
+		sqlStmt += "(?, ?, ?), "
 		values = append(values, challengeId, g.Typ, g.Descript)
 	}
+	sqlStmt = sqlStmt[:len(sqlStmt)-2]
 
 	_, err = dbConn().Exec(sqlStmt, values...)
 
@@ -348,15 +390,71 @@ func updateChallenge(toUpdate *dto.Challenge, associated *[]dto.Goal) error {
 		return err
 	}
 
-	sqlStmt := "INSERT INTO goal (challenge, typ, descript) VALUES (?, ?, ?)"
-	frstGoal := pop(associated)
-	values := []any{toUpdate.ID, frstGoal.Typ, frstGoal.Descript}
+	sqlStmt := "INSERT INTO goal (challenge, typ, descript) VALUES "
+	values := make([]any, 0, 3*len(*associated))
 	for _, g := range *associated {
-		sqlStmt += ", (?, ?, ?)"
+		sqlStmt += "(?, ?, ?), "
 		values = append(values, toUpdate.ID, g.Typ, g.Descript)
 	}
+	sqlStmt = sqlStmt[:len(sqlStmt)-2]
 
 	_, err = dbConn().Exec(sqlStmt, values...)
 
 	return err
+}
+
+func queryChallengeParticipants(challengeId int, ch chan<- *dto.User) {
+	defer close(ch)
+
+	rows, err := dbConn().Query(`SELECT id, name, simplified_name, avatar FROM user INNER JOIN participant ON id=user WHERE challenge=?`, challengeId)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user dto.User
+		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar); err != nil {
+			panic(err.Error())
+		}
+		ch <- &user
+	}
+}
+
+func queryChallengeValidators(challengeId int, ch chan<- *dto.User) {
+	defer close(ch)
+
+	rows, err := dbConn().Query(`SELECT id, name, simplified_name, avatar FROM user INNER JOIN validator ON id=user WHERE challenge=?`, challengeId)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user dto.User
+		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar); err != nil {
+			panic(err.Error())
+		}
+		ch <- &user
+	}
+}
+
+func queryChallengeInvitations(challengeId int, ch chan<- *dto.User) {
+	defer close(ch)
+
+	rows, err := dbConn().Query(`SELECT u.id, u.name, u.simplified_name, u.avatar
+	FROM user AS u
+	INNER JOIN invitation AS i ON u.id = i.user
+	LEFT JOIN participant AS p ON i.user = p.user AND i.challenge = p.challenge
+	WHERE i.challenge=?
+	AND p.user IS NULL`, challengeId)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user dto.User
+		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar); err != nil {
+			panic(err.Error())
+		}
+		ch <- &user
+	}
 }

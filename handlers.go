@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -120,7 +121,10 @@ func updateChallengeHandle(c *gin.Context) {
 	}
 
 	var formChallenge FormChallenge
-	c.Bind(&formChallenge)
+	if bindErr := c.Bind(&formChallenge); bindErr != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
 
 	var err error
 	switch formChallenge.Act {
@@ -140,6 +144,11 @@ func updateChallengeHandle(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d", id))
+}
+
+func challengeMembersHandle(c *gin.Context) {
+	fmt.Println(c.MultipartForm())
+	fmt.Println(c.Request.PostForm)
 }
 
 func challengeHandle(c *gin.Context) {
@@ -165,7 +174,7 @@ func challengeHandle(c *gin.Context) {
 	case 0, 1: // draft, review
 		if selfChallenge {
 			ch := make(chan *dto.Goal)
-			go queryChallengeGoals(id, ch)
+			go queryChallengeGoals(challenge.ID, ch)
 			c.HTML(http.StatusOK, "challenge-creation.html", gin.H{"logged": true, "challenge": challenge, "goals": ch, "srvData": getServerData(key)})
 		} else {
 			c.Status(http.StatusForbidden)
@@ -177,7 +186,59 @@ func challengeHandle(c *gin.Context) {
 			c.Status(http.StatusNotFound)
 			return
 		}
-		c.HTML(http.StatusOK, "challenge-recruit.html", gin.H{"logged": cookieErr == nil && ok, "selfChallenge": selfChallenge, "challenge": challenge, "goals": nil, "srvData": getServerData(key)})
+		goals := make(chan *dto.Goal)
+		go queryChallengeGoals(challenge.ID, goals)
+
+		searchResults := make(chan *dto.User)
+		invitationResults := make(chan *dto.User)
+		if selfChallenge {
+			go func() {
+				idents := strings.FieldsFunc(c.Query("ident"), func(r rune) bool { return r == ',' || r == ' ' })
+				// Problem of this is making a request to MH on each reload with "ident" set
+				// and the request would probably be useless (ie : we already have the info)
+				//
+				// if cookieErr == nil {
+				// 	realIds := make([]string, 0)
+				// 	for _, maybeId := range idents {
+				// 		if _, err := strconv.Atoi(maybeId); err == nil {
+				// 			realIds = append(realIds, maybeId)
+				// 		}
+				// 	}
+				// 	if len(realIds) > 0 {
+				// 		if users, err := requestMultipleUsers(key, realIds); err == nil {
+				// 			if err := insertMultipleUsers(users); err != nil {
+				// 				fmt.Println(err)
+				// 			}
+				// 		} else {
+				// 			fmt.Println(err)
+				// 		}
+				// 	}
+				// }
+				queryMultipleUsers(idents, searchResults)
+			}()
+			go queryChallengeInvitations(challenge.ID, invitationResults)
+		} else {
+			close(searchResults)
+			close(invitationResults)
+		}
+		validatorResults := make(chan *dto.User)
+		go queryChallengeValidators(challenge.ID, validatorResults)
+
+		participantResults := make(chan *dto.User)
+		go queryChallengeParticipants(challenge.ID, participantResults)
+
+		c.HTML(http.StatusOK, "challenge-recruit.html", gin.H{
+			"logged":        cookieErr == nil && ok,
+			"selfChallenge": selfChallenge,
+			"selfID":        uid,
+			"challenge":     challenge,
+			"goals":         goals,
+			"srvData":       getServerData(key),
+			"searchResults": searchResults,
+			"invitations":   invitationResults,
+			"validators":    validatorResults,
+			"participants":  participantResults,
+		})
 	case 3: // started
 	case 4: // ended
 	}

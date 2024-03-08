@@ -28,9 +28,10 @@
             {{ if .challenge.StartDate.Valid }}
                 <div class="box">
                 <div class="line1">Début</div>
-                <p>{{ .challenge.StartDate.String }}
+                <p>
+                    {{ .challenge.StartDate.String }}
                     {{ if .remaining }}
-                    <br><span class="time-remaining" data-rem="{{ .remainingsec }}">~{{ .remaining }}</span>
+                        <br><span class="time-remaining" data-rem="{{ .remainingsec }}">~{{ .remaining }}</span>
                     {{ end }}
                 </p>
                 </div>
@@ -38,9 +39,10 @@
             {{ if .challenge.EndDate.Valid }}
                 <div class="box">
                 <div class="line1">Début</div>
-                <p>{{ .challenge.EndDate.String }}
+                <p>
+                    {{ .challenge.EndDate.String }}
                     {{ if .remaining }}
-                    <br><span class="time-remaining" data-rem="{{ .remainingsec }}">~{{ .remaining }}</span>
+                        <br><span class="time-remaining" data-rem="{{ .remainingsec }}">~{{ .remaining }}</span>
                     {{ end }}
                 </p>
                 </div>
@@ -55,77 +57,54 @@
             </div>
         {{ end }}
     </div>
-
-    {{ if .selfChallenge }}
-    $participation = array(false, false, false);
-    $participation[$chall_data['flags'] & 0x03] = true;
+{{ $challAccess := .challenge.Access }}
+{{ if .selfChallenge }}
     <form>
-        <h4>Ajouter des approbateurs {{ if .participation2 }} / Envoyer des invitations {{ end }}</h4>
-        <input type="text" name="ident" placeholder="Nom, ID" title="Entrer une liste de noms ou d'ids séparés par des espaces" />
+        <h4>Ajouter des approbateurs{{ if eq $challAccess 2 }} / Envoyer des invitations {{ end }}</h4>
+        <input type="text" name="ident" placeholder="Nom ID" title="Entrer une liste de noms ou d'ids séparés par des espaces" />
         <input style="padding:2px 5px" type="submit" value="Chercher" />
     </form>
-    {{ end }}
 
-    $htmlform = '<td onclick="childClick(event)"><input form="%s" type="checkbox" name="%d"></td>';
-    $form = '<th class="sorttable_nosort">
-        <form id="%s" class="search-result" method="POST" action="?ident='.$_GET['ident'].'">
-            <input name="action" type=submit value="+ Approbateur" disabled />
-            $participation[2] ?
-            <br><input name="action" type=submit value="+ Invité" disabled/>
-            ''
-        </form>
-    </th>
-
-    if(!empty($_GET['ident'])) {
-        $values = explode(' ', $_GET['ident']);
-        $result1 = get_all_users_with_id($values);
-        $result2 = get_all_users_like_list($values);
-
-        $name = 'Résultats';
-
-        $htmlform = '<td onclick="childClick(event)">
-            <form class="search-result" method="POST" action="?ident='.$_GET['ident'].'">
-                <input name="%d" type=submit value="+ Approbateur"/>
-                $participation[2]
-                <br><input name="%d" type=submit value="+ Invité"/>
-                ''
-            </form>
-        </td>
-        $form ='';
-        $name = null;
-
-        foreach ($result1 as $item) {
-            $item['html'] = sprintf($htmlform, isset($name) ? $name : $item['id'], $item['id']);
-            $result[$item['id']] = $item;
-        }
-        foreach ($result2 as $item) {
-            $item['html'] = sprintf($htmlform, isset($name) ? $name : $item['id'], $item['id']);
-            $result[$item['id']] = $item;
-        }
-
-        if(!empty($result)) {
-            $Tables['Résultats'] = array(sprintf($form, $name), $result);
-        }
-    }
-
-    $htmlform = '<td onclick="childClick(event)"><form method="POST" action="?ident='.$_GET['ident'].'"><input name="%d-%s" type=submit value="%s"/></form></td>';
-    $editable_lists = ['validator', 'invitation'];
-    if($participation[2] || $participation[1]) {
-        array_push($editable_lists, 'participant');
-    }
-    foreach ($editable_lists as $key) {
-        $action = ($participation[0] && $key == 'validator' || $participation[2] || $participation[1] && $key != 'invitation') ? 'x' : '✓';
-        foreach ($users[$key] as &$entry) {
-            $entry['html'] = sprintf($htmlform, $entry['id'], $key, $action);
-        }
-    }
-    if($participation[1]) {
-        $Tables['Postulants'] = array('', $users['invitation']);
-    } elseif($participation[2]) {
-        $Tables['Invités'] = array('', $users['invitation']);
-    }
-    $form = '';
-} else {
+    <form method="POST" action="{{ .challenge.ID }}/members" style="width: fit-content;">
+        <table class="sortable">
+            <tr><th>Résultats</th><th>Défis créés</th><th>Défis participés</th></tr>
+            {{ range $result := .searchResults }}
+                <tr class="item" onclick="document.location='/user/{{ $result.ID }}';">
+                    <td sorttable_customkey="{{ $result.SimplifiedName }}">
+                        <img class="avatar" src="{{ $result.Avatar.String }}">
+                        <span class="name">{{ $result.Name }}</span>
+                    </td>
+                    <td>%d</td>
+                    <td>%d</td>
+                    <td onclick="childClick(event)">
+                        <input name="{{ $result.ID }}-validator" type=submit value="+ Approbateur"/>
+                        {{ if eq $challAccess 2 }}
+                            <br><input name="{{ $result.ID }}-invitation" type=submit value="+ Invité"/>
+                        {{ end }}
+                    </td>
+                </tr>
+            {{ end }}
+            {{ if gt $challAccess 0 }}
+                <tr><th>{{ "Postulants" }}</th><th>Défis créés</th><th>Défis participés</th></tr>
+                {{ range $invit := .invitations }}
+                    <tr class="item" onclick="document.location='/user/{{ $invit.ID }}';">
+                        <td sorttable_customkey="{{ $invit.SimplifiedName }}">
+                            <img class="avatar" src="{{ $invit.Avatar.String }}">
+                            <span class="name">{{ $invit.Name }}</span>
+                        </td>
+                        <td>%d</td>
+                        <td>%d</td>
+                        <td onclick="childClick(event)">
+                            <input name="{{ $invit.ID }}-invitation" type=submit value="x"/>
+                            {{ if eq $challAccess 1 }}
+                                <input name="{{ $invit.ID }}-invitation" type=submit value="✓"/>
+                            {{ end }}
+                        </td>
+                    </tr>
+                {{ end }}
+            {{ end }}
+{{ else }}
+    <form method="POST" action="{{ .challenge.ID }}/members" style="width: fit-content;">
     if(is_in_list($users['participant'], $_SESSION['user_data']['id'])) {
         $val = 'Se retirer';
     } else {
@@ -137,18 +116,48 @@
         $val = $opt[$chall_data['flags'] & 0x03]($users['invitation'], $_SESSION['user_data']['id']);
     }
     if(isset($val)) {
-        echo '<form method="POST" action="?id=', $_GET['id'], '">',
-            '<input type="submit" value="', $val, '" name="',$_SESSION['user_data']['id'],'-participant" />',
-            '</form>';
+        <input type="submit" value="', $val, '" name="{{ .selfID }}-participant" />
     }
-    $form = '';
-}
-$Tables['Approbateurs'] = array($form, $users['validator']);
-$Tables['Participants'] = array($form, $users['participant']);
+        <table class="sortable">
+{{ end }}
+{{ $selfChall := .selfChallenge }}
+            <tr><th>Approbateurs</th><th>Défis créés</th><th>Défis participés</th></tr>
+            {{ range $approb := .validators }}
+                <tr class="item" onclick="document.location='/user/{{ $approb.ID }}';">
+                    <td sorttable_customkey="{{ $approb.SimplifiedName }}">
+                        <img class="avatar" src="{{ $approb.Avatar.String }}">
+                        <span class="name">{{ $approb.Name }}</span>
+                    </td>
+                    <td>%d</td>
+                    <td>%d</td>
+                    {{ if $selfChall }}
+                        <td onclick="childClick(event)">
+                            <input name="{{ $approb.ID }}-validator" type=submit value="x"/>
+                        </td>
+                    {{ end }}
+                </tr>
+            {{ end }}
+            <tr><th>Participants</th><th>Défis créés</th><th>Défis participés</th></tr>
+            {{ range $partic := .participants }}
+                <tr class="item" onclick="document.location='/user/{{ $partic.ID }}';">
+                    <td sorttable_customkey="{{ $partic.SimplifiedName }}">
+                        <img class="avatar" src="{{ $partic.Avatar.String }}">
+                        <span class="name">{{ $partic.Name }}</span>
+                    </td>
+                    <td>%d</td>
+                    <td>%d</td>
+                    {{ if $selfChall }}
+                        {{ if gt $challAccess 0 }}
+                            <td onclick="childClick(event)">
+                                <input name="{{ $partic.ID }}-participant" type=submit value="x"/>
+                            </td>
+                        {{ end }}
+                    {{ end }}
+                </tr>
+            {{ end }}
+        </table>
+    </form>
 
-echo_users_table($Tables, true);
-
-?>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
     <script src="/script/recruit.js"></script>
 </body>
