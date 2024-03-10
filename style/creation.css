@@ -35,15 +35,6 @@ input[type="submit"] {
     cursor: pointer;
     margin-top: 0.4rem;
 }
-input, textarea {
-    color: #3B3249;
-    border: 1px solid #EFDBA8;
-    background-image: url("https://bbh.fred26.fr/gfx/design/form_field.jpg");
-    background-position: 0px -8px;
-    background-color: #AA9961;
-    outline: 1px solid #5C2B20;
-    box-sizing: border-box;
-}
 input:disabled {
     background: grey url(https://myhordes.eu/build/images/assets/img/background/bg_button_grey.3647fed8..gif) round;
     border: 1px solid grey;

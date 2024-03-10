@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"strings"
 	"unicode"
 
@@ -59,7 +60,8 @@ func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 	 GROUP BY challenge.id, challenge.name, challenge.end_date
 	 ORDER BY ended, started`)
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err)
+		return
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -78,7 +80,8 @@ func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 			&detailedChall.ParticipantCount,
 			&Started,
 			&Ended); err != nil {
-			panic(err.Error())
+			fmt.Println(err)
+			return
 		}
 		detailedChall.UpdateDetailedProperties(Started.Bool, Ended.Bool)
 		ch <- &detailedChall
@@ -233,7 +236,8 @@ func queryMultipleUsers(idents []string, ch chan<- *dto.User) {
 
 	rows, err := dbConn().Query(sqlStmt, values...)
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err)
+		return
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -243,7 +247,8 @@ func queryMultipleUsers(idents []string, ch chan<- *dto.User) {
 			&user.Name,
 			&user.SimplifiedName,
 			&user.Avatar); err != nil {
-			panic(err.Error())
+			fmt.Println(err)
+			return
 		}
 		ch <- &user
 	}
@@ -272,7 +277,8 @@ func queryChallengesRelatedTo(userId int, viewer int, ch chan<- *dto.DetailedCha
 	 GROUP BY challenge.id, challenge.name, challenge.end_date, created, participate, validate, invited
 	 ORDER BY ended, started, challenge.flags & 0x30`, userId, userId, userId, userId, userId, viewer, userId, viewer)
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err)
+		return
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -296,7 +302,8 @@ func queryChallengesRelatedTo(userId int, viewer int, ch chan<- *dto.DetailedCha
 			&participate,
 			&validate,
 			&invited); err != nil {
-			panic(err.Error())
+			fmt.Println(err)
+			return
 		}
 		detailedChall.UpdateDetailedProperties(Started.Bool, Ended.Bool)
 
@@ -357,14 +364,16 @@ func queryChallengeGoals(challengeId int, ch chan<- *dto.Goal) {
 
 	rows, err := dbConn().Query(`SELECT typ, descript FROM goal WHERE challenge=?`, challengeId)
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err)
+		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var goal dto.Goal
 		goal.Challenge = challengeId
 		if err := rows.Scan(&goal.Typ, &goal.Descript); err != nil {
-			panic(err.Error())
+			fmt.Println(err)
+			return
 		}
 		ch <- &goal
 	}
@@ -408,13 +417,15 @@ func queryChallengeParticipants(challengeId int, ch chan<- *dto.User) {
 
 	rows, err := dbConn().Query(`SELECT id, name, simplified_name, avatar FROM user INNER JOIN participant ON id=user WHERE challenge=?`, challengeId)
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err)
+		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var user dto.User
 		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar); err != nil {
-			panic(err.Error())
+			fmt.Println(err)
+			return
 		}
 		ch <- &user
 	}
@@ -425,13 +436,15 @@ func queryChallengeValidators(challengeId int, ch chan<- *dto.User) {
 
 	rows, err := dbConn().Query(`SELECT id, name, simplified_name, avatar FROM user INNER JOIN validator ON id=user WHERE challenge=?`, challengeId)
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err)
+		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var user dto.User
 		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar); err != nil {
-			panic(err.Error())
+			fmt.Println(err)
+			return
 		}
 		ch <- &user
 	}
@@ -447,13 +460,15 @@ func queryChallengeInvitations(challengeId int, ch chan<- *dto.User) {
 	WHERE i.challenge=?
 	AND p.user IS NULL`, challengeId)
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err)
+		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var user dto.User
 		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar); err != nil {
-			panic(err.Error())
+			fmt.Println(err)
+			return
 		}
 		ch <- &user
 	}
@@ -463,13 +478,15 @@ func queryChallengeUserStatus(challengeId, userId int) (invited, participate boo
 	rows, err := dbConn().Query(`select 0 from invitation where challenge=? and user=? union select 1 from participant where challenge=? and user=?`,
 		challengeId, userId, challengeId, userId)
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err)
+		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var r int
 		if err := rows.Scan(&r); err != nil {
-			panic(err.Error())
+			fmt.Println(err)
+			return
 		}
 		switch r {
 		case 0:

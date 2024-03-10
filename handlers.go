@@ -91,7 +91,8 @@ func createChallengeHandle(c *gin.Context) {
 
 	id, err := insertChallenge(challenge, goals)
 	if err != nil {
-		panic(err.Error())
+		c.Status(http.StatusBadRequest)
+		return
 	}
 
 	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d", id))
@@ -140,7 +141,8 @@ func updateChallengeHandle(c *gin.Context) {
 	}
 
 	if err != nil {
-		panic(err.Error())
+		c.Status(http.StatusBadRequest)
+		return
 	}
 
 	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d", id))
