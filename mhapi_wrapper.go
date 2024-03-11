@@ -5,12 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html/template"
-	"io"
 	"net/http"
 	"os"
-	"strings"
-	"sync"
 )
 
 const (
@@ -73,38 +69,22 @@ func requestUser(userkey string, id int) (*dto.User, error) {
 // 	return res, json.NewDecoder(resp.Body).Decode(&res)
 // }
 
-func requestServerData(userkey string) template.JS {
-	var mu sync.Mutex
-	var wg sync.WaitGroup
-	var builder strings.Builder
-	builder.Grow(118000)
-
-	queryParams := "?fields=id,img,name" + buildAuthQuery(userkey)
-
-	for _, v := range []string{"pictos", "buildings", "items"} {
-		wg.Add(1)
-		go func(endpoint string) {
-			defer wg.Done()
-			resp, err := http.Get(BASE_URL + endpoint + queryParams)
-			if err != nil {
-				panic(err.Error())
-			}
-			defer resp.Body.Close()
-			if resp.StatusCode != http.StatusOK {
-				panic(resp.Status)
-			}
-
-			mu.Lock()
-			builder.WriteString("const ")
-			builder.WriteString(endpoint)
-			builder.WriteString("=")
-			io.Copy(&builder, resp.Body)
-			builder.WriteString(";")
-			mu.Unlock()
-		}(v)
+func requestServerData(endpoint, userkey string) map[string]SrvData {
+	resp, err := http.Get(BASE_URL + endpoint + "?fields=id,img,name" + buildAuthQuery(userkey))
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println(resp.StatusCode)
+		return nil
+	}
+	datares := make(map[string]SrvData, 100)
+	if err := json.NewDecoder(resp.Body).Decode(&datares); err != nil {
+		fmt.Println(err)
+		return nil
 	}
 
-	wg.Wait()
-
-	return template.JS(builder.String())
+	return datares
 }
