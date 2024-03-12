@@ -1,4 +1,6 @@
 (function() {
+    const isoNow = new Date().toLocaleString('sv').substring(0, 16);
+    
     const sdv = $('[name=start_date_validator]');
     $('[name=start_date]').on('change', function () {
         if(!this.value || new Date(this.value) < new Date()) {
@@ -10,10 +12,7 @@
         }
     }).trigger('change');
 
-    const edv = $('[name=end_date_validator]');
-    $('[name=end_date]').on('change', function () {
-        edv.prop('disabled', !this.value || new Date(this.value) < new Date());
-    }).trigger('change');
+    $('[name=end_date]').prop('min', isoNow);
 
     $('[type=checkbox]').on('change', function () {
         if(this.checked) {
