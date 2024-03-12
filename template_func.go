@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bhordesgame/dto"
+	"fmt"
 	"html/template"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -28,4 +32,55 @@ func fdate(dateString string) template.HTML {
 		return template.HTML(date.Format("02 January 2006<br><span style=\"font-size:80%\">15:04:05</span>"))
 	}
 	return ""
+}
+
+type MM struct {
+	Text        template.HTML
+	Icon, Label string
+}
+
+func decodeGoal(key string, goal dto.Goal) MM {
+	splited := strings.Split(goal.Descript, ":")
+	idxLast := len(splited) - 1
+	if idxLast >= 0 && splited[idxLast] == "" {
+		splited[idxLast] = "le plus de"
+	}
+	var mm MM
+	switch goal.Typ {
+	case 0:
+		mm.Text = template.HTML(fmt.Sprintf("Accumuler <b>%s</b> pictos", splited[0]))
+		if id, err := strconv.Atoi(splited[1]); err == nil {
+			mm.Icon, mm.Label = getServerDataKey(id, "pictos", key)
+		}
+	case 1:
+		var txt string
+		if splited[0] > "" {
+			if splited[1] > "" {
+				txt = "Etre sur la <b>case</b> [ <b>%s</b> / <b>%s</b> ] de l'OM avec <b>%s</b>"
+			} else {
+				txt = "Etre sur la <b>ligne %s%s</b> de l'OM avec <b>%s</b>"
+			}
+		} else {
+			if splited[1] > "" {
+				txt = "Etre sur la <b>colonne %s%s</b> de l'OM avec <b>%s</b>"
+			} else {
+				txt = "Etre dans l'OM avec <b>%s%s%s</b>"
+			}
+		}
+		mm.Text = template.HTML(fmt.Sprintf(txt, splited[0], splited[1], splited[2]))
+		if id, err := strconv.Atoi(splited[3]); err == nil {
+			mm.Icon, mm.Label = getServerDataKey(id, "items", key)
+		}
+	case 2:
+		mm.Text = "Construire"
+		if id, err := strconv.Atoi(splited[0]); err == nil {
+			mm.Icon, mm.Label = getServerDataKey(id, "buildings", key)
+		}
+	case 3:
+		mm.Text = template.HTML(fmt.Sprintf("Avoir en banque <b>%s</b>", splited[0]))
+		if id, err := strconv.Atoi(splited[1]); err == nil {
+			mm.Icon, mm.Label = getServerDataKey(id, "items", key)
+		}
+	}
+	return mm
 }

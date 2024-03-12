@@ -33,34 +33,50 @@ type SrvData struct {
 }
 
 var serverData map[string]map[string]SrvData
+var templateSrvData template.JS
 
-var global, perBuilder sync.Mutex
+var globalMtx, builderMtx sync.Mutex
 
 func getServerData(userkey string) template.JS {
-	global.Lock()
-	defer global.Unlock()
-
-	if serverData == nil {
-		serverData = make(map[string]map[string]SrvData, 3)
+	if templateSrvData > "" {
+		return templateSrvData
 	}
+	globalMtx.Lock()
+	defer globalMtx.Unlock()
+	if templateSrvData > "" {
+		return templateSrvData
+	}
+
+	serverData = make(map[string]map[string]SrvData, 3)
 	var wg sync.WaitGroup
 	var builder strings.Builder
 	for _, resource := range []string{"pictos", "buildings", "items"} {
 		wg.Add(1)
 		go func(rsc string) {
 			defer wg.Done()
-			if serverData[rsc] == nil {
-				serverData[rsc] = requestServerData(rsc, userkey)
-			}
+			serverData[rsc] = requestServerData(rsc, userkey)
 			if marsh, err := json.Marshal(serverData[rsc]); err == nil {
-				perBuilder.Lock()
+				builderMtx.Lock()
 				builder.WriteString("const " + rsc + "=")
 				builder.Write(marsh)
 				builder.WriteByte(';')
-				perBuilder.Unlock()
+				builderMtx.Unlock()
 			}
 		}(resource)
 	}
 	wg.Wait()
-	return template.JS(builder.String())
+	templateSrvData = template.JS(builder.String())
+	return templateSrvData
+}
+
+func getServerDataKey(id int, datakey, userkey string) (img, name string) {
+	if serverData == nil {
+		getServerData(userkey)
+	}
+	for _, v := range serverData[datakey] {
+		if v.Id == id {
+			return v.Img, v.Name.Fr
+		}
+	}
+	return
 }

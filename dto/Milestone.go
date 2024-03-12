@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
+	"io"
 )
 
 type Milestone struct {
@@ -199,7 +201,7 @@ func (v *jsonNullJob) UnmarshalJSON(data []byte) error {
 			v.Valid = true
 			return nil
 
-		case "fouin":
+		case "dig":
 			v.Byte = 1
 			v.Valid = true
 			return nil
@@ -229,6 +231,10 @@ func (v *jsonNullJob) UnmarshalJSON(data []byte) error {
 			v.Valid = true
 			return nil
 		}
+	}
+
+	if err == io.EOF {
+		err = errors.New(string(data) + " = job not recognized")
 	}
 
 	return err

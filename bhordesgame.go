@@ -32,6 +32,7 @@ func main() {
 		"getStatus":    getStatus,
 		"fDate":        fdate,
 		"templateHTML": func(a string) template.HTML { return template.HTML(a) },
+		"decodeGoal":   decodeGoal,
 	}).ParseFS(f, "templates/*.html"))
 	r.SetHTMLTemplate(t)
 	r.StaticFS("/style", http.FS(Must(fs.Sub(f, "style"))))

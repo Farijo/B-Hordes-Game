@@ -295,7 +295,7 @@ func challengeHandle(c *gin.Context) {
 			"selfID":        uid,
 			"challenge":     challenge,
 			"goals":         goals,
-			"srvData":       getServerData(key),
+			"userkey":       key,
 			"searchResults": searchResults,
 			"invitations":   invitationResults,
 			"validators":    validatorResults,

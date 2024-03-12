@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="/style/theme.css">
     <link rel="stylesheet" href="/style/table.css">
     <link rel="stylesheet" href="/style/recruit.css">
+    <link rel="stylesheet" href="/style/text-input.css">
     <script src="/script/sorttable.js"></script>
 </head>
 <body>
@@ -50,10 +51,12 @@
         {{ end }}
     </div>
     <div class="container">
+        {{ $userkey := .userkey }}
         {{ range $goal := .goals }}
+            {{ $mm := decodeGoal $userkey $goal }}
             <div class="box">
-                <div class="line1">Accumuler <b>{{ $goal.Descript }}</b> pictos</div>
-                <div class="line2"><img src="https://myhordes.eu/build/images/%s">%s</div>
+                <div class="line1">{{ $mm.Text }}</div>
+                <div class="line2"><img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }} </div>
             </div>
         {{ end }}
     </div>

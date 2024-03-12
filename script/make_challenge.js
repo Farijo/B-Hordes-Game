@@ -10,17 +10,22 @@ $('[name=participation]').on('change', function() {
 }).trigger('change');
 
 
-let selectOpt = [];
-for(p in pictos) {
-    selectOpt.push(`<option class="alp" value="${p}">${pictos[p].name.fr}</option>`);
-}
-for(i in items) {
-    selectOpt.push(`<option class="eslc aeb" value="${i}">${items[i].name.fr}</option>`);
-}
-for(b in buildings) {
-    selectOpt.push(`<option class="c" value="${b}">${buildings[b].name.fr}</option>`);
-}
-selectOpt = selectOpt.join('');
+const selectOpt = [[pictos, "alp"], [items, "eslc aeb"], [buildings, "c"]].map(([dataMap, c]) => {
+    const opt = [];
+    for(dataItem in dataMap) {
+        let ii;
+        for (ii=0; ii<opt.length; ++ii) {
+            if (dataMap[dataItem].name.fr < opt[ii][1]) {
+                opt.splice(ii, 0, [dataItem, dataMap[dataItem].name.fr]);
+                break;
+            }
+        }
+        if (ii == opt.length) {
+            opt.push([dataItem, dataMap[dataItem].name.fr]);
+        }
+    }
+    return opt.reduce((acc, [val, name]) => acc + `<option class="${c}" value="${val}">${name}</option>`, '');
+}).join('');
 
 const classes = ['.alp', '.eslc', '.c', '.aeb', '.p'];
 
