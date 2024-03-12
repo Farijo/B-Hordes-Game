@@ -14,16 +14,21 @@
     <div class="container">
         <a class="box" href="/user/{{ .challenge.Creator.ID }}">
             <div class="line1">Par</div>
-            <div class="line2"><img class="avatar" src="{{ .challenge.Creator.Avatar.String }}"><span class="name">{{ .challenge.Creator.Name }}</span></div>
+            <div class="line2">
+                <img class="avatar" src="{{ .challenge.Creator.Avatar.String }}">
+                <span class="name">{{ .challenge.Creator.Name }}</span>
+            </div>
         </a>
         {{ if .selfChallenge }}
-            <form class="box" method="POST" action="/challenge/{{ .challenge.ID }}">
-            <div class="line1">Début</div><input class="line2" name="start_date" step="any" type="datetime-local" value="{{ .challenge.StartDate }}" style="margin:0.5em"/>
-            <input type="submit" name="start_date_validator" value="Valider">
+            <form class="box" method="POST" action="{{ .challenge.ID }}/date" onsubmit="dateToISOGMT(this)">
+                <div class="line1">Début</div>
+                <input class="line2" name="start_date" step="any" type="datetime-local" value="{{ .challenge.StartDate }}" style="margin:0.5em"/>
+                <input type="submit" name="valider" value="Valider">
             </form>
-            <form class="box" method="POST" action="/challenge/{{ .challenge.ID }}">
-            <div class="line1">Fin</div><input class="line2" name="end_date" step="any" type="datetime-local" value="{{ .challenge.EndDate }}" required style="margin:0.5em"/>
-            <input type="submit" name="end_date_validator" value="Valider">
+            <form class="box" method="POST" action="{{ .challenge.ID }}/date" onsubmit="dateToISOGMT(this)">
+                <div class="line1">Fin</div>
+                <input class="line2" name="end_date" step="any" type="datetime-local" value="{{ .challenge.EndDate }}" required style="margin:0.5em"/>
+                <input type="submit" name="valider" value="Valider">
             </form>
         {{ else }}
             {{ if .challenge.StartDate.Valid }}

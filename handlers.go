@@ -180,6 +180,17 @@ func challengeMembersHandle(c *gin.Context) {
 	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d%s", id, ident))
 }
 
+func challengeDateHandle(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	startDate := c.PostForm("start_date")
+	endDate := c.PostForm("end_date")
+	fmt.Println(id, startDate, endDate, c.PostForm("valider"))
+}
+
 func challengeHandle(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

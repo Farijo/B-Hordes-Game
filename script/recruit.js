@@ -1,14 +1,14 @@
 (function() {
     const isoNow = new Date().toLocaleString('sv').substring(0, 16);
     
-    const sdv = $('[name=start_date_validator]');
+    const sdv = $('[name=valider]');
     $('[name=start_date]').on('change', function () {
         if(!this.value || new Date(this.value) < new Date()) {
             sdv.val('Démarrer maintenant');
             sdv.parent().attr('onsubmit', "return confirm('Le lancement du défi empechera toute modification')");
         } else {
             sdv.val('Valider');
-            sdv.parent().attr('onsubmit', null);
+            sdv.parent().attr('onsubmit', "dateToISOGMT(this)");
         }
     }).trigger('change');
 
@@ -49,4 +49,9 @@ function childClick(event) {
     // if(c) {
         // $(c).click();
     // }
+}
+
+function dateToISOGMT(e) {
+    const input = $(e).children('[type="datetime-local"]');
+    input.val(new Date(input.val()).toISOString().substring(0, 16));
 }
