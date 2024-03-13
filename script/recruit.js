@@ -1,5 +1,7 @@
 (function() {
     const startDateInput = $('[name=start_date]');
+    startDateInput.val(startDate);
+    startDateInput.prop('max', endDate);
     startDateInput.on('change', function () {
         if(!this.value || new Date(this.value) < new Date()) {
             startDateInput.siblings('input').val('Démarrer maintenant');
@@ -9,6 +11,10 @@
             startDateInput.parent().attr('onsubmit', "dateToISOGMT(this)");
         }
     }).trigger('change');
+
+    const endDateInput = $('[name=end_date]');
+    endDateInput.val(endDate);
+    endDateInput.prop('min', startDate);
 
     $('[type=checkbox]').on('change', function () {
         if(this.checked) {
