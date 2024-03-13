@@ -9,13 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func refreshHandle(c *gin.Context) {
-	if err := refreshData(c.GetString("key")); err != nil {
-		fmt.Println(err)
-	}
-	c.Redirect(http.StatusFound, "/user")
-}
-
+/* * * * * * * * * * * * * * * * * * * * * *
+ *                   GET                   *
+ * * * * * * * * * * * * * * * * * * * * * */
 func selfHandle(c *gin.Context) {
 	c.Redirect(http.StatusFound, fmt.Sprintf("/user/%d", c.GetInt("uid")))
 }
@@ -51,4 +47,14 @@ func userHandle(c *gin.Context) {
 	go queryChallengesRelatedTo(ch, id, currentUser)
 
 	c.HTML(http.StatusOK, "user.html", gin.H{"logged": cookieErr == nil && ok, "challenges": ch, "user": &user})
+}
+
+/* * * * * * * * * * * * * * * * * * * * * *
+ *                   POST                  *
+ * * * * * * * * * * * * * * * * * * * * * */
+func refreshHandle(c *gin.Context) {
+	if err := refreshData(c.GetString("key")); err != nil {
+		fmt.Println(err)
+	}
+	c.Redirect(http.StatusFound, "/user")
 }

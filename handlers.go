@@ -7,6 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+/* * * * * * * * * * * * * * * * * * * * * *
+ *                   GET                   *
+ * * * * * * * * * * * * * * * * * * * * * */
 func indexHandle(c *gin.Context) {
 	ch := make(chan *dto.DetailedChallenge)
 
