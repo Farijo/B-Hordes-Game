@@ -1,18 +1,14 @@
 (function() {
-    const isoNow = new Date().toLocaleString('sv').substring(0, 16);
-    
-    const sdv = $('[name=valider]');
-    $('[name=start_date]').on('change', function () {
+    const startDateInput = $('[name=start_date]');
+    startDateInput.on('change', function () {
         if(!this.value || new Date(this.value) < new Date()) {
-            sdv.val('Démarrer maintenant');
-            sdv.parent().attr('onsubmit', "return confirm('Le lancement du défi empechera toute modification')");
+            startDateInput.siblings('input').val('Démarrer maintenant');
+            startDateInput.parent().attr('onsubmit', "return confirm('Le lancement du défi empechera toute modification, hormis la date de fin')");
         } else {
-            sdv.val('Valider');
-            sdv.parent().attr('onsubmit', "dateToISOGMT(this)");
+            startDateInput.siblings('input').val('Valider');
+            startDateInput.parent().attr('onsubmit', "dateToISOGMT(this)");
         }
     }).trigger('change');
-
-    $('[name=end_date]').prop('min', isoNow);
 
     $('[type=checkbox]').on('change', function () {
         if(this.checked) {

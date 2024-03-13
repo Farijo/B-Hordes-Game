@@ -22,12 +22,12 @@
         {{ if .selfChallenge }}
             <form class="box" method="POST" action="{{ .challenge.ID }}/date" onsubmit="dateToISOGMT(this)">
                 <div class="line1">Début</div>
-                <input class="line2" name="start_date" step="any" type="datetime-local" value="{{ .challenge.StartDate }}" style="margin:0.5em"/>
+                <input class="line2" name="start_date" step="60" type="datetime-local" value="{{ .challenge.StartDate.String }}" max="{{ .challenge.EndDate.String }}" style="margin:0.5em"/>
                 <input type="submit" name="valider" value="Valider">
             </form>
             <form class="box" method="POST" action="{{ .challenge.ID }}/date" onsubmit="dateToISOGMT(this)">
                 <div class="line1">Fin</div>
-                <input class="line2" name="end_date" step="any" type="datetime-local" value="{{ .challenge.EndDate }}" required style="margin:0.5em"/>
+                <input class="line2" name="end_date" step="60" type="datetime-local" value="{{ .challenge.EndDate.String }}" min="{{ .challenge.StartDate.String }}" required style="margin:0.5em"/>
                 <input type="submit" name="valider" value="Valider">
             </form>
         {{ else }}

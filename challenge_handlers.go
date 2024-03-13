@@ -105,7 +105,7 @@ func challengeHandle(c *gin.Context) {
 			"invitations":   invitationResults,
 			"validators":    makeChannelFor(queryChallengeValidators, challenge.ID),
 			"participants":  makeChannelFor(queryChallengeParticipants, challenge.ID),
-			"action":        getActionString(logged, challenge, uid),
+			"action":        makeChannelActionString(logged, challenge, uid),
 			"ident":         ident,
 		})
 	case 3: // started
@@ -191,7 +191,7 @@ func challengeMembersHandle(c *gin.Context) {
 	}
 
 	ident := c.Query("ident")
-	if len(ident) > 0 {
+	if ident > "" {
 		ident = "?ident=" + ident
 	}
 
@@ -212,7 +212,7 @@ func challengeDateHandle(c *gin.Context) {
 /* * * * * * * * * * * * * * * * * * * * * *
  *                  OTHER                  *
  * * * * * * * * * * * * * * * * * * * * * */
-func getActionString(logged bool, challenge dto.DetailedChallenge, uid int) <-chan string {
+func makeChannelActionString(logged bool, challenge dto.DetailedChallenge, uid int) <-chan string {
 	action := make(chan string)
 	if logged {
 		go func() {
