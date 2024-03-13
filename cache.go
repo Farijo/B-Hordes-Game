@@ -48,8 +48,8 @@ func getServerData(userkey string) template.JS {
 	}
 
 	serverData = make(map[string]map[string]SrvData, 3)
-	var wg sync.WaitGroup
 	var builder strings.Builder
+	var wg sync.WaitGroup
 	for _, resource := range []string{"pictos", "buildings", "items"} {
 		wg.Add(1)
 		go func(rsc string) {
