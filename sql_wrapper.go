@@ -215,7 +215,7 @@ func queryUser(id int) (user dto.User, err error) {
 	return
 }
 
-func queryMultipleUsers(idents []string, ch chan<- *dto.User) {
+func queryMultipleUsers(ch chan<- *dto.User, idents []string) {
 	defer close(ch)
 	if len(idents) == 0 {
 		return
@@ -254,7 +254,7 @@ func queryMultipleUsers(idents []string, ch chan<- *dto.User) {
 	}
 }
 
-func queryChallengesRelatedTo(userId int, viewer int, ch chan<- *dto.DetailedChallenge) {
+func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, viewer int) {
 	defer close(ch)
 
 	rows, err := dbConn().Query(`SELECT user.name as cname, user.simplified_name, user.avatar
@@ -359,7 +359,7 @@ func insertChallenge(toInsert *dto.Challenge, associated *[]dto.Goal) (int, erro
 	return challengeId, err
 }
 
-func queryChallengeGoals(challengeId int, ch chan<- *dto.Goal) {
+func queryChallengeGoals(ch chan<- *dto.Goal, challengeId int) {
 	defer close(ch)
 
 	rows, err := dbConn().Query(`SELECT typ, descript FROM goal WHERE challenge=?`, challengeId)
@@ -412,7 +412,7 @@ func updateChallenge(toUpdate *dto.Challenge, associated *[]dto.Goal) error {
 	return err
 }
 
-func queryChallengeParticipants(challengeId int, ch chan<- *dto.User) {
+func queryChallengeParticipants(ch chan<- *dto.User, challengeId int) {
 	defer close(ch)
 
 	rows, err := dbConn().Query(`SELECT id, name, simplified_name, avatar FROM user INNER JOIN participant ON id=user WHERE challenge=?`, challengeId)
@@ -431,7 +431,7 @@ func queryChallengeParticipants(challengeId int, ch chan<- *dto.User) {
 	}
 }
 
-func queryChallengeValidators(challengeId int, ch chan<- *dto.User) {
+func queryChallengeValidators(ch chan<- *dto.User, challengeId int) {
 	defer close(ch)
 
 	rows, err := dbConn().Query(`SELECT id, name, simplified_name, avatar FROM user INNER JOIN validator ON id=user WHERE challenge=?`, challengeId)
@@ -450,7 +450,7 @@ func queryChallengeValidators(challengeId int, ch chan<- *dto.User) {
 	}
 }
 
-func queryChallengeInvitations(challengeId int, ch chan<- *dto.User) {
+func queryChallengeInvitations(ch chan<- *dto.User, challengeId int) {
 	defer close(ch)
 
 	rows, err := dbConn().Query(`SELECT u.id, u.name, u.simplified_name, u.avatar
