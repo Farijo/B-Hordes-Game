@@ -474,12 +474,16 @@ func queryChallengeValidators(ch chan<- *dto.DetailedUser, challengeId int) {
 func queryChallengeInvitations(ch chan<- *dto.DetailedUser, challengeId int) {
 	defer close(ch)
 
-	rows, err := dbConn().Query(`SELECT u.id, u.name, u.simplified_name, u.avatar
-	FROM user AS u
-	INNER JOIN invitation AS i ON u.id = i.user
-	LEFT JOIN participant AS p ON i.user = p.user AND i.challenge = p.challenge
-	WHERE i.challenge=?
-	AND p.user IS NULL`, challengeId) // TODO detailed user
+	rows, err := dbConn().Query(`SELECT u.id, u.name, u.simplified_name, u.avatar, COUNT(DISTINCT c.id), COUNT(DISTINCT p.challenge)
+								 FROM user u
+								 LEFT JOIN challenge c ON u.id = c.creator
+								 LEFT JOIN participant p ON u.id = p.user
+								 WHERE u.id IN (SELECT invitation.user FROM invitation 
+												LEFT JOIN participant ON invitation.user=participant.user
+												AND invitation.challenge=participant.challenge
+												AND participant.user IS NULL
+												WHERE invitation.challenge=?)
+								 GROUP BY u.id, u.name`, challengeId)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -487,7 +491,7 @@ func queryChallengeInvitations(ch chan<- *dto.DetailedUser, challengeId int) {
 	defer rows.Close()
 	for rows.Next() {
 		var user dto.DetailedUser
-		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar); err != nil {
+		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &user.CreationCount, &user.ParticipationCount); err != nil {
 			fmt.Println(err)
 			return
 		}
