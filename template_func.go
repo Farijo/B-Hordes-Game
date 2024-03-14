@@ -48,11 +48,17 @@ func decodeGoal(key string, goal dto.Goal) MM {
 	var mm MM
 	switch goal.Typ {
 	case 0:
+		if len(splited) < 2 {
+			return mm
+		}
 		mm.Text = template.HTML(fmt.Sprintf("Accumuler <b>%s</b> pictos", splited[0]))
 		if id, err := strconv.Atoi(splited[1]); err == nil {
 			mm.Icon, mm.Label = getServerDataKey(id, "pictos", key)
 		}
 	case 1:
+		if len(splited) < 4 {
+			return mm
+		}
 		var txt string
 		if splited[0] > "" {
 			if splited[1] > "" {
@@ -72,11 +78,17 @@ func decodeGoal(key string, goal dto.Goal) MM {
 			mm.Icon, mm.Label = getServerDataKey(id, "items", key)
 		}
 	case 2:
+		if len(splited) < 1 {
+			return mm
+		}
 		mm.Text = "Construire"
 		if id, err := strconv.Atoi(splited[0]); err == nil {
 			mm.Icon, mm.Label = getServerDataKey(id, "buildings", key)
 		}
 	case 3:
+		if len(splited) < 2 {
+			return mm
+		}
 		mm.Text = template.HTML(fmt.Sprintf("Avoir en banque <b>%s</b>", splited[0]))
 		if id, err := strconv.Atoi(splited[1]); err == nil {
 			mm.Icon, mm.Label = getServerDataKey(id, "items", key)
