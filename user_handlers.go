@@ -38,7 +38,7 @@ func userHandle(c *gin.Context) {
 		}
 
 		insertUser(mhUser)
-		user = *mhUser
+		user.User = *mhUser
 	}
 
 	ch := make(chan *dto.DetailedChallenge)

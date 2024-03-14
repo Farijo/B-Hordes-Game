@@ -50,14 +50,15 @@ func challengeHandle(c *gin.Context) {
 			c.Status(http.StatusForbidden)
 		}
 	case 2: // invite
-		challenge.Creator, err = queryUser(challenge.Creator.ID)
-		if err != nil {
+		if duser, err := queryUser(challenge.Creator.ID); err != nil {
 			c.Status(http.StatusNotFound)
 			return
+		} else {
+			challenge.Creator = duser.User
 		}
 
-		searchResults := make(chan *dto.User)
-		invitationResults := make(chan *dto.User)
+		searchResults := make(chan *dto.DetailedUser)
+		invitationResults := make(chan *dto.DetailedUser)
 		if selfChallenge {
 			go func() {
 				idents := strings.FieldsFunc(c.Query("ident"), func(r rune) bool { return r == ',' || r == ' ' })

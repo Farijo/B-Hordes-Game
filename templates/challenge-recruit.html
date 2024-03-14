@@ -89,8 +89,8 @@
                         <img class="avatar" src="{{ $result.Avatar.String }}">
                         <span class="name">{{ $result.Name }}</span>
                     </td>
-                    <td>%d</td>
-                    <td>%d</td>
+                    <td>{{ .CreationCount }}</td>
+                    <td>{{ .ParticipationCount }}</td>
                     <td onclick="childClick(event)">
                         <input name="{{ $result.ID }}-validator" type=submit value="+ Approbateur"/>
                         {{ if eq $challAccess 2 }}
@@ -107,8 +107,8 @@
                             <img class="avatar" src="{{ $invit.Avatar.String }}">
                             <span class="name">{{ $invit.Name }}</span>
                         </td>
-                        <td>%d</td>
-                        <td>%d</td>
+                        <td>{{ .CreationCount }}</td>
+                        <td>{{ .ParticipationCount }}</td>
                         <td onclick="childClick(event)">
                             <input name="{{ $invit.ID }}-invitation" type=submit value="x"/>
                             {{ if eq $challAccess 1 }}
@@ -135,8 +135,8 @@
                         <img class="avatar" src="{{ $approb.Avatar.String }}">
                         <span class="name">{{ $approb.Name }}</span>
                     </td>
-                    <td>%d</td>
-                    <td>%d</td>
+                    <td>{{ .CreationCount }}</td>
+                    <td>{{ .ParticipationCount }}</td>
                     {{ if $selfChall }}
                         <td onclick="childClick(event)">
                             <input name="{{ $approb.ID }}-validator" type=submit value="x"/>
@@ -151,8 +151,8 @@
                         <img class="avatar" src="{{ $partic.Avatar.String }}">
                         <span class="name">{{ $partic.Name }}</span>
                     </td>
-                    <td>%d</td>
-                    <td>%d</td>
+                    <td>{{ .CreationCount }}</td>
+                    <td>{{ .ParticipationCount }}</td>
                     {{ if $selfChall }}
                         {{ if gt $challAccess 0 }}
                             <td onclick="childClick(event)">
@@ -167,5 +167,15 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
     <script src="/script/recruit.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function(event) { 
+            var scrollpos = localStorage.getItem('scrollpos');
+            if (scrollpos) window.scrollTo(0, scrollpos);
+        });
+
+        window.onbeforeunload = function(e) {
+            localStorage.setItem('scrollpos', window.scrollY);
+        };
+    </script>
 </body>
 </html>

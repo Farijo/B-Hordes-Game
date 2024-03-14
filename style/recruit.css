@@ -38,7 +38,7 @@ body > form {
 
 tr input[type=submit] {
   padding: 2px 5px;
-  width: 100%;
+  /* width: 100%; */
 }
 
 .sortable {
@@ -53,4 +53,9 @@ tr input[type=submit] {
 a.box {
   background: #593223;
   padding: 0;
+}
+
+td[onclick] {
+  text-align: left;
+  border-bottom: none;
 }

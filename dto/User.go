@@ -6,3 +6,9 @@ type User struct {
 	SimplifiedName string         `db:"simplified_name"`
 	Avatar         jsonNullString `db:"avatar"`
 }
+
+type DetailedUser struct {
+	User
+	CreationCount      int
+	ParticipationCount int
+}
