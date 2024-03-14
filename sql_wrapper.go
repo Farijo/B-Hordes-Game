@@ -214,7 +214,7 @@ func queryUser(id int) (user dto.DetailedUser, err error) {
 							  LEFT JOIN challenge ON user.id = challenge.creator
 							  LEFT JOIN participant ON participant.user = user.id
 							  WHERE user.id = ?
-							  GROUP BY user.id, user.name, challenge.id`, id)
+							  GROUP BY user.id, user.name`, id)
 	user.ID = id
 	err = row.Scan(&user.Name, &user.SimplifiedName, &user.Avatar, &user.CreationCount, &user.ParticipationCount)
 	return
@@ -226,7 +226,11 @@ func queryMultipleUsers(ch chan<- *dto.DetailedUser, idents []string) {
 		return
 	}
 
-	sqlStmt := "SELECT id,name,simplified_name,avatar FROM user WHERE " // TODO detailed user
+	sqlStmt := `SELECT user.id, user.name, simplified_name, avatar, COUNT(DISTINCT challenge.id), COUNT(DISTINCT participant.challenge)
+				FROM user
+				LEFT JOIN challenge ON user.id = challenge.creator
+				LEFT JOIN participant ON participant.user = user.id
+				WHERE user.id IN (SELECT id FROM user WHERE `
 	values := make([]any, 0, 3)
 	for _, ident := range idents {
 		if len(ident) > 1 {
@@ -237,7 +241,7 @@ func queryMultipleUsers(ch chan<- *dto.DetailedUser, idents []string) {
 	if len(values) == 0 {
 		return
 	}
-	sqlStmt = sqlStmt[:len(sqlStmt)-3]
+	sqlStmt = sqlStmt[:len(sqlStmt)-3] + ") GROUP BY user.id, user.name"
 
 	rows, err := dbConn().Query(sqlStmt, values...)
 	if err != nil {
@@ -251,7 +255,9 @@ func queryMultipleUsers(ch chan<- *dto.DetailedUser, idents []string) {
 			&user.ID,
 			&user.Name,
 			&user.SimplifiedName,
-			&user.Avatar); err != nil {
+			&user.Avatar,
+			&user.CreationCount,
+			&user.ParticipationCount); err != nil {
 			fmt.Println(err)
 			return
 		}
