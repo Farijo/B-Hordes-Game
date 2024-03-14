@@ -35,15 +35,6 @@ input[type="submit"] {
     cursor: pointer;
     margin-top: 0.4rem;
 }
-input:disabled {
-    background: grey url(https://myhordes.eu/build/images/assets/img/background/bg_button_grey.3647fed8..gif) round;
-    border: 1px solid grey;
-    color: #f0d79e;
-}
-
-*:disabled {
-    cursor: not-allowed !important;
-}
 .checklabel {
     display: flex;
     border-bottom: none;

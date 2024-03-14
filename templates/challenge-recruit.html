@@ -19,20 +19,20 @@
                 <span class="name">{{ .challenge.Creator.Name }}</span>
             </div>
         </a>
+        <script>
+            function ISOGMTToLocale(iso) {
+                return new Date(`${iso}Z`).toLocaleString('sv').substring(0, 16);
+            }
+            {{ if .challenge.StartDate.Valid }}const startDate=ISOGMTToLocale("{{ .challenge.StartDate.String }}");{{ end }}
+            {{ if .challenge.EndDate.Valid }}const endDate=ISOGMTToLocale("{{ .challenge.EndDate.String }}");{{ end }}
+        </script>
         {{ if .selfChallenge }}
-            <script>
-                function ISOGMTToLocale(iso) {
-                    return new Date(`${iso}Z`).toLocaleString('sv').substring(0, 16);
-                }
-                const startDate=ISOGMTToLocale("{{ .challenge.StartDate.String }}");
-                const endDate=ISOGMTToLocale("{{ .challenge.EndDate.String }}");
-            </script>
-            <form class="box" method="POST" action="{{ .challenge.ID }}/date" onsubmit="dateToISOGMT(this)">
+            <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onsubmit="dateToISOGMT(this)">
                 <div class="line1">Début</div>
                 <input class="line2" name="start_date" step="60" type="datetime-local" style="margin:0.5em"/>
                 <input type="submit" name="valider" value="Valider">
             </form>
-            <form class="box" method="POST" action="{{ .challenge.ID }}/date" onsubmit="dateToISOGMT(this)">
+            <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onsubmit="dateToISOGMT(this)">
                 <div class="line1">Fin</div>
                 <input class="line2" name="end_date" step="60" type="datetime-local" required style="margin:0.5em"/>
                 <input type="submit" name="valider" value="Valider">
@@ -40,24 +40,20 @@
         {{ else }}
             {{ if .challenge.StartDate.Valid }}
                 <div class="box">
-                <div class="line1">Début</div>
-                <p>
-                    {{ .challenge.StartDate.String }}
-                    {{ if .remaining }}
-                        <br><span class="time-remaining" data-rem="{{ .remainingsec }}">~{{ .remaining }}</span>
+                    <div class="line1">Début</div>
+                    <p></p>
+                    {{ if lt .challenge.Status 3 }}
+                        <span class="time-remaining"></span>
                     {{ end }}
-                </p>
                 </div>
             {{ end }}
             {{ if .challenge.EndDate.Valid }}
                 <div class="box">
-                <div class="line1">Début</div>
-                <p>
-                    {{ .challenge.EndDate.String }}
-                    {{ if .remaining }}
-                        <br><span class="time-remaining" data-rem="{{ .remainingsec }}">~{{ .remaining }}</span>
+                    <div class="line1">Fin</div>
+                    <p></p>
+                    {{ if lt .challenge.Status 4 }}
+                        <span class="time-remaining"></span>
                     {{ end }}
-                </p>
                 </div>
             {{ end }}
         {{ end }}

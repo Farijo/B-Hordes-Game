@@ -55,12 +55,14 @@ func getServerData(userkey string) template.JS {
 		go func(rsc string) {
 			defer wg.Done()
 			serverData[rsc] = requestServerData(rsc, userkey)
-			if marsh, err := json.Marshal(serverData[rsc]); err == nil {
-				builderMtx.Lock()
-				builder.WriteString("const " + rsc + "=")
-				builder.Write(marsh)
-				builder.WriteByte(';')
-				builderMtx.Unlock()
+			if serverData[rsc] != nil {
+				if marsh, err := json.Marshal(serverData[rsc]); err == nil {
+					builderMtx.Lock()
+					builder.WriteString("const " + rsc + "=")
+					builder.Write(marsh)
+					builder.WriteByte(';')
+					builderMtx.Unlock()
+				}
 			}
 		}(resource)
 	}

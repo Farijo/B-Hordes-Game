@@ -204,9 +204,27 @@ func challengeDateHandle(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	startDate := c.PostForm("start_date")
-	endDate := c.PostForm("end_date")
-	fmt.Println(id, startDate, endDate, c.PostForm("valider"))
+	switch c.PostForm("valider")[0] {
+	case "Valider"[0]:
+		start := true
+		date := c.PostForm("start_date")
+		if date == "" {
+			start = false
+			date = c.PostForm("end_date")
+		}
+		if date > "" {
+			updateChallengeDate(id, c.GetInt("uid"), date, start)
+		}
+	case "Démarrer maintenant"[0]:
+		updateChallengeDate(id, c.GetInt("uid"), "", true)
+	}
+
+	ident := c.Query("ident")
+	if ident > "" {
+		ident = "?ident=" + ident
+	}
+
+	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d%s", id, ident))
 }
 
 /* * * * * * * * * * * * * * * * * * * * * *

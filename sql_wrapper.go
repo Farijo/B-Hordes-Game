@@ -99,7 +99,7 @@ func queryChallenge(id int) (challenge dto.DetailedChallenge, err error) {
 		return
 	}
 	challenge.ID = id
-	challenge.UpdateDetailedProperties(untilStart.Valid && untilStart.String[0] == '-', untilEnd.Valid && untilEnd.String[0] == '-')
+	challenge.UpdateDetailedProperties(untilStart.Valid && (untilStart.String[0] == '-' || untilStart.String == "00:00:00"), untilEnd.Valid && (untilEnd.String[0] == '-' || untilEnd.String == "00:00:00"))
 
 	return
 }
@@ -555,4 +555,48 @@ func insertOrDeleteChallengeMember(challengeId, requestorId, userId int, validat
 
 		return err
 	}
+}
+
+func updateChallengeDate(challengeID, requestorID int, date string, start bool) error {
+	params := []any{challengeID, requestorID}
+	var stmt string
+	if start {
+		if date > "" {
+			stmt = `UPDATE challenge
+					SET start_date = ?
+					WHERE id = ?
+					AND creator = ?
+					AND (start_date IS NULL OR NOW() < start_date)	# challenge pas commencé
+					AND (  end_date IS NULL OR     ? <   end_date)	# date avant la fin`
+			params = []any{date, challengeID, requestorID, date}
+		} else {
+			stmt = `UPDATE challenge
+					SET start_date = NOW()
+					WHERE id = ?
+					AND creator = ?
+					AND (start_date IS NULL OR NOW() < start_date)	# challenge pas commencé`
+		}
+	} else {
+		if date > "" {
+			stmt = `UPDATE challenge
+					SET end_date = ?
+					WHERE id = ?
+					AND creator = ?
+					AND NOW() < ?								# date dans le futur
+					AND start_date IS NOT NULL					# challenge doit avoir un début
+					AND start_date < ?							# date après le début
+					AND (end_date IS NULL OR NOW() < end_date)  # challenge pas terminé`
+			params = []any{date, challengeID, requestorID, date, date}
+		} else {
+			stmt = `UPDATE challenge
+					SET end_date = NOW()
+					WHERE id = ?
+					AND creator = ?
+					AND start_date IS NOT NULL					# challenge doit avoir un début
+					AND start_date < NOW()						# challenge commencé
+					AND (end_date IS NULL OR NOW() < end_date)  # challenge pas terminé`
+		}
+	}
+	_, err := dbConn().Exec(stmt, params...)
+	return err
 }
