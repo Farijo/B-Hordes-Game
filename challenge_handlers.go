@@ -110,6 +110,24 @@ func challengeHandle(c *gin.Context) {
 			"ident":         ident,
 		})
 	case 3: // started
+		if duser, err := queryUser(challenge.Creator.ID); err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		} else {
+			challenge.Creator = duser.User
+		}
+
+		c.HTML(http.StatusOK, "challenge-progress.html", gin.H{
+			"logged":        logged,
+			"selfChallenge": selfChallenge,
+			"selfID":        uid,
+			"challenge":     challenge,
+			"goals":         makeChannelFor(queryChallengeGoals, challenge.ID),
+			"userkey":       key,
+			"validators":    makeChannelFor(queryChallengeValidators, challenge.ID),
+			"participants":  makeChannelFor(queryChallengeParticipants, challenge.ID),
+			"action":        makeChannelActionString(logged, challenge, uid),
+		})
 	case 4: // ended
 	}
 }

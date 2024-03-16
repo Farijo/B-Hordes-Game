@@ -39,9 +39,13 @@ type MM struct {
 	Icon, Label string
 }
 
-func decodeGoal(key string, goal dto.Goal) MM {
+func decodeGoal(key string, goal dto.Goal, l *[]template.HTML) MM {
 	splited := strings.Split(goal.Descript, ":")
 	idxLast := len(splited) - 1
+	short := splited[idxLast]
+	if l != nil {
+		defer func() { *l = append(*l, template.HTML(short)) }()
+	}
 	if idxLast >= 0 && splited[idxLast] == "" {
 		splited[idxLast] = "le plus de"
 	}
@@ -54,6 +58,7 @@ func decodeGoal(key string, goal dto.Goal) MM {
 		mm.Text = template.HTML(fmt.Sprintf("Accumuler <b>%s</b> pictos", splited[0]))
 		if id, err := strconv.Atoi(splited[1]); err == nil {
 			mm.Icon, mm.Label = getServerDataKey(id, "pictos", key)
+			short += "<img src=\"https://myhordes.eu/build/images/" + mm.Icon + "\">"
 		}
 	case 1:
 		if len(splited) < 4 {
@@ -76,6 +81,7 @@ func decodeGoal(key string, goal dto.Goal) MM {
 		mm.Text = template.HTML(fmt.Sprintf(txt, splited[0], splited[1], splited[2]))
 		if id, err := strconv.Atoi(splited[3]); err == nil {
 			mm.Icon, mm.Label = getServerDataKey(id, "items", key)
+			short = fmt.Sprintf("[%s/%s] %s <img src=\"https://myhordes.eu/build/images/%s\">", splited[0], splited[1], short, mm.Icon)
 		}
 	case 2:
 		if len(splited) < 1 {
@@ -84,6 +90,7 @@ func decodeGoal(key string, goal dto.Goal) MM {
 		mm.Text = "Construire"
 		if id, err := strconv.Atoi(splited[0]); err == nil {
 			mm.Icon, mm.Label = getServerDataKey(id, "buildings", key)
+			short = "<img src=\"https://myhordes.eu/build/images/" + mm.Icon + "\">"
 		}
 	case 3:
 		if len(splited) < 2 {
@@ -92,7 +99,13 @@ func decodeGoal(key string, goal dto.Goal) MM {
 		mm.Text = template.HTML(fmt.Sprintf("Avoir en banque <b>%s</b>", splited[0]))
 		if id, err := strconv.Atoi(splited[1]); err == nil {
 			mm.Icon, mm.Label = getServerDataKey(id, "items", key)
+			short += "<img src=\"https://myhordes.eu/build/images/" + mm.Icon + "\">"
 		}
 	}
 	return mm
+}
+
+func mkslice() *[]template.HTML {
+	slice := make([]template.HTML, 0)
+	return &slice
 }

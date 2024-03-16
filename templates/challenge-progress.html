@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/style/theme.css">
+    <link rel="stylesheet" href="/style/table.css">
+    <link rel="stylesheet" href="/style/recruit.css">
+    <link rel="stylesheet" href="/style/text-input.css">
+    <script src="/script/sorttable.js"></script>
+</head>
+<body>
+    {{ template "top-bar.html" . }}
+    <h2>{{ .challenge.Name }}</h2>
+    <div class="container">
+        <a class="box" href="/user/{{ .challenge.Creator.ID }}">
+            <div class="line1">Par</div>
+            <div class="line2">
+                <img class="avatar" src="{{ .challenge.Creator.Avatar.String }}">
+                <span class="name">{{ .challenge.Creator.Name }}</span>
+            </div>
+        </a>
+        <div class="box">
+            <div class="line1">Début</div>
+            <p></p>
+        </div>
+        {{ if .challenge.EndDate.Valid }}
+            <div class="box">
+                <div class="line1">Fin</div>
+                <p></p>
+                {{ if lt .challenge.Status 4 }}
+                    <span class="time-remaining"></span>
+                {{ end }}
+            </div>
+        {{ end }}
+    </div>
+    <div class="container">
+        {{ $userkey := .userkey }}
+        {{ $sl := mkslice }}
+        {{ range $goal := .goals }}
+            {{ $mm := decodeGoal $userkey $goal $sl }}
+            <div class="box">
+                <div class="line1">{{ $mm.Text }}</div>
+                <div class="line2"><img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }} </div>
+            </div>
+        {{ end }}
+    </div>
+    <table class="sortable">
+        <tr><th>Participants</th>
+        {{ range $s := $sl }}
+            <th>{{ $s }}</th>
+        {{ end }}
+        {{ range $partic := .participants }}
+            <tr class="item" onclick="document.location='/user/{{ $partic.ID }}';">
+                <td sorttable_customkey="{{ $partic.SimplifiedName }}">
+                    <img class="avatar" src="{{ $partic.Avatar.String }}">
+                    <span class="name">{{ $partic.Name }}</span>
+                </td>
+                <td>{{ .CreationCount }}</td>
+                <td>{{ .ParticipationCount }}</td>
+            </tr>
+        {{ end }}
+    </table>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
+    <script>$('p').first().text(new Date("{{ .challenge.StartDate.String }}Z").toLocaleString())</script>
+</body>
+</html>

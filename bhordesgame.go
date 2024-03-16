@@ -33,6 +33,7 @@ func main() {
 		"fDate":        fdate,
 		"templateHTML": func(a string) template.HTML { return template.HTML(a) },
 		"decodeGoal":   decodeGoal,
+		"mkslice":      mkslice,
 	}).ParseFS(f, "templates/*.html")))
 	r.StaticFS("/style", http.FS(Must(fs.Sub(f, "style"))))
 	r.StaticFS("/script", http.FS(Must(fs.Sub(f, "script"))))
