@@ -373,7 +373,7 @@ func insertChallenge(toInsert *dto.Challenge, associated *[]dto.Goal) (int, erro
 func queryChallengeGoals(ch chan<- *dto.Goal, challengeId int) {
 	defer close(ch)
 
-	rows, err := dbConn().Query(`SELECT typ, descript FROM goal WHERE challenge=?`, challengeId)
+	rows, err := dbConn().Query(`SELECT id, typ, descript FROM goal WHERE challenge=?`, challengeId)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -382,7 +382,7 @@ func queryChallengeGoals(ch chan<- *dto.Goal, challengeId int) {
 	for rows.Next() {
 		var goal dto.Goal
 		goal.Challenge = challengeId
-		if err := rows.Scan(&goal.Typ, &goal.Descript); err != nil {
+		if err := rows.Scan(&goal.ID, &goal.Typ, &goal.Descript); err != nil {
 			fmt.Println(err)
 			return
 		}
@@ -624,4 +624,40 @@ func updateChallengeDate(challengeID, requestorID int, date string, start bool) 
 	}
 	_, err := dbConn().Exec(stmt, params...)
 	return err
+}
+
+func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
+	defer close(ch)
+	rows, err := dbConn().Query(`SELECT user.id, name, simplified_name, avatar, s1.goal, s1.accomplished, s1.amount
+				   FROM success s1
+				   JOIN user on user.id = s1.user
+				   LEFT JOIN success s2 ON s1.user = s2.user AND s1.goal = s2.goal AND s1.accomplished < s2.accomplished
+				   JOIN	goal on goal.id = s1.goal AND goal.challenge = ?
+				   WHERE s2.user IS NULL
+				   ORDER BY s1.user`, challengeID)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer rows.Close()
+	cuser := new(dto.UserAdvance)
+	cuser.Successes = make(map[int]dto.Success)
+	for rows.Next() {
+		var user dto.User
+		var success dto.Success
+		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &success.Goal, &success.Accomplished, &success.Amount); err != nil {
+			fmt.Println(err)
+			return
+		}
+		if user.ID != cuser.ID {
+			if cuser.ID != 0 {
+				ch <- cuser
+				cuser = new(dto.UserAdvance)
+				cuser.Successes = make(map[int]dto.Success)
+			}
+			cuser.User = user
+		}
+		cuser.Successes[success.Goal] = success
+	}
+	ch <- cuser
 }

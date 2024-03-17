@@ -39,12 +39,12 @@ type MM struct {
 	Icon, Label string
 }
 
-func decodeGoal(key string, goal dto.Goal, l *[]template.HTML) MM {
+func decodeGoal(key string, goal dto.Goal, l *map[int]template.HTML) MM {
 	splited := strings.Split(goal.Descript, ":")
 	idxLast := len(splited) - 1
 	short := splited[idxLast]
 	if l != nil {
-		defer func() { *l = append(*l, template.HTML(short)) }()
+		defer func() { (*l)[goal.ID] = template.HTML(short) }()
 	}
 	if idxLast >= 0 && splited[idxLast] == "" {
 		splited[idxLast] = "le plus de"
@@ -105,7 +105,7 @@ func decodeGoal(key string, goal dto.Goal, l *[]template.HTML) MM {
 	return mm
 }
 
-func mkslice() *[]template.HTML {
-	slice := make([]template.HTML, 0)
-	return &slice
+func mkmap() *map[int]template.HTML {
+	tmplMap := make(map[int]template.HTML, 0)
+	return &tmplMap
 }

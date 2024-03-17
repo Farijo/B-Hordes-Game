@@ -35,9 +35,9 @@
     </div>
     <div class="container">
         {{ $userkey := .userkey }}
-        {{ $sl := mkslice }}
+        {{ $goalHeaders := mkmap }}
         {{ range $goal := .goals }}
-            {{ $mm := decodeGoal $userkey $goal $sl }}
+            {{ $mm := decodeGoal $userkey $goal $goalHeaders }}
             <div class="box">
                 <div class="line1">{{ $mm.Text }}</div>
                 <div class="line2"><img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }} </div>
@@ -45,18 +45,17 @@
         {{ end }}
     </div>
     <table class="sortable">
-        <tr><th>Participants</th>
-        {{ range $s := $sl }}
-            <th>{{ $s }}</th>
-        {{ end }}
-        {{ range $partic := .participants }}
+        <tr><th>Participants</th>{{ range $_, $goalHeader := $goalHeaders }}<th>{{$goalHeader}}</th>{{ end }}
+        {{ range $partic := .advancement }}
             <tr class="item" onclick="document.location='/user/{{ $partic.ID }}';">
                 <td sorttable_customkey="{{ $partic.SimplifiedName }}">
                     <img class="avatar" src="{{ $partic.Avatar.String }}">
                     <span class="name">{{ $partic.Name }}</span>
                 </td>
-                <td>{{ .CreationCount }}</td>
-                <td>{{ .ParticipationCount }}</td>
+                {{ range $k, $_ := $goalHeaders }}
+                    {{ $s := index $partic.Successes $k }}
+                    <td title="{{ $s.Accomplished }}">{{ $s.Amount }}</td>
+                {{ end }}
             </tr>
         {{ end }}
     </table>

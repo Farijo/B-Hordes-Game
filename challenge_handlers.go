@@ -120,13 +120,11 @@ func challengeHandle(c *gin.Context) {
 		c.HTML(http.StatusOK, "challenge-progress.html", gin.H{
 			"logged":        logged,
 			"selfChallenge": selfChallenge,
-			"selfID":        uid,
 			"challenge":     challenge,
 			"goals":         makeChannelFor(queryChallengeGoals, challenge.ID),
 			"userkey":       key,
 			"validators":    makeChannelFor(queryChallengeValidators, challenge.ID),
-			"participants":  makeChannelFor(queryChallengeParticipants, challenge.ID),
-			"action":        makeChannelActionString(logged, challenge, uid),
+			"advancement":   makeChannelFor(queryChallengeAdvancements, challenge.ID),
 		})
 	case 4: // ended
 	}

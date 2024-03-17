@@ -12,3 +12,8 @@ type DetailedUser struct {
 	CreationCount      int
 	ParticipationCount int
 }
+
+type UserAdvance struct {
+	User
+	Successes map[int]Success
+}
