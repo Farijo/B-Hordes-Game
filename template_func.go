@@ -40,21 +40,23 @@ type GoalHTML struct {
 }
 
 type GoalHeader struct {
-	template.HTML
-	int
+	Content template.HTML
+	Amount  int
 }
 
 func decodeGoal(key string, goal dto.Goal, l *map[int]GoalHeader) GoalHTML {
 	splited := strings.Split(goal.Descript, ":")
-	idxLast := len(splited) - 1
-	goalMax, header := 0, splited[idxLast]
+	idxLast := len(splited) - 2
+	goalMax, header := 0, ""
 	if l != nil {
 		defer func() { (*l)[goal.ID] = GoalHeader{template.HTML(header), goalMax} }()
 	}
 	if idxLast >= 0 {
 		if splited[idxLast] == "" {
+			header = "+"
 			splited[idxLast] = "le plus de"
 		} else {
+			header = splited[idxLast]
 			goalMax, _ = strconv.Atoi(splited[idxLast])
 		}
 	}
@@ -100,6 +102,7 @@ func decodeGoal(key string, goal dto.Goal, l *map[int]GoalHeader) GoalHTML {
 		if id, err := strconv.Atoi(splited[0]); err == nil {
 			out.Icon, out.Label = getServerDataKey(id, "buildings", key)
 			header = "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
+			goalMax = 1
 		}
 	case 3:
 		if len(splited) < 2 {

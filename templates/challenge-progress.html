@@ -45,7 +45,7 @@
         {{ end }}
     </div>
     <table class="sortable">
-        <tr><th>Participants</th>{{ range $_, $goalHeader := $goalHeaders }}<th>{{ $goalHeader.HTML }}</th>{{ end }}
+        <tr><th>Participants</th>{{ range $_, $goalHeader := $goalHeaders }}<th>{{ $goalHeader.Content }}</th>{{ end }}
         {{ range $partic := .advancement }}
             <tr class="item" onclick="document.location='/user/{{ $partic.ID }}';">
                 <td sorttable_customkey="{{ $partic.SimplifiedName }}">
@@ -54,19 +54,29 @@
                 </td>
                 {{ range $k, $g := $goalHeaders }}
                     {{ $s := index $partic.Successes $k }}
-                    <td title="{{ $s.Accomplished }}">
-                        {{ if ge $s.Amount $g.int }}
-                            <img src="data:image/gif;base64,R0lGODlhEAAQAKIGAGU+Ip0mBLVcQoAyE86Sgf///35NKgAAACH5BAEAAAYALAAAAAAQABAAAAMmaLrc/jDKSSG4V4IhQhhABAgF0YVWQHgB+gBBd4oDC2qYW+18DyUAOw==" />
-                        {{ else }}
-                            <img src="data:image/gif;base64,R0lGODlhEAAQAKIGAK2mTmU+Itv/cpZ6PP///4esPn5NKgAAACH5BAEAAAYALAAAAAAQABAAAAM0aLrc/jDKuQa4d0AbegeaAwSFYBYB8IwCQZjpGrSmEIvz+97NWJ48BseTCjksGBBlyVwmAAA7" />
+                    <td {{ if gt $s.Amount 0 }}title="{{ $s.Accomplished }}" sorttable_customkey="{{ $s.Amount }}"{{end}}>
+                        {{ if ne $g.Amount 0 }}
+                            <img src="data:image/gif;base64,R0lGODlhEAAQAKIGA{{ if ge $s.Amount $g.Amount }}K2mTmU+Itv/cpZ6PP///4esPn5NKgAAACH5BAEAAAYALAAAAAAQABAAAAM0aLrc/jDKuQa4d0AbegeaAwSFYBYB8IwCQZjpGrSmEIvz+97NWJ48BseTCjksGBBlyVwmAAA7{{ else }}GU+Ip0mBLVcQoAyE86Sgf///35NKgAAACH5BAEAAAYALAAAAAAQABAAAAMmaLrc/jDKSSG4V4IhQhhABAgF0YVWQHgB+gBBd4oDC2qYW+18DyUAOw=={{ end }}" />
                         {{ end }}
-                        {{ $s.Amount }}
+                        {{ if ne $g.Amount 1 }}
+                            {{ $s.Amount }}
+                        {{ end }}
                     </td>
                 {{ end }}
             </tr>
         {{ end }}
     </table>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
-    <script>$('p').first().text(new Date("{{ .challenge.StartDate.String }}Z").toLocaleString())</script>
+    <script>
+        $('p').first().text(new Date("{{ .challenge.StartDate.String }}Z").toLocaleString());
+        $('td[title]').each((i, e) => {
+            const d = e.title;
+            if(d) {
+                const dd = new Date(d+'Z');
+                e.setAttribute("sorttable_customkey", e.getAttribute("sorttable_customkey") + (Date.now() - dd.getTime()));
+                e.title = dd.toLocaleString();
+            }
+        });
+    </script>
 </body>
 </html>
