@@ -44,12 +44,12 @@ type GoalHeader struct {
 	Amount  int
 }
 
-func decodeGoal(key string, goal dto.Goal, l *map[int]GoalHeader) GoalHTML {
+func decodeGoal(key string, goal dto.Goal, l map[int]GoalHeader) GoalHTML {
 	splited := strings.Split(goal.Descript, ":")
 	idxLast := len(splited) - 2
 	goalMax, header := 0, ""
 	if l != nil {
-		defer func() { (*l)[goal.ID] = GoalHeader{template.HTML(header), goalMax} }()
+		defer func() { l[goal.ID] = GoalHeader{template.HTML(header), goalMax} }()
 	}
 	if idxLast >= 0 {
 		if splited[idxLast] == "" {
@@ -117,7 +117,6 @@ func decodeGoal(key string, goal dto.Goal, l *map[int]GoalHeader) GoalHTML {
 	return out
 }
 
-func mkmap() *map[int]GoalHeader {
-	tmplMap := make(map[int]GoalHeader, 0)
-	return &tmplMap
+func mkmap() map[int]GoalHeader {
+	return make(map[int]GoalHeader, 0)
 }

@@ -72,9 +72,10 @@
         $('td[title]').each((i, e) => {
             const d = e.title;
             if(d) {
+                console.log(d);
                 const dd = new Date(d+'Z');
                 e.setAttribute("sorttable_customkey", e.getAttribute("sorttable_customkey") + (Date.now() - dd.getTime()));
-                e.title = dd.toLocaleString();
+                e.title = dd.toLocaleString() + '.' + dd.getMilliseconds()/10;
             }
         });
     </script>
