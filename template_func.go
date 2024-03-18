@@ -34,35 +34,44 @@ func fdate(dateString string) template.HTML {
 	return ""
 }
 
-type MM struct {
+type GoalHTML struct {
 	Text        template.HTML
 	Icon, Label string
 }
 
-func decodeGoal(key string, goal dto.Goal, l *map[int]template.HTML) MM {
+type GoalHeader struct {
+	template.HTML
+	int
+}
+
+func decodeGoal(key string, goal dto.Goal, l *map[int]GoalHeader) GoalHTML {
 	splited := strings.Split(goal.Descript, ":")
 	idxLast := len(splited) - 1
-	short := splited[idxLast]
+	goalMax, header := 0, splited[idxLast]
 	if l != nil {
-		defer func() { (*l)[goal.ID] = template.HTML(short) }()
+		defer func() { (*l)[goal.ID] = GoalHeader{template.HTML(header), goalMax} }()
 	}
-	if idxLast >= 0 && splited[idxLast] == "" {
-		splited[idxLast] = "le plus de"
+	if idxLast >= 0 {
+		if splited[idxLast] == "" {
+			splited[idxLast] = "le plus de"
+		} else {
+			goalMax, _ = strconv.Atoi(splited[idxLast])
+		}
 	}
-	var mm MM
+	var out GoalHTML
 	switch goal.Typ {
 	case 0:
 		if len(splited) < 2 {
-			return mm
+			return out
 		}
-		mm.Text = template.HTML(fmt.Sprintf("Accumuler <b>%s</b> pictos", splited[0]))
+		out.Text = template.HTML(fmt.Sprintf("Accumuler <b>%s</b> pictos", splited[0]))
 		if id, err := strconv.Atoi(splited[1]); err == nil {
-			mm.Icon, mm.Label = getServerDataKey(id, "pictos", key)
-			short += "<img src=\"https://myhordes.eu/build/images/" + mm.Icon + "\">"
+			out.Icon, out.Label = getServerDataKey(id, "pictos", key)
+			header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 		}
 	case 1:
 		if len(splited) < 4 {
-			return mm
+			return out
 		}
 		var txt string
 		if splited[0] > "" {
@@ -78,34 +87,34 @@ func decodeGoal(key string, goal dto.Goal, l *map[int]template.HTML) MM {
 				txt = "Etre dans l'OM avec <b>%s%s%s</b>"
 			}
 		}
-		mm.Text = template.HTML(fmt.Sprintf(txt, splited[0], splited[1], splited[2]))
+		out.Text = template.HTML(fmt.Sprintf(txt, splited[0], splited[1], splited[2]))
 		if id, err := strconv.Atoi(splited[3]); err == nil {
-			mm.Icon, mm.Label = getServerDataKey(id, "items", key)
-			short = fmt.Sprintf("[%s/%s] %s <img src=\"https://myhordes.eu/build/images/%s\">", splited[0], splited[1], short, mm.Icon)
+			out.Icon, out.Label = getServerDataKey(id, "items", key)
+			header = fmt.Sprintf("[%s/%s] %s <img src=\"https://myhordes.eu/build/images/%s\">", splited[0], splited[1], header, out.Icon)
 		}
 	case 2:
 		if len(splited) < 1 {
-			return mm
+			return out
 		}
-		mm.Text = "Construire"
+		out.Text = "Construire"
 		if id, err := strconv.Atoi(splited[0]); err == nil {
-			mm.Icon, mm.Label = getServerDataKey(id, "buildings", key)
-			short = "<img src=\"https://myhordes.eu/build/images/" + mm.Icon + "\">"
+			out.Icon, out.Label = getServerDataKey(id, "buildings", key)
+			header = "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 		}
 	case 3:
 		if len(splited) < 2 {
-			return mm
+			return out
 		}
-		mm.Text = template.HTML(fmt.Sprintf("Avoir en banque <b>%s</b>", splited[0]))
+		out.Text = template.HTML(fmt.Sprintf("Avoir en banque <b>%s</b>", splited[0]))
 		if id, err := strconv.Atoi(splited[1]); err == nil {
-			mm.Icon, mm.Label = getServerDataKey(id, "items", key)
-			short += "<img src=\"https://myhordes.eu/build/images/" + mm.Icon + "\">"
+			out.Icon, out.Label = getServerDataKey(id, "items", key)
+			header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 		}
 	}
-	return mm
+	return out
 }
 
-func mkmap() *map[int]template.HTML {
-	tmplMap := make(map[int]template.HTML, 0)
+func mkmap() *map[int]GoalHeader {
+	tmplMap := make(map[int]GoalHeader, 0)
 	return &tmplMap
 }

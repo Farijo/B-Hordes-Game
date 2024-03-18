@@ -45,16 +45,23 @@
         {{ end }}
     </div>
     <table class="sortable">
-        <tr><th>Participants</th>{{ range $_, $goalHeader := $goalHeaders }}<th>{{$goalHeader}}</th>{{ end }}
+        <tr><th>Participants</th>{{ range $_, $goalHeader := $goalHeaders }}<th>{{ $goalHeader.HTML }}</th>{{ end }}
         {{ range $partic := .advancement }}
             <tr class="item" onclick="document.location='/user/{{ $partic.ID }}';">
                 <td sorttable_customkey="{{ $partic.SimplifiedName }}">
                     <img class="avatar" src="{{ $partic.Avatar.String }}">
                     <span class="name">{{ $partic.Name }}</span>
                 </td>
-                {{ range $k, $_ := $goalHeaders }}
+                {{ range $k, $g := $goalHeaders }}
                     {{ $s := index $partic.Successes $k }}
-                    <td title="{{ $s.Accomplished }}">{{ $s.Amount }}</td>
+                    <td title="{{ $s.Accomplished }}">
+                        {{ if ge $s.Amount $g.int }}
+                            <img src="data:image/gif;base64,R0lGODlhEAAQAKIGAGU+Ip0mBLVcQoAyE86Sgf///35NKgAAACH5BAEAAAYALAAAAAAQABAAAAMmaLrc/jDKSSG4V4IhQhhABAgF0YVWQHgB+gBBd4oDC2qYW+18DyUAOw==" />
+                        {{ else }}
+                            <img src="data:image/gif;base64,R0lGODlhEAAQAKIGAK2mTmU+Itv/cpZ6PP///4esPn5NKgAAACH5BAEAAAYALAAAAAAQABAAAAM0aLrc/jDKuQa4d0AbegeaAwSFYBYB8IwCQZjpGrSmEIvz+97NWJ48BseTCjksGBBlyVwmAAA7" />
+                        {{ end }}
+                        {{ $s.Amount }}
+                    </td>
                 {{ end }}
             </tr>
         {{ end }}
