@@ -19,14 +19,13 @@
                 <span class="name">{{ .challenge.Creator.Name }}</span>
             </div>
         </a>
-        <script>
-            function ISOGMTToLocale(iso) {
-                return new Date(`${iso}Z`).toLocaleString('sv').substring(0, 16);
-            }
-            {{ if .challenge.StartDate.Valid }}const startDate=ISOGMTToLocale("{{ .challenge.StartDate.String }}");{{ end }}
-            {{ if .challenge.EndDate.Valid }}const endDate=ISOGMTToLocale("{{ .challenge.EndDate.String }}");{{ end }}
-        </script>
         {{ if .selfChallenge }}
+            <script>
+                function dateToISOGMT(e) {
+                    const input = $(e).children('[type="datetime-local"]');
+                    input.val(new Date(input.val()).toISOString().substring(0, 16));
+                }
+            </script>
             <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onsubmit="dateToISOGMT(this)">
                 <div class="line1">Début</div>
                 <input class="line2" name="start_date" step="60" type="datetime-local" style="margin:0.5em"/>
@@ -91,7 +90,7 @@
                     </td>
                     <td>{{ .CreationCount }}</td>
                     <td>{{ .ParticipationCount }}</td>
-                    <td onclick="childClick(event)">
+                    <td onclick="event.stopPropagation()">
                         <input name="{{ $result.ID }}-validator" type=submit value="+ Approbateur"/>
                         {{ if eq $challAccess 2 }}
                             <br><input name="{{ $result.ID }}-invitation" type=submit value="+ Invité"/>
@@ -109,7 +108,7 @@
                         </td>
                         <td>{{ .CreationCount }}</td>
                         <td>{{ .ParticipationCount }}</td>
-                        <td onclick="childClick(event)">
+                        <td onclick="event.stopPropagation()">
                             <input name="{{ $invit.ID }}-invitation" type=submit value="x"/>
                             {{ if eq $challAccess 1 }}
                                 <input name="{{ $invit.ID }}-invitation" type=submit value="✓"/>
@@ -138,7 +137,7 @@
                     <td>{{ .CreationCount }}</td>
                     <td>{{ .ParticipationCount }}</td>
                     {{ if $selfChall }}
-                        <td onclick="childClick(event)">
+                        <td onclick="event.stopPropagation()">
                             <input name="{{ $approb.ID }}-validator" type=submit value="x"/>
                         </td>
                     {{ end }}
@@ -155,7 +154,7 @@
                     <td>{{ .ParticipationCount }}</td>
                     {{ if $selfChall }}
                         {{ if gt $challAccess 0 }}
-                            <td onclick="childClick(event)">
+                            <td onclick="event.stopPropagation()">
                                 <input name="{{ $partic.ID }}-participant" type=submit value="x"/>
                             </td>
                         {{ end }}
@@ -166,7 +165,6 @@
     </form>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
-    <script src="/script/recruit.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function(event) { 
             var scrollpos = localStorage.getItem('scrollpos');
@@ -176,6 +174,53 @@
         window.onbeforeunload = function(e) {
             localStorage.setItem('scrollpos', window.scrollY);
         };
+
+        const startDateInput = $('[name=start_date]');
+        const endDateInput = $('[name=end_date]');
+
+        {{ if .challenge.StartDate.Valid }}
+            const startDate = new Date("{{ .challenge.StartDate.String }}Z").toLocaleString('sv').substring(0, 16)
+            startDateInput.val(startDate);
+            endDateInput.prop('min', startDate);
+            const sdd = new Date(startDate);
+            const p = $('.box p').first();
+            p.text(sdd.toLocaleString());
+            let rem = Math.round((sdd.getTime() - Date.now())/1000);
+            if(rem < 24*60*60) {
+                const sp = p.siblings('span');
+                const it = setInterval(() => {
+                    rem--;
+                    if(rem <= 0) {
+                        clearInterval(it);
+                        window.location.reload();
+                    }
+                    sp.text(decomposeTemps(rem));
+                }, 1000);
+            }
+        {{ else }}
+            endDateInput.parent().prop('title', "Une date de début doit d'abord être renseignée").children('input').prop('disabled', true)
+        {{ end }}
+
+        {{ if .challenge.EndDate.Valid }}
+            const endDate = new Date("{{ .challenge.EndDate.String }}Z").toLocaleString('sv').substring(0, 16)
+            startDateInput.prop('max', endDate);
+            endDateInput.val(endDate);
+            $('.box p').last().text(new Date(endDate).toLocaleString());
+        {{ end }}
+
+        startDateInput.on('change', function () {
+            if(!this.value || new Date(this.value) < new Date()) {
+                startDateInput.siblings('input').val('Démarrer maintenant');
+                startDateInput.parent().attr('onsubmit', "return confirm('Le lancement du défi empechera toute modification, hormis la date de fin')");
+            } else {
+                startDateInput.siblings('input').val('Valider');
+                startDateInput.parent().attr('onsubmit', "dateToISOGMT(this)");
+            }
+        }).trigger('change');
+
+        function decomposeTemps(duree) {
+            return `~ ${Math.floor(duree / 3600).padStart(2, '0')}:${Math.floor((duree % 3600) / 60).padStart(2, '0')}:${(duree % 60).padStart(2, '0')}`;
+        }
     </script>
 </body>
 </html>
