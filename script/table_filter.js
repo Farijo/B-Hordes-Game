@@ -26,4 +26,9 @@
             }
         });
     })
+
+    $('td.date').each((i, e) => {
+        const date = new Date(e.getAttribute("sorttable_customkey")+'Z');
+        e.innerHTML = `${date.toLocaleDateString()}<br><span style=\"font-size:80%\">${date.toLocaleTimeString()}</span>`;
+    })
 })();

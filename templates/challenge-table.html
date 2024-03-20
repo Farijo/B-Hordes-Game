@@ -51,8 +51,8 @@
         <td>{{ if $challdata.Private }}<img title=Oui src="https://myhordes.eu/build/images/professions/vest.dab68fee.gif" />{{ else }}<img title=Non alt=Non />{{ end }}</td>
         <td sorttable_customkey="{{ $challdata.Status }}"><img title="{{ index (index $status $challdata.Status) 0 }}" src="data:image/png;base64, {{ index (index $status $challdata.Status) 1 }}"/></td>
         <td>{{ $challdata.ParticipantCount }}</td>
-        <td sorttable_customkey="{{ $challdata.StartDate.String }}" style="min-width:9em">{{ fDate $challdata.StartDate.String }}</td>
-        <td sorttable_customkey="{{ $challdata.EndDate.String }}" style="min-width:9em">{{ fDate $challdata.EndDate.String }}</td>
+        <td {{ if $challdata.StartDate.Valid }}sorttable_customkey="{{ $challdata.StartDate.String }}" class="date" style="min-width:9em"{{ end }}></td>
+        <td {{ if $challdata.EndDate.Valid }}sorttable_customkey="{{ $challdata.EndDate.String }}" class="date" style="min-width:9em"{{ end }}></td>
         <td>truc</td>
     </tr>
     {{ end }}
