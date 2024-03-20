@@ -281,7 +281,7 @@ func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, view
 	 LEFT JOIN user        ON challenge.creator = user.id
 	 LEFT JOIN participant ON challenge.id = participant.challenge AND participant.user = ?
 	 LEFT JOIN validator   ON challenge.id = validator.challenge AND validator.user = ?
-	 LEFT JOIN invitation  ON challenge.id = invitation.challenge AND invitation.user = ?
+	 LEFT JOIN invitation  ON challenge.id = invitation.challenge AND invitation.user = ? AND participant.user IS NULL
 	 WHERE ? IN (challenge.creator, participant.user, validator.user, invitation.user)
 	 AND (challenge.flags & 0x04 = 0 OR ? in (challenge.creator, participant.user, validator.user))
 	 AND (?=? OR ((challenge.flags & 0x30) >> 4) = 2 AND challenge.flags & 0x03 < 2)

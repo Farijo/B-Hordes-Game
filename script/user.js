@@ -6,7 +6,7 @@
         const val = this.value;
         rows.each(function() {
             const r = $(this);
-            if(r.children(':first').attr('title').includes(val)) {
+            if(val === '*' || r.children(':first').attr('title').includes(val)) {
                 table.append(r);
             } else {
                 r.remove();

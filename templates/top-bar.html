@@ -11,15 +11,14 @@
 <div id="top-bar">
     <a href="/">Accueil</a>
     {{ if .logged }}
-    <a href="/challenge">Créer un défi</a>
-    <a href="/view/validation.php">Validations (5)</a>
-    <a href="/user">Mon palmarès</a>
-    <a href="/view/user.php?selection=Invit%C3%A9">Invitations en attente</a>
     <form method="post" action="/user">
-        <input type="submit" name="refresh" value="MAJ mes infos" style="font-size:1rem">
+        <input type="submit" name="refresh" value="Mise à jour" style="font-size:1rem">
     </form>
-    <a href="/logout">Me déconnecter</a>
+    <a href="/challenge">Créer un défi</a>
+    <a href="/user">Profil</a>
+    <a href="/validation">Validations</a>
+    <a href="/logout">Déconnexion</a>
     {{ else }}
-    <a href="https://myhordes.eu/jx/disclaimer/26">Me connecter</a>
+    <a href="https://myhordes.eu/jx/disclaimer/26">Connexion</a>
     {{ end }}
 </div>

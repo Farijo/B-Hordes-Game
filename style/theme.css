@@ -64,8 +64,13 @@ label {
 .name {
     text-align:left;
     margin-left:0.5rem;
+    margin-right: 3em;
     font-family: 'Courier New', monospace;
     font-weight: bolder;
+}
+
+td:has(.name) {
+    white-space: nowrap;
 }
 
 select {

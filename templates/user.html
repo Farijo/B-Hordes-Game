@@ -12,9 +12,22 @@
     {{ if eq "" .user.Name }}
     <h2>Joueur introuvable</h2>
     {{ else }}
-    {{template "user-table.html" .user }}
+    <table>
+        <tr>
+            <th>Joueur</th>
+            <th>Défis créés</th>
+            <th>Défis participés</th>
+        </tr>
+        <tr>
+            <td><img class="avatar" src="{{ .user.Avatar.String }}"><span class="name">{{ .user.Name }}</span></td>
+            <td>{{ .user.CreationCount }}</td>
+            <td>{{ .user.ParticipationCount }}</td>
+        </tr>
+    </table>
+    
     <h2>Défis en tant que
         <select id=type>
+            <option>*</option>
             <option>Participant</option>
             <option>Créateur</option>
             <option>Approbateur</option>
