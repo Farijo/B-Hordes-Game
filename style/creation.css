@@ -23,7 +23,7 @@ input[type="checkbox"], input[type="submit"] {
 input[type="number"] {
     width: 3rem;
 }
-input[type="submit"] {
+input[name="act"] {
     margin: auto 0.4rem;
 }
 #goal-img, #more {
