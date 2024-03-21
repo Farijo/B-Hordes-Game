@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func getAccess() [][]string {
@@ -25,13 +24,6 @@ func getStatus() [][]string {
 		{"En cours", "R0lGODlhEAAQAMQAAAAAANbKvzENBNQ4FasnAVoYCe3o4TQrI/ZHIO2XFv+0QzUsI8EzEtjMwOvk3tzRx7otCrIrBefg2P99YLByFawnA35NKgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAABYALAAAAAAQABAAAAV5oCWOQmmOqCgQQ6IMg5CqrDuwk4yu7Uv8MJ1qQEkkYDcCQxhoBgxPKEwpOxQChSy2AA0MILoDYEwGGACFQSRcJp8LiIqg6zQ8DHh0XBCwiAEBZW83fH5jgWRYcQSFYoiJaT+NgGMmiggxAQsWfCUifSYyTqMSDjMWIQA7"},
 		{"Terminé", "R0lGODlhEAARAMQUACglFWZXHX1tKYt7MaSRO0I6F8KUBu21CCwpGP/ba1dKF7ahQf///zc0IDEuHIpqBVxGAIx8MjQxHqWSPH5NKgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAABQALAAAAAAQABEAAAVpICWOQDmeKBAQAoC+Kuu+Z9zSZZmsLZO7scHgsCgOAgnhosQTJIXHgyDQsgkOQsF0FwgwC2ADGAww5ESIdPrQLRxmOIXhkPDRRCo5JAGHBeQPb3cUeQaGfSkrXYiJBBMRjDUACBINDighADs="},
 	}
-}
-
-func fdate(dateString string) template.HTML {
-	if date, err := time.Parse(time.DateTime, dateString); err == nil {
-		return template.HTML(date.Format("02 January 2006<br><span style=\"font-size:80%\">15:04:05</span>"))
-	}
-	return ""
 }
 
 type GoalHTML struct {

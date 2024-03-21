@@ -30,7 +30,6 @@ func main() {
 	r.SetHTMLTemplate(Must(template.New("").Funcs(template.FuncMap{
 		"getAccess":    getAccess,
 		"getStatus":    getStatus,
-		"fDate":        fdate,
 		"templateHTML": func(a string) template.HTML { return template.HTML(a) },
 		"decodeGoal":   decodeGoal,
 		"mkmap":        mkmap,
