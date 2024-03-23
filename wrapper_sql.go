@@ -56,8 +56,8 @@ func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 	 LEFT JOIN user ON challenge.creator = user.id
 	 LEFT JOIN participant ON challenge.id = participant.challenge
 	 WHERE challenge.flags & 0x03 < 2
-	 AND (challenge.flags & 0x04 = 0)
-	 AND ((challenge.flags & 0x30) >> 4 = 2)
+	 AND (challenge.flags & 0x04) = 0
+	 AND (challenge.flags & 0x30) = 0x20
 	 GROUP BY challenge.id, challenge.name, challenge.end_date
 	 ORDER BY ended, started`)
 	if err != nil {
@@ -326,7 +326,7 @@ func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, view
 	 LEFT JOIN invitation  ON challenge.id = invitation.challenge AND invitation.user = ? AND participant.user IS NULL
 	 WHERE ? IN (challenge.creator, participant.user, validator.user, invitation.user)
 	 AND (challenge.flags & 0x04 = 0 OR ? in (challenge.creator, participant.user, validator.user))
-	 AND (?=? OR ((challenge.flags & 0x30) >> 4) = 2 AND challenge.flags & 0x03 < 2)
+	 AND (?=? OR (challenge.flags & 0x30) = 0x20 AND challenge.flags & 0x03 < 2)
 	 GROUP BY challenge.id, challenge.name, challenge.end_date, created, participate, validate, invited
 	 ORDER BY ended, started, challenge.flags & 0x30`, userId, userId, userId, userId, userId, viewer, userId, viewer)
 	if err != nil {
