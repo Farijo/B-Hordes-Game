@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -49,8 +50,8 @@ func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 	rows, err := dbConn().Query(`SELECT user.name as cname, user.simplified_name, user.avatar
 	, challenge.id, challenge.name, challenge.flags, challenge.start_date, challenge.end_date
 	, COUNT(participant.user) AS participant_count
-	, challenge.start_date <= NOW() AS started
-	, challenge.end_date < NOW() AS ended
+	, challenge.start_date <= UTC_TIMESTAMP() AS started
+	, challenge.end_date < UTC_TIMESTAMP() AS ended
 	 FROM challenge
 	 LEFT JOIN user ON challenge.creator = user.id
 	 LEFT JOIN participant ON challenge.id = participant.challenge
@@ -91,7 +92,7 @@ func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 func queryChallenge(id int) (challenge dto.DetailedChallenge, err error) {
 	var untilStart, untilEnd sql.NullString
 	row := dbConn().QueryRow(`SELECT name, creator, flags, start_date, end_date
-	, TIMEDIFF(start_date,NOW()) as rem_start, TIMEDIFF(end_date,NOW()) as rem_end
+	, TIMEDIFF(start_date,UTC_TIMESTAMP()) as rem_start, TIMEDIFF(end_date,UTC_TIMESTAMP()) as rem_end
 	 FROM challenge
 	 WHERE id=?`, id)
 
@@ -122,24 +123,58 @@ func insertUser(user *dto.User) error {
 // }
 
 func insertMilestone(milestone *dto.Milestone) error {
-	rows, err := dbConn().Query(`SELECT typ,descript,goal.id
-	FROM goal
-	JOIN challenge ON goal.challenge = challenge.id
-	JOIN participant ON challenge.id = participant.challenge AND participant.user = ?
-	WHERE challenge.start_date <= NOW()
-	AND (NOW() < challenge.end_date OR challenge.end_date IS NULL)
-	AND ((challenge.flags & 0x30) >> 4) = 2`, milestone.User.ID)
+	tx, err := dbConn().Begin()
 	if err != nil {
 		return err
 	}
-	rowPresent := rows.Next()
+	defer tx.Rollback()
+
+	rows, err := tx.Query(`SELECT typ,descript,goal.id, challenge.flags & 0x08 = 0 as api
+	FROM goal
+	JOIN challenge ON goal.challenge = challenge.id
+	JOIN participant ON challenge.id = participant.challenge AND participant.user = ?
+	WHERE challenge.start_date <= UTC_TIMESTAMP()
+	AND (UTC_TIMESTAMP() < challenge.end_date OR challenge.end_date IS NULL)
+	AND (challenge.flags & 0x30) = 0x20`, milestone.User.ID)
+	if err != nil {
+		return err
+	}
+	successes := make([]dto.Success, 0)
+	rowPresent := false
+	for rows.Next() {
+		rowPresent = true
+		var g dto.Goal
+		var api bool
+		if err = rows.Scan(&g.Typ, &g.Descript, &g.ID, &api); err != nil {
+			rows.Close()
+			return err
+		}
+		if api {
+			splited := strings.Split(g.Descript, ":")
+			if id, err := strconv.Atoi(splited[1]); g.Typ == 0 && err == nil {
+				successes = append(successes, dto.Success{
+					User:         milestone.User.ID,
+					Goal:         g.ID,
+					Accomplished: "",
+					Amount:       int(milestone.Rewards.Pictos[uint16(id)]),
+				})
+			}
+		}
+	}
 	rows.Close()
 	if !rowPresent {
 		// not in a challenge, nothing to do
 		return nil
 	}
 
-	rows, err = dbConn().Query(`SELECT rewards, isGhost, playedMaps, dead, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, custom FROM milestone WHERE user=? ORDER BY dt ASC`, milestone.User.ID)
+	for _, success := range successes {
+		if _, err := tx.Exec(`INSERT INTO success VALUES(?, ?, UTC_TIMESTAMP(2), ?)
+		ON DUPLICATE KEY UPDATE amount=amount`, success.User, success.Goal, success.Amount); err != nil {
+			return err
+		}
+	}
+
+	rows, err = tx.Query(`SELECT rewards, isGhost, playedMaps, dead, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, custom FROM milestone WHERE user=? ORDER BY dt ASC`, milestone.User.ID)
 	if err != nil {
 		return err
 	}
@@ -183,10 +218,10 @@ func insertMilestone(milestone *dto.Milestone) error {
 		milestone.Rewards.String = string(changements)
 	} else if !mustUpdate {
 		// nothing has changed since last milestone
-		return nil
+		return tx.Commit()
 	}
 
-	if _, err = dbConn().Exec(`INSERT INTO milestone VALUES(?, NOW(2), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+	if _, err = tx.Exec(`INSERT INTO milestone VALUES(?, UTC_TIMESTAMP(2), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		milestone.User.ID,
 		milestone.IsGhost,
 		milestone.PlayedMaps,
@@ -205,7 +240,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 		return err
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 func queryUser(id int) (user dto.DetailedUser, err error) {
@@ -271,8 +306,8 @@ func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, view
 	rows, err := dbConn().Query(`SELECT user.name as cname, user.simplified_name, user.avatar
 	, challenge.id, challenge.name, challenge.flags, challenge.start_date, challenge.end_date
 	, COUNT(participant.user) AS participant_count
-	, challenge.start_date <= NOW() AS started
-	, challenge.end_date < NOW() AS ended
+	, challenge.start_date <= UTC_TIMESTAMP() AS started
+	, challenge.end_date < UTC_TIMESTAMP() AS ended
 	, challenge.creator=? AS created
 	, participant.user IS NOT NULL as participate
 	, validator.user IS NOT NULL as validate
@@ -547,7 +582,7 @@ func insertOrDeleteChallengeMember(challengeId, requestorId, userId int, validat
 		SELECT @userid, id
 		FROM challenge
 		WHERE
-			id = @challenge AND (start_date IS NULL OR NOW() < start_date)
+			id = @challenge AND (start_date IS NULL OR UTC_TIMESTAMP() < start_date)
 			AND ((flags & 0x03 = 0 AND @userid = @requestor)
 			OR   (flags & 0x03 = 1 AND creator = @requestor OR flags & 0x03 = 2 AND @requestor = @userid)
 			AND EXISTS (SELECT 1 FROM invitation WHERE user = @userid AND challenge = @challenge))`)
@@ -559,7 +594,7 @@ func insertOrDeleteChallengeMember(challengeId, requestorId, userId int, validat
 		SELECT @userid, id
 		FROM challenge
 		WHERE
-			id = @challenge AND (start_date IS NULL OR NOW() < start_date)
+			id = @challenge AND (start_date IS NULL OR UTC_TIMESTAMP() < start_date)
 			AND ((flags & 0x03 = 1 AND @userid = @requestor)
 			OR   (flags & 0x03 = 2 AND creator = @requestor))`)
 
@@ -567,7 +602,7 @@ func insertOrDeleteChallengeMember(challengeId, requestorId, userId int, validat
 	} else {
 		_, err := dbConn().Exec(`DELETE p FROM participant p
 		INNER JOIN challenge c ON p.challenge = c.id
-		WHERE c.id = @challenge AND p.user = @userid AND (c.start_date IS NULL OR NOW() < c.start_date)
+		WHERE c.id = @challenge AND p.user = @userid AND (c.start_date IS NULL OR UTC_TIMESTAMP() < c.start_date)
 		AND (@requestor = p.user OR @requestor = c.creator AND (c.flags & 0x03 > 0))`)
 
 		if err != nil {
@@ -575,7 +610,7 @@ func insertOrDeleteChallengeMember(challengeId, requestorId, userId int, validat
 		}
 		_, err = dbConn().Exec(`DELETE i FROM invitation i
 		INNER JOIN challenge c ON i.challenge = c.id
-		WHERE c.id = @challenge AND i.user = @userid AND (c.start_date IS NULL OR NOW() < c.start_date)
+		WHERE c.id = @challenge AND i.user = @userid AND (c.start_date IS NULL OR UTC_TIMESTAMP() < c.start_date)
 		AND (@requestor = i.user AND (c.flags & 0x03 = 1) OR @requestor = c.creator AND (c.flags & 0x03 = 2))`)
 
 		return err
@@ -591,15 +626,15 @@ func updateChallengeDate(challengeID, requestorID int, date string, start bool) 
 					SET start_date = ?
 					WHERE id = ?
 					AND creator = ?
-					AND (start_date IS NULL OR NOW() < start_date)	# challenge pas commencé
+					AND (start_date IS NULL OR UTC_TIMESTAMP() < start_date)	# challenge pas commencé
 					AND (  end_date IS NULL OR     ? <   end_date)	# date avant la fin`
 			params = []any{date, challengeID, requestorID, date}
 		} else {
 			stmt = `UPDATE challenge
-					SET start_date = NOW()
+					SET start_date = UTC_TIMESTAMP()
 					WHERE id = ?
 					AND creator = ?
-					AND (start_date IS NULL OR NOW() < start_date)	# challenge pas commencé`
+					AND (start_date IS NULL OR UTC_TIMESTAMP() < start_date)	# challenge pas commencé`
 		}
 	} else {
 		if date > "" {
@@ -607,19 +642,19 @@ func updateChallengeDate(challengeID, requestorID int, date string, start bool) 
 					SET end_date = ?
 					WHERE id = ?
 					AND creator = ?
-					AND NOW() < ?								# date dans le futur
+					AND UTC_TIMESTAMP() < ?								# date dans le futur
 					AND start_date IS NOT NULL					# challenge doit avoir un début
 					AND start_date < ?							# date après le début
-					AND (end_date IS NULL OR NOW() < end_date)  # challenge pas terminé`
+					AND (end_date IS NULL OR UTC_TIMESTAMP() < end_date)  # challenge pas terminé`
 			params = []any{date, challengeID, requestorID, date, date}
 		} else {
 			stmt = `UPDATE challenge
-					SET end_date = NOW()
+					SET end_date = UTC_TIMESTAMP()
 					WHERE id = ?
 					AND creator = ?
 					AND start_date IS NOT NULL					# challenge doit avoir un début
-					AND start_date < NOW()						# challenge commencé
-					AND (end_date IS NULL OR NOW() < end_date)  # challenge pas terminé`
+					AND start_date < UTC_TIMESTAMP()						# challenge commencé
+					AND (end_date IS NULL OR UTC_TIMESTAMP() < end_date)  # challenge pas terminé`
 		}
 	}
 	_, err := dbConn().Exec(stmt, params...)
@@ -659,5 +694,7 @@ func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
 		}
 		cuser.Successes[success.Goal] = success
 	}
-	ch <- cuser
+	if cuser.ID != 0 {
+		ch <- cuser
+	}
 }
