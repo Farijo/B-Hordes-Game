@@ -149,17 +149,24 @@ func insertMilestone(milestone *dto.Milestone) error {
 			rows.Close()
 			return err
 		}
-		if api {
-			splited := strings.Split(g.Descript, ":")
-			if id, err := strconv.Atoi(splited[1]); g.Typ == 0 && err == nil {
-				successes = append(successes, dto.Success{
-					User:         milestone.User.ID,
-					Goal:         g.ID,
-					Accomplished: "",
-					Amount:       int(milestone.Rewards.Pictos[uint16(id)]),
-				})
-			}
+		if !api || g.Typ != 0 {
+			continue
 		}
+		splited := strings.Split(g.Descript, ":")
+		id, err := strconv.Atoi(splited[1])
+		if err != nil {
+			continue
+		}
+		count := int(milestone.Rewards.Pictos[uint16(id)])
+		if gAmount, err := strconv.Atoi(splited[0]); err == nil && gAmount < count {
+			count = gAmount
+		}
+		successes = append(successes, dto.Success{
+			User:         milestone.User.ID,
+			Goal:         g.ID,
+			Accomplished: "",
+			Amount:       count,
+		})
 	}
 	rows.Close()
 	if !rowPresent {
