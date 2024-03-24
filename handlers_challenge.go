@@ -127,6 +127,7 @@ func challengeHandle(c *gin.Context) {
 			"advancement":   makeChannelFor(queryChallengeAdvancements, challenge.ID),
 		})
 	case 4: // ended
+		//TODO
 	}
 }
 

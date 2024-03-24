@@ -1,5 +1,5 @@
 form > * {
-    display: block;
+    /* display: block; */
 }
 label {
     margin: 0;

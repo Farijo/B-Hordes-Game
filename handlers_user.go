@@ -56,5 +56,5 @@ func refreshHandle(c *gin.Context) {
 	if err := refreshData(c.GetString("key")); err != nil {
 		fmt.Println(err)
 	}
-	c.Redirect(http.StatusFound, "/user")
+	c.Redirect(http.StatusFound, c.PostForm("redirect"))
 }

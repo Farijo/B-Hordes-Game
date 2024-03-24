@@ -13,6 +13,8 @@
     {{ if .logged }}
     <form method="post" action="/user">
         <input type="submit" name="refresh" value="Mise à jour" style="font-size:1rem">
+        <input type="hidden" name="redirect">
+        <script>document.getElementsByName("redirect").item(0).value=window.location.href</script>
     </form>
     <a href="/challenge">Créer un défi</a>
     <a href="/user">Profil</a>
