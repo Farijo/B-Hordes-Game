@@ -34,6 +34,7 @@ CREATE TABLE goal (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     challenge INTEGER NOT NULL,
     typ TINYINT NOT NULL,
+    entity SMALLINT UNSIGNED NOT NULL,
     descript VARCHAR(255),
     FOREIGN KEY(challenge) REFERENCES challenge(id)
 );
