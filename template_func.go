@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"strconv"
-	"strings"
 )
 
 func getAccess() [][]string {
@@ -33,78 +32,54 @@ type GoalHTML struct {
 
 type GoalHeader struct {
 	Content template.HTML
-	Amount  int
+	Amount  uint32
 }
 
-func decodeGoal(key string, goal dto.Goal, l map[int]GoalHeader) GoalHTML {
-	splited := strings.Split(goal.Descript, ":")
-	idxLast := len(splited) - 2
-	goalMax, header := 0, ""
-	if l != nil {
-		defer func() { l[goal.ID] = GoalHeader{template.HTML(header), goalMax} }()
-	}
-	if idxLast >= 0 {
-		if splited[idxLast] == "" {
-			header = "+"
-			splited[idxLast] = "le plus de"
-		} else {
-			header = splited[idxLast]
-			goalMax, _ = strconv.Atoi(splited[idxLast])
-		}
+func decodeGoal(key string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
+	amountStr, header := "le plus de", "+"
+	if goal.Amount.Valid {
+		header = strconv.Itoa(int(goal.Amount.Int32))
+		amountStr = header
 	}
 	var out GoalHTML
 	switch goal.Typ {
 	case 0:
-		if len(splited) < 2 {
-			return out
-		}
-		out.Text = template.HTML(fmt.Sprintf("Accumuler <b>%s</b> pictos", splited[0]))
-		if id, err := strconv.Atoi(splited[1]); err == nil {
-			out.Icon, out.Label = getServerDataKey(id, "pictos", key)
-			header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
-		}
+		out.Text = template.HTML(fmt.Sprintf("Accumuler <b>%s</b> pictos", amountStr))
+		out.Icon, out.Label = getServerDataKey(goal.Entity, "pictos", key)
+		header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 	case 1:
-		if len(splited) < 4 {
-			return out
-		}
+		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key)
 		var txt string
-		if splited[0] > "" {
-			if splited[1] > "" {
-				txt = "Etre sur la <b>case</b> [ <b>%s</b> / <b>%s</b> ] de l'OM avec <b>%s</b>"
+		if goal.X.Valid {
+			if goal.Y.Valid {
+				txt = fmt.Sprintf("Etre sur la <b>case</b> [ <b>%d</b> / <b>%d</b> ] de l'OM avec <b>%s</b>", goal.X.Byte, goal.Y.Byte, amountStr)
+				header = fmt.Sprintf("[%d/%d] %s <img src=\"https://myhordes.eu/build/images/%s\">", goal.X.Byte, goal.Y.Byte, header, out.Icon)
 			} else {
-				txt = "Etre sur la <b>ligne %s%s</b> de l'OM avec <b>%s</b>"
+				txt = fmt.Sprintf("Etre sur la <b>ligne %d</b> de l'OM avec <b>%s</b>", goal.X.Byte, amountStr)
+				header = fmt.Sprintf("[%d/_] %s <img src=\"https://myhordes.eu/build/images/%s\">", goal.X.Byte, header, out.Icon)
 			}
 		} else {
-			if splited[1] > "" {
-				txt = "Etre sur la <b>colonne %s%s</b> de l'OM avec <b>%s</b>"
+			if goal.Y.Valid {
+				txt = fmt.Sprintf("Etre sur la <b>colonne %d</b> de l'OM avec <b>%s</b>", goal.Y.Byte, amountStr)
+				header = fmt.Sprintf("[_/%d] %s <img src=\"https://myhordes.eu/build/images/%s\">", goal.Y.Byte, header, out.Icon)
 			} else {
-				txt = "Etre dans l'OM avec <b>%s%s%s</b>"
+				txt = fmt.Sprintf("Etre dans l'OM avec <b>%s</b>", amountStr)
+				header = fmt.Sprintf("[_/_] %s <img src=\"https://myhordes.eu/build/images/%s\">", header, out.Icon)
 			}
 		}
-		out.Text = template.HTML(fmt.Sprintf(txt, splited[0], splited[1], splited[2]))
-		if id, err := strconv.Atoi(splited[3]); err == nil {
-			out.Icon, out.Label = getServerDataKey(id, "items", key)
-			header = fmt.Sprintf("[%s/%s] %s <img src=\"https://myhordes.eu/build/images/%s\">", splited[0], splited[1], header, out.Icon)
-		}
+		out.Text = template.HTML(txt)
 	case 2:
-		if len(splited) < 1 {
-			return out
-		}
 		out.Text = "Construire"
-		if id, err := strconv.Atoi(splited[0]); err == nil {
-			out.Icon, out.Label = getServerDataKey(id, "buildings", key)
-			header = "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
-			goalMax = 1
-		}
+		out.Icon, out.Label = getServerDataKey(goal.Entity, "buildings", key)
+		header = "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
+		goal.Amount.Int32 = 1
 	case 3:
-		if len(splited) < 2 {
-			return out
-		}
-		out.Text = template.HTML(fmt.Sprintf("Avoir en banque <b>%s</b>", splited[0]))
-		if id, err := strconv.Atoi(splited[1]); err == nil {
-			out.Icon, out.Label = getServerDataKey(id, "items", key)
-			header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
-		}
+		out.Text = template.HTML(fmt.Sprintf("Avoir en banque <b>%s</b>", amountStr))
+		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key)
+		header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
+	}
+	if l != nil {
+		l[goal.ID] = GoalHeader{template.HTML(header), uint32(goal.Amount.Int32)}
 	}
 	return out
 }

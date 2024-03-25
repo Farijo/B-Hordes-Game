@@ -1,6 +1,9 @@
 package main
 
-import "bhordesgame/dto"
+import (
+	"bhordesgame/dto"
+	"strconv"
+)
 
 type FormChallenge struct {
 	Name          string `form:"name"`
@@ -35,13 +38,17 @@ func buildGoalsFromForm(types, x, y, count, val []string) *[]dto.Goal {
 	for i := range goals {
 		v := &goals[i]
 		v.Typ = types[i][0] - '0'
+		v.Entity = uint16(Ignore(strconv.ParseUint(pop(&val), 10, 16)))
 		switch v.Typ {
-		case 0, 3:
-			v.Descript = pop(&count) + ":" + pop(&val)
 		case 1:
-			v.Descript = pop(&x) + ":" + pop(&y) + ":" + pop(&count) + ":" + pop(&val)
-		case 2:
-			v.Descript = pop(&val)
+			v.X.Valid = true
+			v.X.Byte = byte(Ignore(strconv.ParseInt(pop(&x), 10, 8)))
+			v.Y.Valid = true
+			v.Y.Byte = byte(Ignore(strconv.ParseInt(pop(&y), 10, 8)))
+			fallthrough
+		case 0, 3:
+			v.Amount.Valid = true
+			v.Amount.Int32 = int32(Ignore(strconv.ParseUint(pop(&count), 10, 32)))
 		}
 	}
 

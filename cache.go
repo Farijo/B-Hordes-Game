@@ -25,7 +25,7 @@ func refreshData(key string) error {
 }
 
 type SrvData struct {
-	Id   int    `json:"id"`
+	Id   uint16 `json:"id"`
 	Img  string `json:"img"`
 	Name struct {
 		Fr string `json:"fr"`
@@ -71,7 +71,7 @@ func getServerData(userkey string) template.JS {
 	return templateSrvData
 }
 
-func getServerDataKey(id int, datakey, userkey string) (img, name string) {
+func getServerDataKey(id uint16, datakey, userkey string) (img, name string) {
 	if serverData == nil {
 		getServerData(userkey)
 	}

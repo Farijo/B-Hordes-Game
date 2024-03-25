@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"unicode"
 
@@ -129,7 +128,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 	}
 	defer tx.Rollback()
 
-	rows, err := tx.Query(`SELECT typ,descript,goal.id, challenge.flags & 0x08 = 0 as api
+	rows, err := tx.Query(`SELECT goal.id,typ,entity,amount,x,y, challenge.flags & 0x08 = 0 as api
 	FROM goal
 	JOIN challenge ON goal.challenge = challenge.id
 	JOIN participant ON challenge.id = participant.challenge AND participant.user = ?
@@ -145,21 +144,16 @@ func insertMilestone(milestone *dto.Milestone) error {
 		rowPresent = true
 		var g dto.Goal
 		var api bool
-		if err = rows.Scan(&g.Typ, &g.Descript, &g.ID, &api); err != nil {
+		if err = rows.Scan(&g.ID, &g.Typ, &g.Entity, &g.Amount, &g.X, &g.Y, &api); err != nil {
 			rows.Close()
 			return err
 		}
 		if !api || g.Typ != 0 {
 			continue
 		}
-		splited := strings.Split(g.Descript, ":")
-		id, err := strconv.Atoi(splited[1])
-		if err != nil {
-			continue
-		}
-		count := int(milestone.Rewards.Pictos[uint16(id)])
-		if gAmount, err := strconv.Atoi(splited[0]); err == nil && gAmount < count {
-			count = gAmount
+		count := milestone.Rewards.Pictos[g.Entity]
+		if g.Amount.Valid && uint32(g.Amount.Int32) < count {
+			count = uint32(g.Amount.Int32)
 		}
 		successes = append(successes, dto.Success{
 			User:         milestone.User.ID,
@@ -399,11 +393,11 @@ func insertChallenge(toInsert *dto.Challenge, associated *[]dto.Goal) (int, erro
 	}
 	challengeId := int(challengeId64)
 
-	sqlStmt := "INSERT INTO goal (challenge, typ, descript) VALUES "
+	sqlStmt := "INSERT INTO goal (challenge, typ, entity, amount, x, y) VALUES "
 	values := make([]any, 0, 3*len(*associated))
 	for _, g := range *associated {
-		sqlStmt += "(?, ?, ?), "
-		values = append(values, challengeId, g.Typ, g.Descript)
+		sqlStmt += "(?, ?, ?, ?, ?, ?), "
+		values = append(values, challengeId, g.Typ, g.Entity, g.Amount, g.X, g.Y)
 	}
 	sqlStmt = sqlStmt[:len(sqlStmt)-2]
 
@@ -415,7 +409,7 @@ func insertChallenge(toInsert *dto.Challenge, associated *[]dto.Goal) (int, erro
 func queryChallengeGoals(ch chan<- *dto.Goal, challengeId int) {
 	defer close(ch)
 
-	rows, err := dbConn().Query(`SELECT id, typ, descript FROM goal WHERE challenge=?`, challengeId)
+	rows, err := dbConn().Query(`SELECT id, typ, entity, amount, x, y FROM goal WHERE challenge=?`, challengeId)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -424,7 +418,7 @@ func queryChallengeGoals(ch chan<- *dto.Goal, challengeId int) {
 	for rows.Next() {
 		var goal dto.Goal
 		goal.Challenge = challengeId
-		if err := rows.Scan(&goal.ID, &goal.Typ, &goal.Descript); err != nil {
+		if err := rows.Scan(&goal.ID, &goal.Typ, &goal.Entity, &goal.Amount, &goal.X, &goal.Y); err != nil {
 			fmt.Println(err)
 			return
 		}
@@ -452,11 +446,11 @@ func updateChallenge(toUpdate *dto.Challenge, associated *[]dto.Goal) error {
 		return err
 	}
 
-	sqlStmt := "INSERT INTO goal (challenge, typ, descript) VALUES "
+	sqlStmt := "INSERT INTO goal (challenge, typ, entity, amount, x, y) VALUES "
 	values := make([]any, 0, 3*len(*associated))
 	for _, g := range *associated {
-		sqlStmt += "(?, ?, ?), "
-		values = append(values, toUpdate.ID, g.Typ, g.Descript)
+		sqlStmt += "(?, ?, ?, ?, ?, ?), "
+		values = append(values, toUpdate.ID, g.Typ, g.Entity, g.Amount, g.X, g.Y)
 	}
 	sqlStmt = sqlStmt[:len(sqlStmt)-2]
 

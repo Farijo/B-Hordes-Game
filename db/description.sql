@@ -35,7 +35,9 @@ CREATE TABLE goal (
     challenge INTEGER NOT NULL,
     typ TINYINT NOT NULL,
     entity SMALLINT UNSIGNED NOT NULL,
-    descript VARCHAR(255),
+    amount INT UNSIGNED,
+    x TINYINT,
+    y TINYINT,
     FOREIGN KEY(challenge) REFERENCES challenge(id)
 );
 CREATE TABLE validator (
