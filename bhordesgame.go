@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bhordesgame/dto"
 	"embed"
 	"fmt"
 	"html/template"
@@ -36,8 +37,8 @@ func main() {
 	r.SetHTMLTemplate(Must(template.New("").Funcs(template.FuncMap{
 		"getAccess": getAccess,
 		"getStatus": getStatus,
-		"dumpStruct": func(strct any) template.JS {
-			return template.JS(strings.ReplaceAll(fmt.Sprintf("%+v", strct), " ", ","))
+		"dumpStruct": func(strct *dto.Goal) template.JS {
+			return template.JS(strings.ReplaceAll(fmt.Sprintf("%+v", *strct), " ", ","))
 		},
 		"decodeGoal": decodeGoal,
 		"mkmap":      mkmap,

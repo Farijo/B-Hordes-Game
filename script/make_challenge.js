@@ -66,7 +66,6 @@ addAGoal = function(deletable) {
 
 })();
 
-addAGoal(null);
 $('#more').on('click', addAGoal);
 
 function bindFormValues(participation, private, goals, api) {
@@ -74,45 +73,34 @@ function bindFormValues(participation, private, goals, api) {
     $('[name=privat]').val(private);
     $('[name=validation_api]').prop('checked', api);
 
-    let i = 0;
+    let deletable = false;
 
-    function getNextVal() {
-        let val = '';
-        while (goals[i] != ':' && i < goals.length) {
-            val += goals[i];
-            i++;
-        }
-        i++;
-        return val;
-    }
+    for (const goal of goals) {
+        
+        addAGoal(deletable);
+        deletable = true;
 
-    while (i < goals.length) {
-        const gvalue = goals[i];
-        i += 2;
-        $(`[name=type]:last`).val(gvalue).trigger('change');
+        $(`[name=type]:last`).val(goal.Typ).trigger('change');
 
-        switch (gvalue) {
-            case '1': // case
-                $(`[name=x]:last`).val(getNextVal()).trigger('change');
-                $(`[name=y]:last`).val(getNextVal()).trigger('change');
-            case '0': // picto
-            case '3': // banque
-                $(`[name=count]:last`).val(getNextVal()).trigger('change');
-            case '2': // construire
-                const nval = getNextVal();
-                for (var key in pictImg[gvalue]) {
-                    if (pictImg[gvalue][key].id == nval) {
+        switch (goal.Typ) {
+            case 1: // case
+                if(goal.X.Valid) $(`[name=x]:last`).val(goal.X.Byte).trigger('change');
+                if(goal.Y.Valid) $(`[name=y]:last`).val(goal.Y.Byte).trigger('change');
+            case 0: // picto
+            case 3: // banque
+                if(goal.Amount.Valid) $(`[name=count]:last`).val(goal.Amount.Int32).trigger('change');
+            case 2: // construire
+                const nval = goal.Entity;
+                for (var key in pictImg[goal.Typ]) {
+                    if (pictImg[goal.Typ][key].id == nval) {
                         $(`.goal-list:last`).val(key).trigger('change');
                         break;
                     }
                 }
                 break;
-            case '4': // perso
+            case 4: // perso
             default:
-                i++;
                 break;
         }
-        if(i >= goals.length) return;
-        addAGoal(true);     
     }
 }
