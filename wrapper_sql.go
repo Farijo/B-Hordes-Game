@@ -46,7 +46,7 @@ func transformer() *transform.Transformer {
 func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 	defer close(ch)
 
-	rows, err := dbConn().Query(`SELECT user.name as cname, user.simplified_name, user.avatar
+	rows, err := dbConn().Query(`SELECT user.ID, user.name as cname, user.simplified_name, user.avatar
 	, challenge.id, challenge.name, challenge.flags, challenge.start_date, challenge.end_date
 	, COUNT(participant.user) AS participant_count
 	, challenge.start_date <= UTC_TIMESTAMP() AS started
@@ -69,6 +69,7 @@ func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 		var Started sql.NullBool
 		var Ended sql.NullBool
 		if err := rows.Scan(
+			&detailedChall.Creator.ID,
 			&detailedChall.Creator.Name,
 			&detailedChall.Creator.SimplifiedName,
 			&detailedChall.Creator.Avatar,
@@ -304,7 +305,7 @@ func queryMultipleUsers(ch chan<- *dto.DetailedUser, idents []string) {
 func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, viewer int) {
 	defer close(ch)
 
-	rows, err := dbConn().Query(`SELECT user.name as cname, user.simplified_name, user.avatar
+	rows, err := dbConn().Query(`SELECT user.id, user.name as cname, user.simplified_name, user.avatar
 	, challenge.id, challenge.name, challenge.flags, challenge.start_date, challenge.end_date
 	, COUNT(participant.user) AS participant_count
 	, challenge.start_date <= UTC_TIMESTAMP() AS started
@@ -334,6 +335,7 @@ func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, view
 		var Ended sql.NullBool
 		var created, participate, validate, invited bool
 		if err := rows.Scan(
+			&detailedChall.Creator.ID,
 			&detailedChall.Creator.Name,
 			&detailedChall.Creator.SimplifiedName,
 			&detailedChall.Creator.Avatar,

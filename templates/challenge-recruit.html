@@ -84,14 +84,16 @@
         <table class="sortable">
             <tr><th>Résultats</th><th>Défis créés</th><th>Défis participés</th></tr>
             {{ range $result := .searchResults }}
-                <tr class="item" onclick="document.location='/user/{{ $result.ID }}';">
+                <tr class="item">
                     <td sorttable_customkey="{{ $result.SimplifiedName }}">
+                        <a href="/user/{{ $result.ID }}">
                         <img class="avatar" src="{{ $result.Avatar.String }}">
                         <span class="name">{{ $result.Name }}</span>
+                        </a>
                     </td>
                     <td>{{ .CreationCount }}</td>
                     <td>{{ .ParticipationCount }}</td>
-                    <td onclick="event.stopPropagation()">
+                    <td>
                         <input name="{{ $result.ID }}-validator" type=submit value="+ Approbateur"/>
                         {{ if eq $challAccess 2 }}
                             <br><input name="{{ $result.ID }}-invitation" type=submit value="+ Invité"/>
@@ -102,14 +104,16 @@
             {{ if gt $challAccess 0 }}
                 <tr><th>{{ "Postulants" }}</th><th>Défis créés</th><th>Défis participés</th></tr>
                 {{ range $invit := .invitations }}
-                    <tr class="item" onclick="document.location='/user/{{ $invit.ID }}';">
+                    <tr class="item">
                         <td sorttable_customkey="{{ $invit.SimplifiedName }}">
+                            <a href="/user/{{ $invit.ID }}">
                             <img class="avatar" src="{{ $invit.Avatar.String }}">
                             <span class="name">{{ $invit.Name }}</span>
+                            </a>
                         </td>
                         <td>{{ .CreationCount }}</td>
                         <td>{{ .ParticipationCount }}</td>
-                        <td onclick="event.stopPropagation()">
+                        <td>
                             <input name="{{ $invit.ID }}-invitation" type=submit value="x"/>
                             {{ if eq $challAccess 1 }}
                                 <input name="{{ $invit.ID }}-invitation" type=submit value="✓"/>
@@ -130,15 +134,17 @@
 {{ $selfChall := .selfChallenge }}
             <tr><th>Approbateurs</th><th>Défis créés</th><th>Défis participés</th></tr>
             {{ range $approb := .validators }}
-                <tr class="item" onclick="document.location='/user/{{ $approb.ID }}';">
+                <tr class="item">
                     <td sorttable_customkey="{{ $approb.SimplifiedName }}">
+                        <a href="/user/{{ $approb.ID }}">
                         <img class="avatar" src="{{ $approb.Avatar.String }}">
                         <span class="name">{{ $approb.Name }}</span>
+                        </a>
                     </td>
                     <td>{{ .CreationCount }}</td>
                     <td>{{ .ParticipationCount }}</td>
                     {{ if $selfChall }}
-                        <td onclick="event.stopPropagation()">
+                        <td>
                             <input name="{{ $approb.ID }}-validator" type=submit value="x"/>
                         </td>
                     {{ end }}
@@ -146,8 +152,9 @@
             {{ end }}
             <tr><th>Participants</th><th>Défis créés</th><th>Défis participés</th></tr>
             {{ range $partic := .participants }}
-                <tr class="item" onclick="document.location='/user/{{ $partic.ID }}';">
+                <tr class="item">
                     <td sorttable_customkey="{{ $partic.SimplifiedName }}">
+                        <a href="/user/{{ $partic.ID }}">
                         <img class="avatar" src="{{ $partic.Avatar.String }}">
                         <span class="name">{{ $partic.Name }}</span>
                     </td>
@@ -155,7 +162,7 @@
                     <td>{{ .ParticipationCount }}</td>
                     {{ if $selfChall }}
                         {{ if gt $challAccess 0 }}
-                            <td onclick="event.stopPropagation()">
+                            <td>
                                 <input name="{{ $partic.ID }}-participant" type=submit value="x"/>
                             </td>
                         {{ end }}
