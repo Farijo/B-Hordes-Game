@@ -30,7 +30,7 @@ type Milestone struct {
 	}
 }
 
-func (incoming *Milestone) InvalidateUnchangedFields(previous *Milestone) bool {
+func (incoming *Milestone) CheckFieldsDifference(previous *Milestone) bool {
 	hasChanges := false
 
 	if incoming.IsGhost.Valid {
@@ -84,6 +84,31 @@ func (incoming *Milestone) InvalidateUnchangedFields(previous *Milestone) bool {
 	if incoming.Map.Custom.Valid {
 		incoming.Map.Custom.Valid = !previous.Map.Custom.Valid || (incoming.Map.Custom.Bool != previous.Map.Custom.Bool)
 		hasChanges = hasChanges || incoming.Map.Custom.Valid
+	}
+
+	changements := make([]byte, 0, 120)
+	incoming.Rewards.Valid = false
+	for id, number := range incoming.Rewards.Pictos {
+		if number != previous.Rewards.Pictos[id] {
+			changements = binary.LittleEndian.AppendUint16(changements, id)
+			changements = binary.LittleEndian.AppendUint32(changements, number)
+
+			incoming.Rewards.Valid = true
+		}
+	}
+	// to test : raz
+	for id := range previous.Rewards.Pictos {
+		if _, ok := incoming.Rewards.Pictos[id]; !ok {
+			changements = binary.LittleEndian.AppendUint16(changements, id)
+			changements = binary.LittleEndian.AppendUint32(changements, 0)
+
+			incoming.Rewards.Valid = true
+		}
+	}
+
+	if incoming.Rewards.Valid {
+		incoming.Rewards.String = string(changements)
+		hasChanges = true
 	}
 
 	return hasChanges

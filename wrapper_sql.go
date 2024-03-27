@@ -3,7 +3,6 @@ package main
 import (
 	"bhordesgame/dto"
 	"database/sql"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"strings"
@@ -203,22 +202,9 @@ func insertMilestone(milestone *dto.Milestone) error {
 	}
 	rows.Close()
 
-	mustUpdate := milestone.InvalidateUnchangedFields(&previousMS)
+	mustUpdate := milestone.CheckFieldsDifference(&previousMS)
 
-	changements := make([]byte, 0, 120)
-	milestone.Rewards.Valid = false
-	for id, number := range milestone.Rewards.Pictos {
-		if number != previousMS.Rewards.Pictos[id] {
-			changements = binary.LittleEndian.AppendUint16(changements, id)
-			changements = binary.LittleEndian.AppendUint32(changements, number)
-
-			milestone.Rewards.Valid = true
-		}
-	}
-
-	if milestone.Rewards.Valid {
-		milestone.Rewards.String = string(changements)
-	} else if !mustUpdate {
+	if !mustUpdate {
 		// nothing has changed since last milestone
 		return tx.Commit()
 	}
@@ -673,11 +659,9 @@ func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
 	LEFT JOIN success s2 ON s1.user = s2.user AND s1.goal = s2.goal AND s1.accomplished < s2.accomplished
 	LEFT JOIN success s3 ON s1.user = s3.user AND s1.goal = s3.goal AND s1.accomplished > s3.accomplished AND goal.typ = 0
 	WHERE s2.user IS NULL
-	AND  (s3.user IS NULL OR CONCAT(s1.accomplished, s3.accomplished) = (
-		SELECT CONCAT(MAX(accomplished), MIN(accomplished))
-		FROM success
-		WHERE user = s3.user
-		AND   goal = s3.goal
+	AND  (s3.user IS NULL OR CONCAT( s1.accomplished ,  s3.accomplished) = (
+					  SELECT CONCAT(MAX(accomplished), MIN(accomplished))
+					  FROM success WHERE user = s3.user AND goal = s3.goal
 	))
 	ORDER BY s1.user`, challengeID)
 	if err != nil {
