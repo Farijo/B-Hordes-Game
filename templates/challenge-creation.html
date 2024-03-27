@@ -68,7 +68,7 @@
 <script src="/script/make_challenge.js"></script>
 <script>
     {{ if .challenge }}
-        const goals = [{{ range $goal := .goals }}{{ dumpStruct . }},{{ end }}];
+        const goals = [{{ range .goals }}{{ dumpStruct . }},{{ end }}];
         bindFormValues({{ .challenge.Access }}, {{ .challenge.Private }}, goals, {{ .challenge.API }})
         {{ if eq .challenge.Status 0 }}
             $('[value=Modifier]').css('display', 'none');

@@ -41,14 +41,18 @@ func buildGoalsFromForm(types, x, y, count, val []string) *[]dto.Goal {
 		v.Entity = uint16(Ignore(strconv.ParseUint(pop(&val), 10, 16)))
 		switch v.Typ {
 		case 1:
-			v.X.Valid = true
-			v.X.Byte = byte(Ignore(strconv.ParseInt(pop(&x), 10, 8)))
-			v.Y.Valid = true
-			v.Y.Byte = byte(Ignore(strconv.ParseInt(pop(&y), 10, 8)))
+			x, err := strconv.ParseInt(pop(&x), 10, 8)
+			v.X.Valid = err == nil
+			v.X.Byte = byte(x)
+
+			y, err := strconv.ParseInt(pop(&y), 10, 8)
+			v.Y.Valid = err == nil
+			v.Y.Byte = byte(y)
 			fallthrough
 		case 0, 3:
-			v.Amount.Valid = true
-			v.Amount.Int32 = int32(Ignore(strconv.ParseUint(pop(&count), 10, 32)))
+			a, err := strconv.ParseInt(pop(&count), 10, 32)
+			v.Amount.Valid = err == nil
+			v.Amount.Int32 = int32(a)
 		}
 	}
 

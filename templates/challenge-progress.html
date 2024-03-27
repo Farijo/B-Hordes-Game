@@ -52,10 +52,12 @@
     <table class="sortable">
         <tr><th>Participants</th>{{ range $_, $goalHeader := $goalHeaders }}<th>{{ $goalHeader.Content }}</th>{{ end }}
         {{ range $partic := .advancement }}
-            <tr class="item" onclick="document.location='/user/{{ $partic.ID }}';">
+            <tr class="item">
                 <td sorttable_customkey="{{ $partic.SimplifiedName }}">
+                    <a href="/user/{{ $partic.ID }}">
                     <img class="avatar" src="{{ $partic.Avatar.String }}">
                     <span class="name">{{ $partic.Name }}</span>
+                    </a>
                 </td>
                 {{ range $k, $g := $goalHeaders }}
                     {{ $s := index $partic.Successes $k }}

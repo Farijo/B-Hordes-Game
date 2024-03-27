@@ -55,7 +55,7 @@ a.box {
   padding: 0;
 }
 
-td[onclick] {
+td:has(input) {
   text-align: left;
   border-bottom: none;
 }

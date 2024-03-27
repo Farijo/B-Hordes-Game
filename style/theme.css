@@ -14,8 +14,12 @@ body > * {
     margin-right: auto;
     text-align: center;
 }
+
+a {
+    text-decoration: none;
+}
   
-button, a, input[type=submit] {
+button, a:not(:has(*)), input[type=submit] {
     background: url(https://myhordes.eu/build/images/assets/img/background/bg_button.209bcd56..gif) 50%/cover no-repeat;
     border: solid #000;
     border-top-color: rgb(0, 0, 0);
@@ -39,7 +43,7 @@ button, a, input[type=submit] {
     text-align: center;
 }
 
-button:hover, a:hover, input[type=submit]:hover {
+button:hover, a:not(:has(*)):hover, input[type=submit]:hover {
     border-color: #f0d79e;
     color: #fff;
 }
@@ -64,7 +68,6 @@ label {
 .name {
     text-align:left;
     margin-left:0.5rem;
-    margin-right: 3em;
     font-family: 'Courier New', monospace;
     font-weight: bolder;
 }
