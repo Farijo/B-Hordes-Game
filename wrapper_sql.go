@@ -664,13 +664,20 @@ func updateChallengeDate(challengeID, requestorID int, date string, start bool) 
 
 func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
 	defer close(ch)
-	rows, err := dbConn().Query(`SELECT user.id, name, simplified_name, avatar, s1.goal, s1.accomplished, s1.amount
-				   FROM success s1
-				   JOIN user on user.id = s1.user
-				   LEFT JOIN success s2 ON s1.user = s2.user AND s1.goal = s2.goal AND s1.accomplished < s2.accomplished
-				   JOIN	goal on goal.id = s1.goal AND goal.challenge = ?
-				   WHERE s2.user IS NULL
-				   ORDER BY s1.user`, challengeID)
+	rows, err := dbConn().Query(`SELECT user.id, name, simplified_name, avatar, s1.goal, s1.accomplished, IF(goal.typ=0, s1.amount-s3.amount,s1.amount) as adv
+	FROM success s1
+	JOIN user on user.id = s1.user
+	JOIN goal on goal.id = s1.goal AND goal.challenge = ?
+	LEFT JOIN success s2 ON s1.user = s2.user AND s1.goal = s2.goal AND s1.accomplished < s2.accomplished
+	LEFT JOIN success s3 ON s1.user = s3.user AND s1.goal = s3.goal AND s1.accomplished > s3.accomplished AND goal.typ=0
+	WHERE s2.user IS NULL
+	AND  (s3.user IS NULL OR CONCAT(s1.accomplished,s3.accomplished) = (
+		SELECT CONCAT(MAX(accomplished), MIN(accomplished))
+		FROM success
+		WHERE user=s3.user
+		AND goal=s3.goal
+	))
+	ORDER BY s1.user`, challengeID)
 	if err != nil {
 		fmt.Println(err)
 		return
