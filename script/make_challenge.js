@@ -103,4 +103,8 @@ function bindFormValues(participation, private, goals, api) {
                 break;
         }
     }
+
+    if(!deletable) {
+        addAGoal(false);
+    }
 }

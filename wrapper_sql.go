@@ -128,7 +128,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 	}
 	defer tx.Rollback()
 
-	rows, err := tx.Query(`SELECT goal.id,typ,entity,amount,x,y, challenge.flags & 0x08 = 0 as api
+	rows, err := tx.Query(`SELECT goal.id,typ,entity, challenge.flags & 0x08 = 0 as api
 	FROM goal
 	JOIN challenge ON goal.challenge = challenge.id
 	JOIN participant ON challenge.id = participant.challenge AND participant.user = ?
@@ -144,22 +144,18 @@ func insertMilestone(milestone *dto.Milestone) error {
 		rowPresent = true
 		var g dto.Goal
 		var api bool
-		if err = rows.Scan(&g.ID, &g.Typ, &g.Entity, &g.Amount, &g.X, &g.Y, &api); err != nil {
+		if err = rows.Scan(&g.ID, &g.Typ, &g.Entity, &api); err != nil {
 			rows.Close()
 			return err
 		}
 		if !api || g.Typ != 0 {
 			continue
 		}
-		count := milestone.Rewards.Pictos[g.Entity]
-		if g.Amount.Valid && uint32(g.Amount.Int32) < count {
-			count = uint32(g.Amount.Int32)
-		}
 		successes = append(successes, dto.Success{
 			User:         milestone.User.ID,
 			Goal:         g.ID,
 			Accomplished: "",
-			Amount:       count,
+			Amount:       milestone.Rewards.Pictos[g.Entity],
 		})
 	}
 	rows.Close()
@@ -652,7 +648,7 @@ func updateChallengeDate(challengeID, requestorID int, date string, start bool) 
 
 func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
 	defer close(ch)
-	rows, err := dbConn().Query(`SELECT user.id, name, simplified_name, avatar, s1.goal, s1.accomplished, IF(goal.typ = 0, COALESCE(s1.amount - s3.amount, 0), s1.amount)
+	rows, err := dbConn().Query(`SELECT user.id, name, simplified_name, avatar, s1.goal, s1.accomplished, IF(goal.typ = 0, GREATEST(COALESCE(s1.amount - s3.amount, 0), 0), s1.amount)
 	FROM success s1
 	JOIN user on user.id = s1.user
 	JOIN goal on goal.id = s1.goal AND goal.challenge = ?

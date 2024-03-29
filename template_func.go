@@ -36,10 +36,10 @@ type GoalHeader struct {
 }
 
 func decodeGoal(key string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
-	amountStr, header := "le plus de", "+"
+	amountStr, header := "le plus de", "+ "
 	if goal.Amount.Valid {
-		header = strconv.Itoa(int(goal.Amount.Int32))
-		amountStr = header
+		amountStr = strconv.Itoa(int(goal.Amount.Int32))
+		header = amountStr + " "
 	}
 	var out GoalHTML
 	switch goal.Typ {
