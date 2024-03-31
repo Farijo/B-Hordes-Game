@@ -12,7 +12,7 @@ import (
 const (
 	BASE_URL = "https://myhordes.eu/api/x/json/"
 
-	ME     = "me?fields=id,name,avatar,isGhost,playedMaps,rewards,homeMessage,hero,dead,out,ban,baseDef,x,y,mapId,job,map"
+	ME     = "me?fields=id,name,avatar,isGhost,playedMaps,rewards,dead,out,ban,baseDef,x,y,job,map.fields(wid,hei,days,custom,conspiracy,city.fields(buildings.fields(id),bank.fields(id,count)),zones.fields(items.fields(id,count)))"
 	OTHER  = "user?id=%d&fields=id,name,avatar"
 	OTHERS = "users?ids=%s&fields=id,name,avatar"
 )

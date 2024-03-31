@@ -141,13 +141,13 @@ func insertMilestone(milestone *dto.Milestone) error {
 	successes := make([]dto.Success, 0)
 	rowPresent := false
 	for rows.Next() {
-		rowPresent = true
 		var g dto.Goal
 		var api bool
 		if err = rows.Scan(&g.ID, &g.Typ, &g.Entity, &api); err != nil {
 			rows.Close()
 			return err
 		}
+		rowPresent = true
 		if !api || g.Typ != 0 {
 			continue
 		}
@@ -155,7 +155,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 			User:         milestone.User.ID,
 			Goal:         g.ID,
 			Accomplished: "",
-			Amount:       milestone.Rewards.Pictos[g.Entity],
+			Amount:       milestone.Rewards.Data[g.Entity],
 		})
 	}
 	rows.Close()

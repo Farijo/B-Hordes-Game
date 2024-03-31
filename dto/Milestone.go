@@ -14,8 +14,9 @@ type Milestone struct {
 	Dt         string          `db:"dt"`
 	IsGhost    jsonNullBool    `db:"isGhost"`
 	PlayedMaps jsonNullCounter `db:"playedMaps"`
-	Rewards    jsonNullReward  `db:"rewards"`
+	Rewards    jsonNullDict    `db:"rewards"`
 	Dead       jsonNullBool    `db:"dead"`
+	Out        jsonNullBool    `db:"out"`
 	Ban        jsonNullBool    `db:"ban"`
 	BaseDef    jsonNullByte    `db:"baseDef"`
 	X          jsonNullByte    `db:"x"`
@@ -27,6 +28,11 @@ type Milestone struct {
 		Days       jsonNullByte `db:"mapDays"`
 		Conspiracy jsonNullBool `db:"conspiracy"`
 		Custom     jsonNullBool `db:"custom"`
+		City       struct {
+			Buildings jsonNullDict `db:"buildings"`
+			Bank      jsonNullDict `db:"bank"`
+		}
+		Zones jsonNullDict `db:"zones"`
 	}
 }
 
@@ -86,30 +92,10 @@ func (incoming *Milestone) CheckFieldsDifference(previous *Milestone) bool {
 		hasChanges = hasChanges || incoming.Map.Custom.Valid
 	}
 
-	changements := make([]byte, 0, 120)
-	incoming.Rewards.Valid = false
-	for id, number := range incoming.Rewards.Pictos {
-		if number != previous.Rewards.Pictos[id] {
-			changements = binary.LittleEndian.AppendUint16(changements, id)
-			changements = binary.LittleEndian.AppendUint32(changements, number)
-
-			incoming.Rewards.Valid = true
-		}
-	}
-	// to test : raz
-	for id := range previous.Rewards.Pictos {
-		if _, ok := incoming.Rewards.Pictos[id]; !ok {
-			changements = binary.LittleEndian.AppendUint16(changements, id)
-			changements = binary.LittleEndian.AppendUint32(changements, 0)
-
-			incoming.Rewards.Valid = true
-		}
-	}
-
-	if incoming.Rewards.Valid {
-		incoming.Rewards.String = string(changements)
-		hasChanges = true
-	}
+	hasChanges = incoming.Rewards.KeepDifferencesOnly(previous.Rewards) || hasChanges
+	hasChanges = incoming.Map.City.Bank.KeepDifferencesOnly(previous.Map.City.Bank) || hasChanges
+	hasChanges = incoming.Map.City.Buildings.KeepDifferencesOnly(previous.Map.City.Buildings) || hasChanges
+	hasChanges = incoming.Map.Zones.KeepDifferencesOnly(previous.Map.Zones) || hasChanges
 
 	return hasChanges
 }
@@ -134,17 +120,17 @@ func (n *jsonNullCounter) Scan(value any) error {
 	return err
 }
 
-func (n *jsonNullReward) Scan(value any) error {
+func (n *jsonNullDict) Scan(value any) error {
 	err := n.NullString.Scan(value)
 	if n.Valid {
-		if n.Pictos == nil {
-			n.Pictos = make(map[uint16]uint32, 20)
+		if n.Data == nil {
+			n.Data = make(map[uint16]uint32, 20)
 		}
 		nsLen := len(n.String)
 		for i := 0; i < nsLen; i += 6 {
 			id := binary.LittleEndian.Uint16([]byte(n.String[i : i+2]))
 			number := binary.LittleEndian.Uint32([]byte(n.String[i+2 : i+6]))
-			n.Pictos[id] = number
+			n.Data[id] = number
 		}
 	}
 	return err
@@ -170,14 +156,14 @@ func (n *jsonNullJob) Scan(value any) error {
 
 // custom JSON reading for reward and job
 
-type jsonNullReward struct {
+type jsonNullDict struct {
 	sql.NullString
-	Pictos map[uint16]uint32
+	Data map[uint16]uint32
 }
 
-func (v *jsonNullReward) UnmarshalJSON(data []byte) error {
+func (v *jsonNullDict) UnmarshalJSON(data []byte) error {
 	// Unmarshalling into a pointer will let us detect null
-	v.Pictos = make(map[uint16]uint32, 20)
+	v.Data = make(map[uint16]uint32, 20)
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	idx, val := uint16(0), uint32(0)
 	for token, err := decoder.Token(); err == nil; token, err = decoder.Token() {
@@ -188,18 +174,18 @@ func (v *jsonNullReward) UnmarshalJSON(data []byte) error {
 				return err
 			}
 			if val > 0 {
-				v.Pictos[uint16(token.(float64))] = val
+				v.Data[uint16(token.(float64))] = val
 				val = 0
 			} else {
 				idx = uint16(token.(float64))
 			}
-		case "number":
+		case "number", "count":
 			token, err = decoder.Token()
 			if err != nil {
 				return err
 			}
 			if idx > 0 {
-				v.Pictos[idx] = uint32(token.(float64))
+				v.Data[idx] = uint32(token.(float64))
 				idx = 0
 			} else {
 				val = uint32(token.(float64))
@@ -208,6 +194,35 @@ func (v *jsonNullReward) UnmarshalJSON(data []byte) error {
 	}
 
 	return nil
+}
+
+func (v *jsonNullDict) KeepDifferencesOnly(other jsonNullDict) bool {
+	changements := make([]byte, 0, 120)
+	v.Valid = false
+	for id, number := range v.Data {
+		if number != other.Data[id] {
+			changements = binary.LittleEndian.AppendUint16(changements, id)
+			changements = binary.LittleEndian.AppendUint32(changements, number)
+
+			v.Valid = true
+		}
+	}
+	// to test : raz
+	for id := range other.Data {
+		if _, ok := v.Data[id]; !ok {
+			changements = binary.LittleEndian.AppendUint16(changements, id)
+			changements = binary.LittleEndian.AppendUint32(changements, 0)
+
+			v.Valid = true
+		}
+	}
+
+	if v.Valid {
+		v.String = string(changements)
+		return true
+	}
+
+	return false
 }
 
 type jsonNullJob struct {
