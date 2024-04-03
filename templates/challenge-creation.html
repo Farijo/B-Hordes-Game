@@ -81,6 +81,7 @@
             $('[value=Valider]').css('display', 'none');
         {{ end }}
     {{ else }}
+        addAGoal(false);
         $('[value=Modifier]').css('display', 'none');
         $('[value=\"Ouvrir les inscriptions\"]').css('display', 'none');
     {{ end }}

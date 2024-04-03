@@ -16,7 +16,7 @@ type Milestone struct {
 	PlayedMaps jsonNullCounter `db:"playedMaps"`
 	Rewards    jsonNullDict    `db:"rewards"`
 	Dead       jsonNullBool    `db:"dead"`
-	Out        jsonNullBool    `db:"out"`
+	Out        jsonNullBool    `db:"isOut"`
 	Ban        jsonNullBool    `db:"ban"`
 	BaseDef    jsonNullByte    `db:"baseDef"`
 	X          jsonNullByte    `db:"x"`
@@ -32,7 +32,7 @@ type Milestone struct {
 			Buildings jsonNullList `db:"buildings"`
 			Bank      jsonNullDict `db:"bank"`
 		}
-		Zones jsonNullDict `db:"zones"`
+		Zones jsonNullDict `db:"zoneItems"`
 	}
 }
 
@@ -50,6 +50,10 @@ func (incoming *Milestone) CheckFieldsDifference(previous *Milestone) bool {
 	if incoming.Dead.Valid {
 		incoming.Dead.Valid = !previous.Dead.Valid || (incoming.Dead.Bool != previous.Dead.Bool)
 		hasChanges = hasChanges || incoming.Dead.Valid
+	}
+	if incoming.Out.Valid {
+		incoming.Out.Valid = !previous.Out.Valid || (incoming.Out.Bool != previous.Out.Bool)
+		hasChanges = hasChanges || incoming.Out.Valid
 	}
 	if incoming.Ban.Valid {
 		incoming.Ban.Valid = !previous.Ban.Valid || (incoming.Ban.Bool != previous.Ban.Bool)
