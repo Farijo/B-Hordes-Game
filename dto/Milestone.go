@@ -29,7 +29,7 @@ type Milestone struct {
 		Conspiracy jsonNullBool `db:"conspiracy"`
 		Custom     jsonNullBool `db:"custom"`
 		City       struct {
-			Buildings jsonNullDict `db:"buildings"`
+			Buildings jsonNullList `db:"buildings"`
 			Bank      jsonNullDict `db:"bank"`
 		}
 		Zones jsonNullDict `db:"zones"`
@@ -136,6 +136,22 @@ func (n *jsonNullDict) Scan(value any) error {
 	return err
 }
 
+func (n *jsonNullList) Scan(value any) error {
+	err := n.NullString.Scan(value)
+	if n.Valid {
+		if n.Data == nil {
+			n.Data = make(map[uint16]bool, 10)
+		}
+		nsLen := len(n.String)
+		for i := 0; i < nsLen; i += 3 {
+			id := binary.LittleEndian.Uint16([]byte(n.String[i : i+2]))
+			is := n.String[i+2] != '0'
+			n.Data[id] = is
+		}
+	}
+	return err
+}
+
 func (n *jsonNullByte) Scan(value any) error {
 	oldB, oldV := n.Byte, n.Valid
 	err := n.NullByte.Scan(value)
@@ -212,6 +228,58 @@ func (v *jsonNullDict) KeepDifferencesOnly(other jsonNullDict) bool {
 		if _, ok := v.Data[id]; !ok {
 			changements = binary.LittleEndian.AppendUint16(changements, id)
 			changements = binary.LittleEndian.AppendUint32(changements, 0)
+
+			v.Valid = true
+		}
+	}
+
+	if v.Valid {
+		v.String = string(changements)
+		return true
+	}
+
+	return false
+}
+
+type jsonNullList struct {
+	sql.NullString
+	Data map[uint16]bool
+}
+
+func (v *jsonNullList) UnmarshalJSON(data []byte) error {
+	// Unmarshalling into a pointer will let us detect null
+	v.Data = make(map[uint16]bool, 10)
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	for token, err := decoder.Token(); err == nil; token, err = decoder.Token() {
+		switch token {
+		case "id":
+			token, err = decoder.Token()
+			if err != nil {
+				return err
+			}
+			v.Data[uint16(token.(float64))] = true
+		}
+	}
+
+	return nil
+}
+
+func (v *jsonNullList) KeepDifferencesOnly(other jsonNullList) bool {
+	changements := make([]byte, 0, 120)
+	v.Valid = false
+	for id, is := range v.Data {
+		if is != other.Data[id] {
+			changements = binary.LittleEndian.AppendUint16(changements, id)
+			changements = append(changements, '1')
+
+			v.Valid = true
+		}
+	}
+	// to test : raz
+	for id := range other.Data {
+		if _, ok := v.Data[id]; !ok {
+			changements = binary.LittleEndian.AppendUint16(changements, id)
+			changements = append(changements, '0')
 
 			v.Valid = true
 		}
