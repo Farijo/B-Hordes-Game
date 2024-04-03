@@ -171,17 +171,18 @@ func insertMilestone(milestone *dto.Milestone) error {
 		}
 	}
 
-	rows, err = tx.Query(`SELECT rewards, isGhost, playedMaps, dead, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, custom FROM milestone WHERE user=? ORDER BY dt ASC`, milestone.User.ID)
+	rows, err = tx.Query(`SELECT isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, custom, buildings, bank, zoneItems FROM milestone WHERE user=? ORDER BY dt ASC`, milestone.User.ID)
 	if err != nil {
 		return err
 	}
 	var previousMS dto.Milestone
 	for rows.Next() {
 		if err = rows.Scan(
-			&previousMS.Rewards,
 			&previousMS.IsGhost,
 			&previousMS.PlayedMaps,
+			&previousMS.Rewards,
 			&previousMS.Dead,
+			&previousMS.Out,
 			&previousMS.Ban,
 			&previousMS.BaseDef,
 			&previousMS.X,
@@ -191,7 +192,10 @@ func insertMilestone(milestone *dto.Milestone) error {
 			&previousMS.Map.Hei,
 			&previousMS.Map.Days,
 			&previousMS.Map.Conspiracy,
-			&previousMS.Map.Custom); err != nil {
+			&previousMS.Map.Custom,
+			&previousMS.Map.City.Buildings,
+			&previousMS.Map.City.Bank,
+			&previousMS.Map.Zones); err != nil {
 			rows.Close()
 			return err
 		}
@@ -205,12 +209,13 @@ func insertMilestone(milestone *dto.Milestone) error {
 		return tx.Commit()
 	}
 
-	if _, err = tx.Exec(`INSERT INTO milestone VALUES(?, UTC_TIMESTAMP(2), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+	if _, err = tx.Exec(`INSERT INTO milestone VALUES(?, UTC_TIMESTAMP(2), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		milestone.User.ID,
 		milestone.IsGhost,
 		milestone.PlayedMaps,
 		milestone.Rewards,
 		milestone.Dead,
+		milestone.Out,
 		milestone.Ban,
 		milestone.BaseDef,
 		milestone.X,
@@ -220,7 +225,10 @@ func insertMilestone(milestone *dto.Milestone) error {
 		milestone.Map.Hei,
 		milestone.Map.Days,
 		milestone.Map.Conspiracy,
-		milestone.Map.Custom); err != nil {
+		milestone.Map.Custom,
+		milestone.Map.City.Buildings,
+		milestone.Map.City.Bank,
+		milestone.Map.Zones); err != nil {
 		return err
 	}
 

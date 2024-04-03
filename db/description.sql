@@ -62,6 +62,7 @@ CREATE TABLE milestone (
     playedMaps INT,
     rewards BLOB, -- BLOB = concatenation de uint16, uint32 (id du picto, nombre de picto)
     dead BOOLEAN,
+    isOut BOOLEAN,
     ban BOOLEAN,
     baseDef TINYINT,
     x TINYINT,
@@ -72,6 +73,9 @@ CREATE TABLE milestone (
     mapDays TINYINT,
     conspiracy BOOLEAN,
     custom BOOLEAN,
+    buildings BLOB,
+    bank BLOB,
+    zoneItems BLOB,
     PRIMARY KEY(user,dt),
     FOREIGN KEY(user) REFERENCES user(id)
 );
