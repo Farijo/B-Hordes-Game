@@ -15,7 +15,7 @@
         <table>
             <tr>
                 <td><label>Nom</label></td>
-                <td><input type="text" name="name" pattern="[^\x22]+" {{ if .challenge }} value="{{ .challenge.Name }}" {{ end }} required/></td>
+                <td><input type="text" name="name" pattern="[^\x22]{2,64}" {{ if .challenge }} value="{{ .challenge.Name }}" {{ end }} required/></td>
             </tr>
             <tr>
                 <td><label>Participation</label></td>

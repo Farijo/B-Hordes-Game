@@ -161,17 +161,19 @@ func insertMilestone(milestone *dto.Milestone) error {
 	rows.Close()
 	if !rowPresent {
 		// not in a challenge, nothing to do
+		// TODO delete last useless milestone (never delete milestone whose not the last)
 		return nil
 	}
 
 	for _, success := range successes {
 		if _, err := tx.Exec(`INSERT INTO success VALUES(?, ?, UTC_TIMESTAMP(2), ?)
-		ON DUPLICATE KEY UPDATE amount=amount`, success.User, success.Goal, success.Amount); err != nil {
+		ON DUPLICATE KEY UPDATE amount = amount`, success.User, success.Goal, success.Amount); err != nil {
 			return err
 		}
 	}
 
-	rows, err = tx.Query(`SELECT isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, custom, buildings, bank, zoneItems FROM milestone WHERE user=? ORDER BY dt ASC`, milestone.User.ID)
+	rows, err = tx.Query(`SELECT isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, custom, buildings, bank, zoneItems
+	FROM milestone WHERE user = ? ORDER BY dt ASC`, milestone.User.ID)
 	if err != nil {
 		return err
 	}
@@ -202,9 +204,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 	}
 	rows.Close()
 
-	mustUpdate := milestone.CheckFieldsDifference(&previousMS)
-
-	if !mustUpdate {
+	if !milestone.CheckFieldsDifference(&previousMS) {
 		// nothing has changed since last milestone
 		return tx.Commit()
 	}

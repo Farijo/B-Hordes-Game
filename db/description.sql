@@ -17,7 +17,7 @@ CREATE TABLE user (
 );
 CREATE TABLE challenge (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(30) NOT NULL,
+    name VARCHAR(64) NOT NULL,
     creator INT NOT NULL,
     flags TINYINT UNSIGNED NOT NULL, -- & 0x03 = participation (open, request, invite), & 0x04 = private, & 0x08 = no api validation, & 0x30 = status (draft, review, invite)
     start_date DATETIME,
