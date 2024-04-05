@@ -51,7 +51,7 @@
             <span class="name">{{ $challdata.Creator.Name }}</span>
             </a>
         </td>
-        <td>{{ $challdata.Name }}</td>
+        <td><a class="chlg-name" href="/challenge/{{ .ID }}">{{ $challdata.Name }}</a></td>
         <td sorttable_customkey="{{ $challdata.Access }}"><img title="{{ index (index $access $challdata.Access) 0 }}" src="data:image/png;base64, {{ index (index $access $challdata.Access) 1 }}"/></td>
         <td>{{ if $challdata.Private }}<img title=Oui src="https://myhordes.eu/build/images/professions/vest.dab68fee.gif" />{{ else }}<img title=Non alt=Non />{{ end }}</td>
         <td sorttable_customkey="{{ $challdata.Status }}"><img title="{{ index (index $status $challdata.Status) 0 }}" src="data:image/png;base64, {{ index (index $status $challdata.Status) 1 }}"/></td>
@@ -59,7 +59,6 @@
         <td {{ if $challdata.StartDate.Valid }}sorttable_customkey="{{ $challdata.StartDate.String }}" class="date" style="min-width:9em"{{ end }}></td>
         <td {{ if $challdata.EndDate.Valid }}sorttable_customkey="{{ $challdata.EndDate.String }}" class="date" style="min-width:9em"{{ end }}></td>
         <td>
-            <a href="/challenge/{{ $challdata.ID }}">Voir</a>
             <a href="https://myhordes.eu/jx/forum/jump/1890332">ext</a>
         </td>
     </tr>

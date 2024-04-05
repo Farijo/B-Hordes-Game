@@ -15,21 +15,13 @@ body > * {
     text-align: center;
 }
 
-a {
+a:not(.chlg-name) {
     text-decoration: none;
 }
   
-button, a:not(:has(*)), input[type=submit] {
+button, a:not(:has(*),.chlg-name), input[type=submit] {
     background: url(https://myhordes.eu/build/images/assets/img/background/bg_button.209bcd56..gif) 50%/cover no-repeat;
-    border: solid #000;
-    border-top-color: rgb(0, 0, 0);
-    border-top-width: medium;
-    border-right-color: rgb(0, 0, 0);
-    border-right-width: medium;
-    border-bottom-color: rgb(0, 0, 0);
-    border-bottom-width: medium;
-    border-left-color: rgb(0, 0, 0);
-    border-left-width: medium;
+    border: solid #000 medium;
     border-width: 1px 1px 2px;
     box-shadow: 0 0 2px #000;
     color: #f0d79e;

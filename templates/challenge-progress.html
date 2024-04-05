@@ -36,6 +36,13 @@
                 <input class="line2" name="end_date" step="60" type="datetime-local" style="margin:0.5em"/>
                 <input type="submit" name="valider" value="Valider">
             </form>
+        {{ else }}
+            {{ if .challenge.EndDate.Valid }}
+                <div class="box">
+                    <div class="line1">Fin</div>
+                    <p></p>
+                </div>
+            {{ end }}
         {{ end }}
     </div>
     <div class="container">
@@ -103,8 +110,11 @@
 
         {{ if .challenge.EndDate.Valid }}
             const endDate = new Date("{{ .challenge.EndDate.String }}Z").toLocaleString('sv').substring(0, 16)
-            endDateInput.val(endDate);
-            $('.box p').last().text(new Date(endDate).toLocaleString());
+            if(endDateInput.length) {
+                endDateInput.val(endDate);
+            } else {
+                $('.box p').last().text(new Date(endDate).toLocaleString());
+            }
         {{ end }}
 
         endDateInput.on('change', function () {
