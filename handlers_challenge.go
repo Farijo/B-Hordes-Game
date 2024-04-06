@@ -26,7 +26,7 @@ func challengeHandle(c *gin.Context) {
 
 	challenge, err := queryChallenge(id)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println(err)
 		c.Status(http.StatusNotFound)
 		return
 	}
@@ -139,10 +139,11 @@ func createChallengeHandle(c *gin.Context) {
 	c.Bind(&formChallenge)
 
 	challenge := formChallenge.buildChallenge(c.GetInt("uid"))
-	goals := buildGoalsFromForm(c.PostFormArray("type"), c.PostFormArray("x"), c.PostFormArray("y"), c.PostFormArray("count"), c.PostFormArray("val"))
+	goals := buildGoalsFromForm(c.PostFormArray("type"), c.PostFormArray("x"), c.PostFormArray("y"), c.PostFormArray("count"), c.PostFormArray("val"), c.PostFormArray("custom"))
 
 	id, err := insertChallenge(challenge, goals)
 	if err != nil {
+		fmt.Println(err)
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -159,6 +160,7 @@ func updateChallengeHandle(c *gin.Context) {
 
 	var formChallenge FormChallenge
 	if bindErr := c.Bind(&formChallenge); bindErr != nil {
+		fmt.Println(bindErr)
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -172,11 +174,12 @@ func updateChallengeHandle(c *gin.Context) {
 	default:
 		challenge := formChallenge.buildChallenge(c.GetInt("uid"))
 		challenge.ID = id
-		goals := buildGoalsFromForm(c.PostFormArray("type"), c.PostFormArray("x"), c.PostFormArray("y"), c.PostFormArray("count"), c.PostFormArray("val"))
+		goals := buildGoalsFromForm(c.PostFormArray("type"), c.PostFormArray("x"), c.PostFormArray("y"), c.PostFormArray("count"), c.PostFormArray("val"), c.PostFormArray("custom"))
 		err = updateChallenge(challenge, goals)
 	}
 
 	if err != nil {
+		fmt.Println(err)
 		c.Status(http.StatusBadRequest)
 		return
 	}

@@ -38,6 +38,7 @@ CREATE TABLE goal (
     amount INT UNSIGNED,
     x TINYINT,
     y TINYINT,
+    custom VARCHAR(128),
     FOREIGN KEY(challenge) REFERENCES challenge(id)
 );
 CREATE TABLE validator (

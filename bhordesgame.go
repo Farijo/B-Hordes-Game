@@ -4,6 +4,7 @@ import (
 	"bhordesgame/dto"
 	"embed"
 	"fmt"
+	"html"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -38,6 +39,8 @@ func main() {
 		"getAccess": getAccess,
 		"getStatus": getStatus,
 		"dumpStruct": func(strct *dto.Goal) template.JS {
+			rep := `"`
+			strct.Custom.String = rep + html.EscapeString(strct.Custom.String) + rep
 			return template.JS(strings.ReplaceAll(fmt.Sprintf("%+v", *strct), " ", ","))
 		},
 		"decodeGoal": decodeGoal,

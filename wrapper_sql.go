@@ -385,11 +385,11 @@ func insertChallenge(toInsert *dto.Challenge, associated *[]dto.Goal) (int, erro
 	}
 	challengeId := int(challengeId64)
 
-	sqlStmt := "INSERT INTO goal (challenge, typ, entity, amount, x, y) VALUES "
+	sqlStmt := "INSERT INTO goal (challenge, typ, entity, amount, x, y, custom) VALUES "
 	values := make([]any, 0, 3*len(*associated))
 	for _, g := range *associated {
-		sqlStmt += "(?, ?, ?, ?, ?, ?), "
-		values = append(values, challengeId, g.Typ, g.Entity, g.Amount, g.X, g.Y)
+		sqlStmt += "(?, ?, ?, ?, ?, ?, ?), "
+		values = append(values, challengeId, g.Typ, g.Entity, g.Amount, g.X, g.Y, g.Custom)
 	}
 	sqlStmt = sqlStmt[:len(sqlStmt)-2]
 
@@ -401,7 +401,7 @@ func insertChallenge(toInsert *dto.Challenge, associated *[]dto.Goal) (int, erro
 func queryChallengeGoals(ch chan<- *dto.Goal, challengeId int) {
 	defer close(ch)
 
-	rows, err := dbConn().Query(`SELECT id, typ, entity, amount, x, y FROM goal WHERE challenge=?`, challengeId)
+	rows, err := dbConn().Query(`SELECT id, typ, entity, amount, x, y, custom FROM goal WHERE challenge=?`, challengeId)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -410,7 +410,7 @@ func queryChallengeGoals(ch chan<- *dto.Goal, challengeId int) {
 	for rows.Next() {
 		var goal dto.Goal
 		goal.Challenge = challengeId
-		if err := rows.Scan(&goal.ID, &goal.Typ, &goal.Entity, &goal.Amount, &goal.X, &goal.Y); err != nil {
+		if err := rows.Scan(&goal.ID, &goal.Typ, &goal.Entity, &goal.Amount, &goal.X, &goal.Y, &goal.Custom); err != nil {
 			fmt.Println(err)
 			return
 		}
@@ -438,11 +438,11 @@ func updateChallenge(toUpdate *dto.Challenge, associated *[]dto.Goal) error {
 		return err
 	}
 
-	sqlStmt := "INSERT INTO goal (challenge, typ, entity, amount, x, y) VALUES "
+	sqlStmt := "INSERT INTO goal (challenge, typ, entity, amount, x, y, custom) VALUES "
 	values := make([]any, 0, 3*len(*associated))
 	for _, g := range *associated {
-		sqlStmt += "(?, ?, ?, ?, ?, ?), "
-		values = append(values, toUpdate.ID, g.Typ, g.Entity, g.Amount, g.X, g.Y)
+		sqlStmt += "(?, ?, ?, ?, ?, ?, ?), "
+		values = append(values, toUpdate.ID, g.Typ, g.Entity, g.Amount, g.X, g.Y, g.Custom)
 	}
 	sqlStmt = sqlStmt[:len(sqlStmt)-2]
 

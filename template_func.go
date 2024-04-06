@@ -77,6 +77,9 @@ func decodeGoal(key string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
 		out.Text = template.HTML(fmt.Sprintf("Avoir en banque <b>%s</b>", amountStr))
 		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key)
 		header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
+	case 4:
+		out.Label = goal.Custom.String
+		header = "-"
 	}
 	if l != nil {
 		l[goal.ID] = GoalHeader{template.HTML(header), uint32(goal.Amount.Int32)}

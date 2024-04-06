@@ -32,13 +32,12 @@ func (form *FormChallenge) buildChallenge(creatorId int) *dto.Challenge {
 	return &result
 }
 
-func buildGoalsFromForm(types, x, y, count, val []string) *[]dto.Goal {
+func buildGoalsFromForm(types, x, y, count, val, custom []string) *[]dto.Goal {
 	goals := make([]dto.Goal, len(types))
 
 	for i := range goals {
 		v := &goals[i]
 		v.Typ = types[i][0] - '0'
-		v.Entity = uint16(Ignore(strconv.ParseUint(pop(&val), 10, 16)))
 		switch v.Typ {
 		case 1:
 			x, err := strconv.ParseInt(pop(&x), 10, 8)
@@ -53,7 +52,12 @@ func buildGoalsFromForm(types, x, y, count, val []string) *[]dto.Goal {
 			a, err := strconv.ParseInt(pop(&count), 10, 32)
 			v.Amount.Valid = err == nil
 			v.Amount.Int32 = int32(a)
+		case 4:
+			v.Custom.String = pop(&custom)
+			v.Custom.Valid = true
+			continue
 		}
+		v.Entity = uint16(Ignore(strconv.ParseUint(pop(&val), 10, 16)))
 	}
 
 	return &goals

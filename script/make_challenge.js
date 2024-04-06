@@ -51,11 +51,9 @@ addAGoal = function(deletable) {
         }
         const cls = classes[this.value];
         agoal.find(classes.join(',')).css('display', 'none').prop("disabled", true);
-        if(cls != '.p') {
-            agoal.find(cls).css('display', '').prop('disabled', false);
-            selectList.val(selectList.children(cls+":first").val());
-            selectList.trigger('change');
-        }
+        agoal.find(cls).css('display', '').prop('disabled', false);
+        selectList.val(selectList.children(cls+":first").val());
+        selectList.trigger('change');
     }).trigger('change');
 
     if(!deletable) {
@@ -99,6 +97,9 @@ function bindFormValues(participation, private, goals, api) {
                 }
                 break;
             case 4: // perso
+                const ta = document.createElement('textarea');
+                ta.innerHTML = goal.Custom.String;
+                if(goal.Custom.Valid) $(`[name=custom]:last`).val(ta.value).trigger('change');
             default:
                 break;
         }

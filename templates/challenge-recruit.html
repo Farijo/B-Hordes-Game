@@ -63,8 +63,12 @@
         {{ range $goal := .goals }}
             {{ $mm := decodeGoal $userkey $goal nil }}
             <div class="box">
-                <div class="line1">{{ $mm.Text }}</div>
-                <div class="line2"><img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }} </div>
+                {{ if $mm.Text }}
+                    <div class="line1">{{ $mm.Text }}</div>
+                    <div class="line2"><img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }} </div>
+                {{ else }}
+                    {{ $mm.Label }}
+                {{ end }}
             </div>
         {{ end }}
     </div>
