@@ -38,3 +38,7 @@ table > caption {
 .sortable td select {
     max-width: 8em;
 }
+
+.chlg-name {
+    margin: 0 1em;
+}
