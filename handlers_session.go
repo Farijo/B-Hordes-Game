@@ -26,6 +26,10 @@ func connectionHandle(c *gin.Context) {
 		c.SetCookie("user", key, 24*60*60, "/", "localhost", false, true)
 		if err := refreshData(key); err != nil {
 			fmt.Println(err)
+			if err.Error() == "too many request" {
+				c.Status(http.StatusTooManyRequests)
+				return
+			}
 		}
 	}
 	c.Redirect(http.StatusFound, "/")

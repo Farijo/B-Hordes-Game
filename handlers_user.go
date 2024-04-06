@@ -55,6 +55,10 @@ func userHandle(c *gin.Context) {
 func refreshHandle(c *gin.Context) {
 	if err := refreshData(c.GetString("key")); err != nil {
 		fmt.Println(err)
+		if err.Error() == "too many request" {
+			c.Status(http.StatusTooManyRequests)
+			return
+		}
 	}
 	c.Redirect(http.StatusFound, c.PostForm("redirect"))
 }
