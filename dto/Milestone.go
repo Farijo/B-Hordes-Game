@@ -308,7 +308,7 @@ func (v *jsonNullJob) UnmarshalJSON(data []byte) error {
 
 	for ; err == nil; token, err = decoder.Token() {
 		switch token {
-		case "hab":
+		case "basic":
 			v.Byte = 0
 			v.Valid = true
 			return nil
@@ -318,12 +318,12 @@ func (v *jsonNullJob) UnmarshalJSON(data []byte) error {
 			v.Valid = true
 			return nil
 
-		case "ecl":
+		case "vest":
 			v.Byte = 2
 			v.Valid = true
 			return nil
 
-		case "guard":
+		case "shield":
 			v.Byte = 3
 			v.Valid = true
 			return nil
@@ -333,7 +333,7 @@ func (v *jsonNullJob) UnmarshalJSON(data []byte) error {
 			v.Valid = true
 			return nil
 
-		case "appri":
+		case "tamer":
 			v.Byte = 5
 			v.Valid = true
 			return nil
