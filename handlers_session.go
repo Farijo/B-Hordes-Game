@@ -27,6 +27,7 @@ func connectionHandle(c *gin.Context) {
 		if err := refreshData(key); err != nil {
 			fmt.Println(err)
 			if err.Error() == "too many request" {
+				fmt.Println(key)
 				c.Status(http.StatusTooManyRequests)
 				return
 			}

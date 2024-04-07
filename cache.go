@@ -19,22 +19,21 @@ var calls map[string][]int64 = make(map[string][]int64, 10)
 
 func registerCall(key string) error {
 	now := time.Now().Unix()
-	if t, ok := calls[key]; ok {
+	if userLastCalls, ok := calls[key]; ok {
 		ago := now - CALL_DELAY
-		for i, v := range t {
+		for i, v := range userLastCalls {
 			if v < ago {
-				t[i] = now
+				userLastCalls[i] = now
 				return nil
 			}
 		}
-		if len(t) < CALL_MAX_NB {
+		if len(userLastCalls) < CALL_MAX_NB {
 			calls[key] = append(calls[key], now)
 		} else {
 			return errors.New("too many request")
 		}
 	} else {
-		calls[key] = make([]int64, 1)
-		calls[key][0] = now
+		calls[key] = []int64{now}
 	}
 	return nil
 }
