@@ -42,3 +42,7 @@ table > caption {
 .chlg-name {
     margin: 0 1em;
 }
+
+th img {
+    margin-bottom: -1px;
+}

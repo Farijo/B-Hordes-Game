@@ -36,7 +36,7 @@ type GoalHeader struct {
 }
 
 func decodeGoal(key string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
-	amountStr, header := "le plus de", "+ "
+	amountStr, header := "le plus de", "+"
 	if goal.Amount.Valid {
 		amountStr = strconv.Itoa(int(goal.Amount.Int32))
 		header = amountStr + " "
@@ -53,18 +53,18 @@ func decodeGoal(key string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
 		if goal.X.Valid {
 			if goal.Y.Valid {
 				txt = fmt.Sprintf("Etre sur la <b>case</b> [ <b>%d</b> / <b>%d</b> ] de l'OM avec <b>%s</b>", goal.X.Byte, goal.Y.Byte, amountStr)
-				header = fmt.Sprintf("[%d/%d] %s <img src=\"https://myhordes.eu/build/images/%s\">", goal.X.Byte, goal.Y.Byte, header, out.Icon)
+				header = fmt.Sprintf("[%d/%d] %s<img src=\"https://myhordes.eu/build/images/%s\">", goal.X.Byte, goal.Y.Byte, header, out.Icon)
 			} else {
 				txt = fmt.Sprintf("Etre sur la <b>ligne %d</b> de l'OM avec <b>%s</b>", goal.X.Byte, amountStr)
-				header = fmt.Sprintf("[%d/_] %s <img src=\"https://myhordes.eu/build/images/%s\">", goal.X.Byte, header, out.Icon)
+				header = fmt.Sprintf("[%d/_] %s<img src=\"https://myhordes.eu/build/images/%s\">", goal.X.Byte, header, out.Icon)
 			}
 		} else {
 			if goal.Y.Valid {
 				txt = fmt.Sprintf("Etre sur la <b>colonne %d</b> de l'OM avec <b>%s</b>", goal.Y.Byte, amountStr)
-				header = fmt.Sprintf("[_/%d] %s <img src=\"https://myhordes.eu/build/images/%s\">", goal.Y.Byte, header, out.Icon)
+				header = fmt.Sprintf("[_/%d] %s<img src=\"https://myhordes.eu/build/images/%s\">", goal.Y.Byte, header, out.Icon)
 			} else {
 				txt = fmt.Sprintf("Etre dans l'OM avec <b>%s</b>", amountStr)
-				header = fmt.Sprintf("[_/_] %s <img src=\"https://myhordes.eu/build/images/%s\">", header, out.Icon)
+				header = fmt.Sprintf("[_/_] %s<img src=\"https://myhordes.eu/build/images/%s\">", header, out.Icon)
 			}
 		}
 		out.Text = template.HTML(txt)

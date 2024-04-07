@@ -328,7 +328,7 @@ func (v *jsonNullJob) UnmarshalJSON(data []byte) error {
 			v.Valid = true
 			return nil
 
-		case "mite":
+		case "book":
 			v.Byte = 4
 			v.Valid = true
 			return nil
