@@ -23,7 +23,7 @@ type DetailedChallenge struct {
 
 func (challenge *DetailedChallenge) UpdateDetailedProperties(started, ended bool) {
 	challenge.Access = int8(challenge.Flags & 0x03)
-	challenge.Private = challenge.Flags&0x04 == 1
+	challenge.Private = challenge.Flags&0x04 == 0x04
 	challenge.API = challenge.Flags&0x08 == 0
 	challenge.Status = int8((challenge.Flags & 0x30) >> 4)
 	if ended {
