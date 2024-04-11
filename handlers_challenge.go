@@ -123,7 +123,6 @@ func challengeHandle(c *gin.Context) {
 			"challenge":     challenge,
 			"goals":         makeChannelFor(queryChallengeGoals, challenge.ID),
 			"userkey":       key,
-			"validators":    makeChannelFor(queryChallengeValidators, challenge.ID),
 			"advancement":   makeChannelFor(queryChallengeAdvancements, challenge.ID),
 		})
 	case 4: // ended
@@ -246,6 +245,32 @@ func challengeDateHandle(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d%s", id, ident))
+}
+
+func challengeScanHandle(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	users, err := queryChallengeParticipantsForScan(id, c.GetInt("uid"))
+	if err != nil {
+		fmt.Println(err)
+		c.Status(http.StatusForbidden)
+		return
+	}
+	if len(users) == 0 {
+		c.Status(http.StatusNoContent)
+		return
+	}
+	data, err := requestMultipleUsers(c.GetString("key"), users)
+	if err != nil {
+		fmt.Println(err)
+		c.Status(http.StatusFailedDependency)
+		return
+	}
+
+	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d", id))
 }
 
 /* * * * * * * * * * * * * * * * * * * * * *

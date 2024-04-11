@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 )
 
 const (
@@ -14,7 +15,7 @@ const (
 
 	ME     = "me?fields=id,name,avatar,isGhost,playedMaps.fields(mapId),rewards.fields(id,number),dead,out,ban,baseDef,x,y,job,map.fields(wid,hei,days,custom,conspiracy,city.fields(buildings.fields(id),bank.fields(id,count)),zones.fields(items.fields(id,count)))"
 	OTHER  = "user?id=%d&fields=id,name,avatar"
-	OTHERS = "users?ids=%s&fields=id,name,avatar"
+	OTHERS = "users?ids=%s&fields=id,name,avatar,isGhost,playedMaps.fields(mapId),rewards.fields(id,number),dead,out,ban,baseDef,x,y,job,map.fields(wid,hei,days,custom,conspiracy,city.fields(buildings.fields(id),bank.fields(id,count)),zones.fields(items.fields(id,count)))"
 )
 
 func buildAuthQuery(userkey string) string {
@@ -55,19 +56,23 @@ func requestUser(userkey string, id int) (*dto.User, error) {
 	return &user, json.NewDecoder(resp.Body).Decode(&user)
 }
 
-// func requestMultipleUsers(userkey string, ids []string) (res []dto.User, e error) {
-// 	resp, err := http.Get(BASE_URL + fmt.Sprintf(OTHERS, strings.Join(ids, ",")) + buildAuthQuery(userkey))
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer resp.Body.Close()
+func requestMultipleUsers(userkey string, ids []int) (res []dto.Milestone, e error) {
+	resp, err := http.Get(BASE_URL + fmt.Sprintf(OTHERS, strings.Join(ids, ",")) + buildAuthQuery(userkey))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
 
-// 	if resp.StatusCode != http.StatusOK {
-// 		return nil, errors.New(resp.Status)
-// 	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(resp.Status)
+	}
 
-// 	return res, json.NewDecoder(resp.Body).Decode(&res)
-// }
+	var flat []struct {
+		*dto.User
+		dto.Milestone
+	}
+	return flat, json.NewDecoder(resp.Body).Decode(&flat)
+}
 
 func requestServerData(endpoint, userkey string) map[string]SrvData {
 	resp, err := http.Get(BASE_URL + endpoint + "?fields=id,img,name" + buildAuthQuery(userkey))

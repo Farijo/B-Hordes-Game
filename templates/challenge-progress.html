@@ -60,6 +60,11 @@
             </div>
         {{ end }}
     </div>
+    {{ if .selfChallenge }}
+        <form method="post" action="{{ .challenge.ID }}/scan" style="margin: 4em auto 0 auto;display: block;">
+            <input type="submit" name="scan" value="Scanner les participants"/>
+        </form>
+    {{ end }}
     <table class="sortable">
         <tr><th>Participants</th>{{ range $_, $goalHeader := $goalHeaders }}<th>{{ $goalHeader.Content }}</th>{{ end }}
         {{ range $partic := .advancement }}
