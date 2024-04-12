@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
@@ -263,7 +264,7 @@ func challengeScanHandle(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 		return
 	}
-	data, err := requestMultipleUsers(c.GetString("key"), users)
+	milestones, err := requestMultipleUsers(c.GetString("key"), users)
 	if err != nil {
 		fmt.Println(err)
 		if err.Error() == "too many request" {
@@ -273,6 +274,18 @@ func challengeScanHandle(c *gin.Context) {
 		}
 		return
 	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(milestones))
+	for i := range milestones {
+		go func(milestone *dto.Milestone, wg *sync.WaitGroup) {
+			if err := insertMilestone(milestone); err != nil {
+				fmt.Println(err)
+			}
+			wg.Done()
+		}(&milestones[i], &wg)
+	}
+	wg.Wait()
 
 	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d", id))
 }
