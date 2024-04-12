@@ -39,9 +39,6 @@ func registerCall(key string) error {
 }
 
 func refreshData(key string) error {
-	if err := registerCall(key); err != nil {
-		return err
-	}
 	milestone, err := requestMe(key)
 	if err != nil {
 		return err

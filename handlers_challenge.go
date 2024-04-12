@@ -266,7 +266,11 @@ func challengeScanHandle(c *gin.Context) {
 	data, err := requestMultipleUsers(c.GetString("key"), users)
 	if err != nil {
 		fmt.Println(err)
-		c.Status(http.StatusFailedDependency)
+		if err.Error() == "too many request" {
+			c.Status(http.StatusTooManyRequests)
+		} else {
+			c.Status(http.StatusFailedDependency)
+		}
 		return
 	}
 

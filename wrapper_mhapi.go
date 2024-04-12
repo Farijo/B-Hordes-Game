@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -23,6 +24,9 @@ func buildAuthQuery(userkey string) string {
 }
 
 func requestMe(userkey string) (*dto.Milestone, error) {
+	if err := registerCall(userkey); err != nil {
+		return nil, err
+	}
 	resp, err := http.Get(BASE_URL + ME + buildAuthQuery(userkey))
 	if err != nil {
 		return nil, err
@@ -42,6 +46,9 @@ func requestMe(userkey string) (*dto.Milestone, error) {
 }
 
 func requestUser(userkey string, id int) (*dto.User, error) {
+	if err := registerCall(userkey); err != nil {
+		return nil, err
+	}
 	resp, err := http.Get(BASE_URL + fmt.Sprintf(OTHER, id) + buildAuthQuery(userkey))
 	if err != nil {
 		return nil, err
@@ -56,8 +63,21 @@ func requestUser(userkey string, id int) (*dto.User, error) {
 	return &user, json.NewDecoder(resp.Body).Decode(&user)
 }
 
-func requestMultipleUsers(userkey string, ids []int) (res []dto.Milestone, e error) {
-	resp, err := http.Get(BASE_URL + fmt.Sprintf(OTHERS, strings.Join(ids, ",")) + buildAuthQuery(userkey))
+func requestMultipleUsers(userkey string, ids []int) ([]dto.Milestone, error) {
+	if err := registerCall(userkey); err != nil {
+		return nil, err
+	}
+	lastIdx := len(ids) - 1
+	if lastIdx < 0 {
+		return make([]dto.Milestone, 0), nil
+	}
+	var builder strings.Builder
+	for i := 0; i < lastIdx; i++ {
+		builder.WriteString(strconv.Itoa(ids[i]))
+		builder.WriteRune(',')
+	}
+	builder.WriteString(strconv.Itoa(ids[lastIdx]))
+	resp, err := http.Get(BASE_URL + fmt.Sprintf(OTHERS, builder.String()) + buildAuthQuery(userkey))
 	if err != nil {
 		return nil, err
 	}
@@ -67,11 +87,24 @@ func requestMultipleUsers(userkey string, ids []int) (res []dto.Milestone, e err
 		return nil, errors.New(resp.Status)
 	}
 
-	var flat []struct {
+	flat := make([]struct {
 		*dto.User
 		dto.Milestone
+	}, len(ids))
+	for i := range flat {
+		flat[i].User = &flat[i].Milestone.User
 	}
-	return flat, json.NewDecoder(resp.Body).Decode(&flat)
+
+	if err := json.NewDecoder(resp.Body).Decode(&flat); err != nil {
+		return nil, err
+	}
+
+	res := make([]dto.Milestone, len(flat))
+	for i, v := range flat {
+		res[i] = v.Milestone
+	}
+
+	return res, nil
 }
 
 func requestServerData(endpoint, userkey string) map[string]SrvData {

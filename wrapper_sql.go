@@ -698,13 +698,13 @@ func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
 }
 
 func queryChallengeParticipantsForScan(challengeID, requestorID int) ([]int, error) {
-	rows, err := dbConn().Query(`SELECT user FROM PARTICIPANT
+	rows, err := dbConn().Query(`SELECT user FROM participant
 	WHERE challenge = ?
 	AND EXISTS (SELECT * FROM challenge 
 		WHERE id = ? AND CREATOR = ? 
 		AND start_date <= UTC_TIMESTAMP()
 		AND (UTC_TIMESTAMP() < end_date OR end_date IS NULL)
-		AND flags & 0x30 = 0x20`, challengeID, challengeID, requestorID)
+		AND flags & 0x30 = 0x20)`, challengeID, challengeID, requestorID)
 	if err != nil {
 		return nil, err
 	}
