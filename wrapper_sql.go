@@ -148,15 +148,30 @@ func insertMilestone(milestone *dto.Milestone) error {
 			return err
 		}
 		rowPresent = true
-		if !api || g.Typ != 0 {
+		if !api {
 			continue
 		}
-		successes = append(successes, dto.Success{
+		newSuccess := dto.Success{
 			User:         milestone.User.ID,
 			Goal:         g.ID,
 			Accomplished: "",
-			Amount:       milestone.Rewards.Data[g.Entity],
-		})
+			Amount:       0,
+		}
+		switch g.Typ {
+		case 0: // picto
+			newSuccess.Amount = milestone.Rewards.Data[g.Entity]
+			successes = append(successes, newSuccess)
+		case 2: // construire
+			if milestone.Map.City.Buildings.Data[g.Entity] {
+				newSuccess.Amount = 1
+				successes = append(successes, newSuccess)
+			}
+		case 3: // en banque
+			newSuccess.Amount = milestone.Map.City.Bank.Data[g.Entity]
+			if newSuccess.Amount > 0 {
+				successes = append(successes, newSuccess)
+			}
+		}
 	}
 	rows.Close()
 	if !rowPresent {
