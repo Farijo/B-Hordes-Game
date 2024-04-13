@@ -744,3 +744,61 @@ func queryChallengeParticipantsForScan(challengeID, requestorID int) (string, er
 
 	return builder.String(), nil
 }
+
+func queryValidations(userID int, ch chan any) {
+	defer close(ch)
+
+	rows, err := dbConn().Query(`SELECT m.*, u.name, u.avatar, c.id, c.name as cname, g.id as gid, g.typ, g.descript, s.amount
+	FROM milestone m
+	JOIN user u ON u.id = m.user
+	JOIN participant p ON p.user = m.user
+	JOIN challenge c ON c.id = p.challenge
+	JOIN goal g ON g.challenge = c.id
+	JOIN validator v ON v.challenge = c.id AND v.user = ?
+	LEFT JOIN success s ON s.user = m.user AND s.accomplised = m.dt AND s.goal = g.id
+	ORDER BY c.id, m.dt DESC`, userID)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for rows.Next() {
+		var milestone dto.Milestone
+		var challenge dto.Challenge
+		var goal dto.Goal
+		if err := rows.Scan(
+			&milestone.User.ID,
+			&milestone.Dt,
+			&milestone.IsGhost,
+			&milestone.PlayedMaps,
+			&milestone.Rewards,
+			&milestone.Dead,
+			&milestone.Out,
+			&milestone.Ban,
+			&milestone.BaseDef,
+			&milestone.X,
+			&milestone.Y,
+			&milestone.Job,
+			&milestone.Map.Wid,
+			&milestone.Map.Hei,
+			&milestone.Map.Days,
+			&milestone.Map.Conspiracy,
+			&milestone.Map.Custom,
+			&milestone.Map.City.Buildings,
+			&milestone.Map.City.Bank,
+			&milestone.Map.Zones,
+			&milestone.User.Name,
+			&milestone.User.Avatar,
+			&challenge.ID,
+			&challenge.Name,
+			&goal.ID,
+			&goal.Typ,
+			&goal.Entity,
+			&goal.X,
+			&goal.Y,
+			&goal.Custom,
+			&goal.Amount); err != nil {
+
+		}
+	}
+}
