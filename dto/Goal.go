@@ -8,7 +8,7 @@ type Goal struct {
 	Typ       byte           `db:"typ"`
 	Entity    uint16         `db:"entity"`
 	Amount    sql.NullInt32  `db:"amount"`
-	X         sql.NullByte   `db:"x"`
-	Y         sql.NullByte   `db:"y"`
+	X         sql.NullInt16  `db:"x"`
+	Y         sql.NullInt16  `db:"y"`
 	Custom    sql.NullString `db:"custom"`
 }

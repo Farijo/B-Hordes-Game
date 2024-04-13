@@ -42,11 +42,11 @@ func buildGoalsFromForm(types, x, y, count, val, custom []string) *[]dto.Goal {
 		case 1:
 			x, err := strconv.ParseInt(pop(&x), 10, 8)
 			v.X.Valid = err == nil
-			v.X.Byte = byte(x)
+			v.X.Int16 = int16(x)
 
 			y, err := strconv.ParseInt(pop(&y), 10, 8)
 			v.Y.Valid = err == nil
-			v.Y.Byte = byte(y)
+			v.Y.Int16 = int16(y)
 			fallthrough
 		case 0, 3:
 			a, err := strconv.ParseInt(pop(&count), 10, 32)

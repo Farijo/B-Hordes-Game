@@ -254,17 +254,17 @@ func challengeScanHandle(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	users, err := queryChallengeParticipantsForScan(id, c.GetInt("uid"))
+	userIDs, err := queryChallengeParticipantsForScan(id, c.GetInt("uid"))
 	if err != nil {
 		fmt.Println(err)
 		c.Status(http.StatusForbidden)
 		return
 	}
-	if len(users) == 0 {
+	if userIDs == "" {
 		c.Status(http.StatusNoContent)
 		return
 	}
-	milestones, err := requestMultipleUsers(c.GetString("key"), users)
+	milestones, err := requestMultipleUsers(c.GetString("key"), userIDs)
 	if err != nil {
 		fmt.Println(err)
 		if err.Error() == "too many request" {

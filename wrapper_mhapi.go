@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
 )
 
 const (
@@ -63,21 +61,11 @@ func requestUser(userkey string, id int) (*dto.User, error) {
 	return &user, json.NewDecoder(resp.Body).Decode(&user)
 }
 
-func requestMultipleUsers(userkey string, ids []int) ([]dto.Milestone, error) {
+func requestMultipleUsers(userkey, ids string) ([]dto.Milestone, error) {
 	if err := registerCall(userkey); err != nil {
 		return nil, err
 	}
-	lastIdx := len(ids) - 1
-	if lastIdx < 0 {
-		return make([]dto.Milestone, 0), nil
-	}
-	var builder strings.Builder
-	for i := 0; i < lastIdx; i++ {
-		builder.WriteString(strconv.Itoa(ids[i]))
-		builder.WriteRune(',')
-	}
-	builder.WriteString(strconv.Itoa(ids[lastIdx]))
-	resp, err := http.Get(BASE_URL + fmt.Sprintf(OTHERS, builder.String()) + buildAuthQuery(userkey))
+	resp, err := http.Get(BASE_URL + fmt.Sprintf(OTHERS, ids) + buildAuthQuery(userkey))
 	if err != nil {
 		return nil, err
 	}

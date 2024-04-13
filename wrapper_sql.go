@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -712,7 +713,7 @@ func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
 	}
 }
 
-func queryChallengeParticipantsForScan(challengeID, requestorID int) ([]int, error) {
+func queryChallengeParticipantsForScan(challengeID, requestorID int) (string, error) {
 	rows, err := dbConn().Query(`SELECT user FROM participant
 	WHERE challenge = ?
 	AND EXISTS (SELECT * FROM challenge 
@@ -721,18 +722,25 @@ func queryChallengeParticipantsForScan(challengeID, requestorID int) ([]int, err
 		AND (UTC_TIMESTAMP() < end_date OR end_date IS NULL)
 		AND flags & 0x30 = 0x20)`, challengeID, challengeID, requestorID)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	result := make([]int, 0)
+	var builder strings.Builder
 
-	for rows.Next() {
-		var user int
-		if err := rows.Scan(&user); err != nil {
-			return nil, err
+	if rows.Next() {
+		for {
+			var userID int
+			if err := rows.Scan(&userID); err != nil {
+				return "", err
+			}
+			builder.WriteString(strconv.Itoa(userID))
+			if rows.Next() {
+				builder.WriteRune(',')
+			} else {
+				break
+			}
 		}
-		result = append(result, user)
 	}
 
-	return result, nil
+	return builder.String(), nil
 }

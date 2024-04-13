@@ -43,6 +43,25 @@ func (v *jsonNullByte) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type jsonNullInt16 struct {
+	sql.NullInt16
+}
+
+func (v *jsonNullInt16) UnmarshalJSON(data []byte) error {
+	// Unmarshalling into a pointer will let us detect null
+	var x *int16
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	if x != nil {
+		v.Valid = true
+		v.Int16 = *x
+	} else {
+		v.Valid = false
+	}
+	return nil
+}
+
 type jsonNullString struct {
 	sql.NullString
 }

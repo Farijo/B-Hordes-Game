@@ -19,8 +19,8 @@ type Milestone struct {
 	Out        jsonNullBool    `db:"isOut"`
 	Ban        jsonNullBool    `db:"ban"`
 	BaseDef    jsonNullByte    `db:"baseDef"`
-	X          jsonNullByte    `db:"x"`
-	Y          jsonNullByte    `db:"y"`
+	X          jsonNullInt16   `db:"x"`
+	Y          jsonNullInt16   `db:"y"`
 	Job        jsonNullJob     `db:"job"`
 	Map        struct {
 		Wid        jsonNullByte `db:"mapWid"`
@@ -64,11 +64,11 @@ func (incoming *Milestone) CheckFieldsDifference(previous *Milestone) bool {
 		hasChanges = hasChanges || incoming.BaseDef.Valid
 	}
 	if incoming.X.Valid {
-		incoming.X.Valid = !previous.X.Valid || (incoming.X.Byte != previous.X.Byte)
+		incoming.X.Valid = !previous.X.Valid || (incoming.X.Int16 != previous.X.Int16)
 		hasChanges = hasChanges || incoming.X.Valid
 	}
 	if incoming.Y.Valid {
-		incoming.Y.Valid = !previous.Y.Valid || (incoming.Y.Byte != previous.Y.Byte)
+		incoming.Y.Valid = !previous.Y.Valid || (incoming.Y.Int16 != previous.Y.Int16)
 		hasChanges = hasChanges || incoming.Y.Valid
 	}
 	if incoming.Job.Valid {
@@ -161,6 +161,15 @@ func (n *jsonNullByte) Scan(value any) error {
 	err := n.NullByte.Scan(value)
 	if !n.Valid {
 		n.Byte, n.Valid = oldB, oldV
+	}
+	return err
+}
+
+func (n *jsonNullInt16) Scan(value any) error {
+	oldB, oldV := n.Int16, n.Valid
+	err := n.NullInt16.Scan(value)
+	if !n.Valid {
+		n.Int16, n.Valid = oldB, oldV
 	}
 	return err
 }
