@@ -745,7 +745,12 @@ func queryChallengeParticipantsForScan(challengeID, requestorID int) (string, er
 	return builder.String(), nil
 }
 
-func queryValidations(userID int) map[dto.Challenge]map[dto.Milestone][]dto.Goal {
+type Verification struct {
+	milestone dto.Milestone
+	goals     []dto.Goal
+}
+
+func queryValidations(userID int) map[dto.Challenge][]Verification {
 	rows, err := dbConn().Query(`SELECT m.user, m.dt, m.isGhost, m.playedMaps, m.rewards, m.dead, m.isOut, m.ban, m.baseDef, m.x, m.y, m.job, m.mapWid, m.mapHei, m.mapDays, m.conspiracy, m.custom, m.buildings, m.bank, m.zoneItems, user.name, user.avatar, challenge.id, challenge.name, goal.id, goal.typ, goal.descript, success.amount
 	FROM milestone m
 	JOIN user ON user.id = m.user
@@ -754,13 +759,13 @@ func queryValidations(userID int) map[dto.Challenge]map[dto.Milestone][]dto.Goal
 	JOIN goal ON goal.challenge = challenge.id
 	JOIN validator ON validator.challenge = challenge.id AND validator.user = ?
 	LEFT JOIN success ON success.user = m.user AND success.accomplised = m.dt AND success.goal = goal.id
-	ORDER BY challenge.id, m.dt DESC`, userID)
+	ORDER BY challenge.id ASC, m.dt DESC, m.user ASC, goal.id ASC`, userID)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
 
-	result := make(map[dto.Challenge]map[dto.Milestone][]dto.Goal)
+	result := make(map[dto.Challenge][]Verification)
 
 	for rows.Next() {
 		var milestone dto.Milestone
@@ -798,11 +803,18 @@ func queryValidations(userID int) map[dto.Challenge]map[dto.Milestone][]dto.Goal
 			&goal.Y,
 			&goal.Custom,
 			&goal.Amount); err != nil {
-			if _, ok := result[challenge]; ok {
-
+			fmt.Println(err)
+			return nil
+		}
+		if _, ok := result[challenge]; ok {
+			last := result[challenge][len(result[challenge])-1]
+			if last.milestone.Dt == milestone.Dt && last.milestone.User.ID == milestone.User.ID {
+				last.goals = append(last.goals, goal)
 			} else {
-
+				result[challenge] = append(result[challenge], Verification{milestone, []dto.Goal{goal}})
 			}
+		} else {
+			result[challenge] = []Verification{{milestone, []dto.Goal{goal}}}
 		}
 	}
 
