@@ -750,19 +750,18 @@ type Verification struct {
 	goals     []dto.Goal
 }
 
-func queryValidations(userID int) map[dto.Challenge][]Verification {
-	rows, err := dbConn().Query(`SELECT m.user, m.dt, m.isGhost, m.playedMaps, m.rewards, m.dead, m.isOut, m.ban, m.baseDef, m.x, m.y, m.job, m.mapWid, m.mapHei, m.mapDays, m.conspiracy, m.custom, m.buildings, m.bank, m.zoneItems, user.name, user.avatar, challenge.id, challenge.name, goal.id, goal.typ, goal.descript, success.amount
+func queryValidations(userID int) (map[dto.Challenge][]Verification, error) {
+	rows, err := dbConn().Query(`SELECT m.user, m.dt, m.isGhost, m.playedMaps, m.rewards, m.dead, m.isOut, m.ban, m.baseDef, m.x, m.y, m.job, m.mapWid, m.mapHei, m.mapDays, m.conspiracy, m.custom, m.buildings, m.bank, m.zoneItems, user.name, user.avatar, challenge.id, challenge.name, goal.id, goal.typ, goal.entity, goal.x, goal.y, goal.custom, success.amount
 	FROM milestone m
 	JOIN user ON user.id = m.user
 	JOIN participant ON participant.user = m.user
 	JOIN challenge ON challenge.id = participant.challenge
 	JOIN goal ON goal.challenge = challenge.id
 	JOIN validator ON validator.challenge = challenge.id AND validator.user = ?
-	LEFT JOIN success ON success.user = m.user AND success.accomplised = m.dt AND success.goal = goal.id
+	LEFT JOIN success ON success.user = m.user AND success.accomplished = m.dt AND success.goal = goal.id
 	ORDER BY challenge.id ASC, m.dt DESC, m.user ASC, goal.id ASC`, userID)
 	if err != nil {
-		fmt.Println(err)
-		return nil
+		return nil, err
 	}
 
 	result := make(map[dto.Challenge][]Verification)
@@ -803,8 +802,7 @@ func queryValidations(userID int) map[dto.Challenge][]Verification {
 			&goal.Y,
 			&goal.Custom,
 			&goal.Amount); err != nil {
-			fmt.Println(err)
-			return nil
+			return nil, err
 		}
 		if _, ok := result[challenge]; ok {
 			last := result[challenge][len(result[challenge])-1]
@@ -818,5 +816,5 @@ func queryValidations(userID int) map[dto.Challenge][]Verification {
 		}
 	}
 
-	return result
+	return result, nil
 }
