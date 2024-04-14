@@ -745,22 +745,22 @@ func queryChallengeParticipantsForScan(challengeID, requestorID int) (string, er
 	return builder.String(), nil
 }
 
-func queryValidations(userID int, ch chan any) {
-	defer close(ch)
-
-	rows, err := dbConn().Query(`SELECT m.*, u.name, u.avatar, c.id, c.name as cname, g.id as gid, g.typ, g.descript, s.amount
+func queryValidations(userID int) map[dto.Challenge]map[dto.Milestone][]dto.Goal {
+	rows, err := dbConn().Query(`SELECT m.user, m.dt, m.isGhost, m.playedMaps, m.rewards, m.dead, m.isOut, m.ban, m.baseDef, m.x, m.y, m.job, m.mapWid, m.mapHei, m.mapDays, m.conspiracy, m.custom, m.buildings, m.bank, m.zoneItems, user.name, user.avatar, challenge.id, challenge.name, goal.id, goal.typ, goal.descript, success.amount
 	FROM milestone m
-	JOIN user u ON u.id = m.user
-	JOIN participant p ON p.user = m.user
-	JOIN challenge c ON c.id = p.challenge
-	JOIN goal g ON g.challenge = c.id
-	JOIN validator v ON v.challenge = c.id AND v.user = ?
-	LEFT JOIN success s ON s.user = m.user AND s.accomplised = m.dt AND s.goal = g.id
-	ORDER BY c.id, m.dt DESC`, userID)
+	JOIN user ON user.id = m.user
+	JOIN participant ON participant.user = m.user
+	JOIN challenge ON challenge.id = participant.challenge
+	JOIN goal ON goal.challenge = challenge.id
+	JOIN validator ON validator.challenge = challenge.id AND validator.user = ?
+	LEFT JOIN success ON success.user = m.user AND success.accomplised = m.dt AND success.goal = goal.id
+	ORDER BY challenge.id, m.dt DESC`, userID)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil
 	}
+
+	result := make(map[dto.Challenge]map[dto.Milestone][]dto.Goal)
 
 	for rows.Next() {
 		var milestone dto.Milestone
@@ -798,7 +798,13 @@ func queryValidations(userID int, ch chan any) {
 			&goal.Y,
 			&goal.Custom,
 			&goal.Amount); err != nil {
+			if _, ok := result[challenge]; ok {
 
+			} else {
+
+			}
 		}
 	}
+
+	return result
 }

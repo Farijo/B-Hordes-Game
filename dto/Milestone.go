@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"strings"
 )
 
 type Milestone struct {
@@ -34,6 +35,10 @@ type Milestone struct {
 		}
 		Zones jsonNullDict `db:"zoneItems"`
 	}
+}
+
+func (a Milestone) Compare(b Milestone) int {
+	return strings.Compare(a.Dt, b.Dt)
 }
 
 func (incoming *Milestone) CheckFieldsDifference(previous *Milestone) bool {
