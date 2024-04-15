@@ -746,8 +746,8 @@ func queryChallengeParticipantsForScan(challengeID, requestorID int) (string, er
 }
 
 type Verification struct {
-	milestone dto.Milestone
-	goals     []dto.Goal
+	Milestone dto.Milestone
+	Goals     []dto.Goal
 }
 
 func queryValidations(userID int) (map[dto.Challenge][]Verification, error) {
@@ -806,8 +806,8 @@ func queryValidations(userID int) (map[dto.Challenge][]Verification, error) {
 		}
 		if _, ok := result[challenge]; ok {
 			last := result[challenge][len(result[challenge])-1]
-			if last.milestone.Dt == milestone.Dt && last.milestone.User.ID == milestone.User.ID {
-				last.goals = append(last.goals, goal)
+			if last.Milestone.Dt == milestone.Dt && last.Milestone.User.ID == milestone.User.ID {
+				last.Goals = append(last.Goals, goal)
 			} else {
 				result[challenge] = append(result[challenge], Verification{milestone, []dto.Goal{goal}})
 			}

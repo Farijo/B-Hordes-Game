@@ -43,6 +43,10 @@ func main() {
 			strct.Custom.String = rep + html.EscapeString(strct.Custom.String) + rep
 			return template.JS(strings.ReplaceAll(fmt.Sprintf("%+v", *strct), " ", ","))
 		},
+		"dumpMile": dumpMile,
+		"incr": func(i int) int {
+			return i + 1
+		},
 		"decodeGoal": decodeGoal,
 		"mkmap":      mkmap,
 	}).ParseFS(f, "templates/*.html")))

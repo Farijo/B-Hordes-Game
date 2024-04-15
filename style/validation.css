@@ -1,0 +1,143 @@
+section {
+    text-align: inherit;
+    width: 80%;
+}
+
+input[value="Valider"] {
+    padding: 2px 5px;
+}
+
+button {
+    padding: 2px 4px;
+}
+h2 {
+    margin: 3em 0 0 0;
+    font-size: 1.5em;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+#timeline {
+    list-style: none;
+    margin: 50px 0 30px 120px;
+    padding-left: 30px;
+    border-left: 8px solid #eee9dc;
+}
+#timeline li {
+    margin: 40px 0;
+     padding-left: 20px;
+    position: relative;
+}
+#timeline p {
+    margin: 0 0 15px;
+}
+.date {
+    margin-top: -10px;
+    top: 50%;
+    left: -173px;
+    font-size: 0.95em;
+    line-height: 20px;
+    position: absolute;
+    text-align: center;
+    width: 100px;
+}
+.circle {
+    margin-top: -33px;
+    top: 50%;
+    left: -69px;
+    width: 60px;
+    height: 60px;
+    background: #5C2B20;
+    border: 5px solid #eee9dc;
+    border-radius: 50%;
+    display: block;
+    position: absolute;
+}
+.content {
+    max-height: 20px;
+    padding: 50px 20px 0;
+    border-color: transparent;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 0.5em;
+    position: relative;
+}
+.content:before, .content:after {
+    content: "";
+    width: 0;
+    height: 0;
+    border: solid transparent;
+    position: absolute;
+    pointer-events: none;
+    right: 100%;
+}
+.content:before {
+    border-right-color: inherit;
+    border-width: 20px;
+    top: 50%;
+    margin-top: -20px;
+}
+.content:after {
+    border-right-color: #5C2B20;
+    border-width: 17px;
+    top: 50%;
+    margin-top: -17px;
+}
+.content p {
+    max-height: 0;
+    color: transparent;
+    text-align: justify;
+    word-break: break-word;
+    hyphens: auto;
+    overflow: hidden;
+
+}
+.recap{
+    font-size: 1.3em;
+    position: absolute;
+    margin: 0;
+    z-index: 100;
+    top: 25px;
+    -webkit-transition: -webkit-transform 0.2s linear;
+}
+.radio {
+    display: none;
+}
+.radio:checked + .relative .recap{
+    cursor: auto;
+    -webkit-transform: translateX(42px);
+}
+.radio:checked ~ .content {
+    max-height: 500px;
+    border-color: #eee9dc;
+    margin-right: 20px;
+    -webkit-transform: translateX(20px);
+    -webkit-transition: max-height 0.4s linear, border-color 0.5s linear, -webkit-transform 0.2s linear;
+}
+.radio:checked ~ .content p {
+    max-height: 400px;
+    color: #eee9dc;
+    -webkit-transition: color 0.3s linear 0.3s;
+    font-family: monospace;
+    padding: 1em;
+    overflow: scroll;
+    height: 400px;
+    text-align: left;
+}
+
+.name {
+    margin-right: 1em;
+}
+
+.goal {
+    font-size: medium;
+}
+
+input, textarea {
+    color: #3B3249;
+    border: 1px solid #EFDBA8;
+    background-image: url("https://bbh.fred26.fr/gfx/design/form_field.jpg");
+    background-position: 0px -8px;
+    background-color: #AA9961;
+    outline: 1px solid #5C2B20;
+    box-sizing: border-box;
+}

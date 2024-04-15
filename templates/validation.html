@@ -5,7 +5,36 @@
     <link rel="stylesheet" href="/style/validation.css">
 </head>
 <body>
+    {{ $userkey := .userkey }}
+    {{ $i := 0 }}
     {{ template "top-bar.html" . }}
-    {{ .validations }}
+    {{ range $challenge, $verif := .validations }}
+        <section>
+            <h2>{{ $challenge.Name }}</h2>
+            <ul id='timeline'>
+                {{ range $mile := $verif }}
+                    <li class='work'>
+                        {{ $i = incr $i }}
+                        <input class='radio' id=work{{$i}} name='works' type='radio' checked>
+                        <div class="relative">
+                            <span class="recap">
+                                <label for=work{{$i}} class="name">{{ $mile.Milestone.User.Name }}</label>
+                            </span>
+                            <span class='date'>{{ $mile.Milestone.Dt }}</span>
+                            <label for=work{{$i}} class='circle' style="background:url({{ $mile.Milestone.User.Avatar.String }}) center"></label>
+                        </div>
+                        <div class='content'>
+                            <p>
+                                {{ dumpMile $mile.Milestone $userkey }}
+                            </p>
+                        </div>
+                    </li>
+                {{ end }}
+            </ul>
+        </section>
+    {{ end }}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
+    <script src="/script/validation.js"></script>
 </body>
 </html>

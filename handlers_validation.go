@@ -21,6 +21,7 @@ func validationHandle(c *gin.Context) {
 	c.HTML(http.StatusOK, "validation.html", gin.H{
 		"logged":      true,
 		"validations": mustValidate,
+		"userkey":     c.GetString("key"),
 	})
 }
 
