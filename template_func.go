@@ -126,7 +126,7 @@ func dumpMile(mile *dto.Milestone, userkey string) template.HTML {
 		}
 	}
 	if mile.Ban.Valid {
-		res["Bannit"] = mile.Ban.Bool
+		res["Banni"] = mile.Ban.Bool
 	}
 	if mile.BaseDef.Valid {
 		res["Défense de maison"] = mile.BaseDef.Byte
