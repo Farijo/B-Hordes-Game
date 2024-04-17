@@ -751,7 +751,7 @@ type Verification struct {
 }
 
 func queryValidations(userID int) (map[dto.Challenge][]Verification, error) {
-	rows, err := dbConn().Query(`SELECT m.user, m.dt, m.isGhost, m.playedMaps, m.rewards, m.dead, m.isOut, m.ban, m.baseDef, m.x, m.y, m.job, m.mapWid, m.mapHei, m.mapDays, m.conspiracy, m.custom, m.buildings, m.bank, m.zoneItems, user.name, user.avatar, challenge.id, challenge.name, goal.id, goal.typ, goal.entity, goal.x, goal.y, goal.custom, success.amount
+	rows, err := dbConn().Query(`SELECT UTC_TIMESTAMP(), m.user, m.dt, m.isGhost, m.playedMaps, m.rewards, m.dead, m.isOut, m.ban, m.baseDef, m.x, m.y, m.job, m.mapWid, m.mapHei, m.mapDays, m.conspiracy, m.custom, m.buildings, m.bank, m.zoneItems, user.name, user.avatar, challenge.id, challenge.name, challenge.start_date, goal.id, goal.typ, goal.entity, goal.x, goal.y, goal.custom, success.amount
 	FROM milestone m
 	JOIN user ON user.id = m.user
 	JOIN participant ON participant.user = m.user
@@ -759,7 +759,10 @@ func queryValidations(userID int) (map[dto.Challenge][]Verification, error) {
 	JOIN goal ON goal.challenge = challenge.id
 	JOIN validator ON validator.challenge = challenge.id AND validator.user = ?
 	LEFT JOIN success ON success.user = m.user AND success.accomplished = m.dt AND success.goal = goal.id
-	ORDER BY challenge.id ASC, m.dt DESC, m.user ASC, goal.id ASC`, userID)
+	WHERE challenge.start_date <= UTC_TIMESTAMP()
+	AND (UTC_TIMESTAMP() < challenge.end_date OR challenge.end_date IS NULL)
+	AND (challenge.flags & 0x30) = 0x20
+	ORDER BY challenge.id, m.dt, m.user, goal.id`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -767,10 +770,12 @@ func queryValidations(userID int) (map[dto.Challenge][]Verification, error) {
 	result := make(map[dto.Challenge][]Verification)
 
 	for rows.Next() {
+		var now string
 		var milestone dto.Milestone
 		var challenge dto.Challenge
 		var goal dto.Goal
 		if err := rows.Scan(
+			&now,
 			&milestone.User.ID,
 			&milestone.Dt,
 			&milestone.IsGhost,
