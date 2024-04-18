@@ -60,6 +60,7 @@ h2 {
     border-style: solid;
     border-radius: 0.5em;
     position: relative;
+    display: flex;
 }
 .content:before, .content:after {
     content: "";
@@ -82,14 +83,17 @@ h2 {
     top: 50%;
     margin-top: -17px;
 }
-.content p {
+.content > * {
     max-height: 0;
     color: transparent;
     text-align: justify;
     word-break: break-word;
     hyphens: auto;
     overflow: hidden;
-
+}
+.content > div {
+    flex: auto;
+    text-align: right !important;
 }
 .recap{
     font-size: 1.3em;
@@ -113,7 +117,7 @@ h2 {
     -webkit-transform: translateX(20px);
     -webkit-transition: max-height 0.4s linear, border-color 0.5s linear, -webkit-transform 0.2s linear;
 }
-.radio:checked ~ .content p {
+.radio:checked ~ .content > * {
     max-height: 400px;
     color: #eee9dc;
     -webkit-transition: color 0.3s linear 0.3s;

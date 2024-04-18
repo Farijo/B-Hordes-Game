@@ -836,7 +836,7 @@ func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
 			if _, ok := result[challenge]; ok {
 				last := result[challenge][len(result[challenge])-1]
 				if last.Milestone.Dt == milestone.Dt && last.Milestone.User.ID == milestone.User.ID {
-					last.Goals = append(last.Goals, goal)
+					result[challenge][len(result[challenge])-1].Goals = append(last.Goals, goal)
 				} else {
 					result[challenge] = append(result[challenge], Verification{milestone, []dto.Goal{goal}})
 				}

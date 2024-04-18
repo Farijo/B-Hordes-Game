@@ -27,6 +27,12 @@
                             <p>
                                 {{ dumpMile $mile.Milestone $userkey }}
                             </p>
+                            <div>
+                            {{ range $goal := $mile.Goals }}
+                                {{ $mm := decodeGoal $userkey $goal nil }}
+                                <p>{{ $mm.Text }}<br><img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }}</p>
+                            {{ end }}
+                            </div>
                         </div>
                     </li>
                 {{ end }}
