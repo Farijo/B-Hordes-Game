@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"unicode"
@@ -746,36 +747,56 @@ func queryChallengeParticipantsForScan(challengeID, requestorID int) (string, er
 }
 
 type Verification struct {
-	Milestone dto.Milestone
+	Milestone *dto.Milestone
 	Goals     []dto.Goal
 }
 
-func queryValidations(userID int) (map[dto.Challenge][]Verification, error) {
-	rows, err := dbConn().Query(`SELECT UTC_TIMESTAMP(), m.user, m.dt, m.isGhost, m.playedMaps, m.rewards, m.dead, m.isOut, m.ban, m.baseDef, m.x, m.y, m.job, m.mapWid, m.mapHei, m.mapDays, m.conspiracy, m.custom, m.buildings, m.bank, m.zoneItems, user.name, user.avatar, challenge.id, challenge.name, challenge.start_date, goal.id, goal.typ, goal.entity, goal.x, goal.y, goal.custom, success.amount
-	FROM milestone m
+type Verifications []Verification
+
+func (v Verifications) Len() int {
+	return len(v)
+}
+func (v Verifications) Less(i, j int) bool {
+	return v[i].Milestone.Dt > v[j].Milestone.Dt
+}
+func (v Verifications) Swap(i, j int) {
+	v[i], v[j] = v[j], v[i]
+}
+
+func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
+	rows, err := dbConn().Query(`SELECT m.*, user.name, user.avatar, goal.id, goal.typ, goal.entity, goal.x, goal.y, goal.custom, success.amount
+	FROM (
+		SELECT m.*, challenge.id, challenge.name, (dt >= challenge.start_date) as bef FROM milestone m
+		JOIN participant ON participant.user = m.user
+		JOIN challenge ON challenge.id = participant.challenge
+		WHERE challenge.start_date <= UTC_TIMESTAMP()
+		AND (UTC_TIMESTAMP() < challenge.end_date OR challenge.end_date IS NULL)
+		AND (challenge.flags & 0x30) = 0x20
+		UNION
+		SELECT DISTINCT m.user, '9999-12-31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, challenge.id, challenge.name, 2 FROM milestone m
+		JOIN participant ON participant.user = m.user
+		JOIN challenge ON challenge.id = participant.challenge
+		WHERE challenge.start_date <= UTC_TIMESTAMP()
+		AND (UTC_TIMESTAMP() < challenge.end_date OR challenge.end_date IS NULL)
+		AND (challenge.flags & 0x30) = 0x20
+	) AS m
 	JOIN user ON user.id = m.user
-	JOIN participant ON participant.user = m.user
-	JOIN challenge ON challenge.id = participant.challenge
-	JOIN goal ON goal.challenge = challenge.id
-	JOIN validator ON validator.challenge = challenge.id AND validator.user = ?
+	JOIN goal ON goal.challenge = m.id
+	JOIN validator ON validator.challenge = m.id AND validator.user = ?
 	LEFT JOIN success ON success.user = m.user AND success.accomplished = m.dt AND success.goal = goal.id
-	WHERE challenge.start_date <= UTC_TIMESTAMP()
-	AND (UTC_TIMESTAMP() < challenge.end_date OR challenge.end_date IS NULL)
-	AND (challenge.flags & 0x30) = 0x20
-	ORDER BY challenge.id, m.dt, m.user, goal.id`, userID)
+	ORDER BY m.id, m.user, m.dt, m.bef, goal.id`, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	result := make(map[dto.Challenge][]Verification)
+	result := make(map[dto.Challenge]Verifications)
+	milestone := new(dto.Milestone)
 
 	for rows.Next() {
-		var now string
-		var milestone dto.Milestone
+		var before int
 		var challenge dto.Challenge
 		var goal dto.Goal
 		if err := rows.Scan(
-			&now,
 			&milestone.User.ID,
 			&milestone.Dt,
 			&milestone.IsGhost,
@@ -796,10 +817,11 @@ func queryValidations(userID int) (map[dto.Challenge][]Verification, error) {
 			&milestone.Map.City.Buildings,
 			&milestone.Map.City.Bank,
 			&milestone.Map.Zones,
-			&milestone.User.Name,
-			&milestone.User.Avatar,
 			&challenge.ID,
 			&challenge.Name,
+			&before,
+			&milestone.User.Name,
+			&milestone.User.Avatar,
 			&goal.ID,
 			&goal.Typ,
 			&goal.Entity,
@@ -809,16 +831,26 @@ func queryValidations(userID int) (map[dto.Challenge][]Verification, error) {
 			&goal.Amount); err != nil {
 			return nil, err
 		}
-		if _, ok := result[challenge]; ok {
-			last := result[challenge][len(result[challenge])-1]
-			if last.Milestone.Dt == milestone.Dt && last.Milestone.User.ID == milestone.User.ID {
-				last.Goals = append(last.Goals, goal)
+		switch before {
+		case 1:
+			if _, ok := result[challenge]; ok {
+				last := result[challenge][len(result[challenge])-1]
+				if last.Milestone.Dt == milestone.Dt && last.Milestone.User.ID == milestone.User.ID {
+					last.Goals = append(last.Goals, goal)
+				} else {
+					result[challenge] = append(result[challenge], Verification{milestone, []dto.Goal{goal}})
+				}
 			} else {
-				result[challenge] = append(result[challenge], Verification{milestone, []dto.Goal{goal}})
+				result[challenge] = Verifications{{milestone, []dto.Goal{goal}}}
 			}
-		} else {
-			result[challenge] = []Verification{{milestone, []dto.Goal{goal}}}
+			fallthrough
+		case 2:
+			milestone = new(dto.Milestone)
 		}
+	}
+
+	for k := range result {
+		sort.Sort(result[k])
 	}
 
 	return result, nil

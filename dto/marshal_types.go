@@ -325,8 +325,8 @@ func (v *jsonNullDict) KeepDifferencesOnly(other jsonNullDict) bool {
 		}
 	}
 	// to test : raz
-	for id := range other.Data {
-		if _, ok := v.Data[id]; !ok {
+	for id, old := range other.Data {
+		if _, ok := v.Data[id]; !ok && old > 0 {
 			changements = binary.LittleEndian.AppendUint16(changements, id)
 			changements = binary.LittleEndian.AppendUint32(changements, 0)
 
@@ -354,8 +354,8 @@ func (v *jsonNullList) KeepDifferencesOnly(other jsonNullList) bool {
 		}
 	}
 	// to test : raz
-	for id := range other.Data {
-		if _, ok := v.Data[id]; !ok {
+	for id, old := range other.Data {
+		if _, ok := v.Data[id]; !ok && old {
 			changements = binary.LittleEndian.AppendUint16(changements, id)
 			changements = append(changements, '0')
 
