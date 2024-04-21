@@ -27,12 +27,16 @@
                             <p>
                                 {{ dumpMile $mile.Milestone $userkey }}
                             </p>
-                            <div>
+                            <table>
                             {{ range $goal := $mile.Goals }}
                                 {{ $mm := decodeGoal $userkey $goal nil }}
-                                <p>{{ $mm.Text }}<br><img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }}</p>
+                                <tr>
+                                    <td>{{ $mm.Text }}<br><img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }}</td>
+                                    <td><input {{ if $goal.Amount.Valid }}value="{{ $goal.Amount.Int32 }}"{{ end }}/></td>
+                                </tr>
                             {{ end }}
-                            </div>
+                                <tr><td colspan="2"><input type="submit" /></td></tr>
+                            </table>
                         </div>
                     </li>
                 {{ end }}

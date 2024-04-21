@@ -99,7 +99,7 @@ func dumpMile(mile *dto.Milestone, userkey string) template.HTML {
 		res["Fantôme"] = mile.IsGhost.Bool
 	}
 	if mile.PlayedMaps.Valid {
-		res["Villes"] = mile.PlayedMaps.Int64
+		res["Nombre d'incarnation"] = mile.PlayedMaps.Int64
 	}
 	if mile.Rewards.Valid {
 		pictoMap := make(map[string]uint32)
@@ -172,7 +172,7 @@ func dumpMile(mile *dto.Milestone, userkey string) template.HTML {
 		}
 	}
 	if len(mapMap) > 0 {
-		res["Carte"] = mapMap
+		res["Ville"] = mapMap
 	}
 	if mile.Map.Zones.Valid {
 		itemMap := make(map[string]uint32)

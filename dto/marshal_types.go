@@ -251,6 +251,7 @@ func (n *jsonNullCounter) Scan(value any) error {
 }
 
 func (n *jsonNullDict) Scan(value any) error {
+	wasValid := n.Valid
 	err := n.NullString.Scan(value)
 	if n.Valid {
 		if n.Data == nil {
@@ -262,11 +263,14 @@ func (n *jsonNullDict) Scan(value any) error {
 			number := binary.LittleEndian.Uint32([]byte(n.String[i+2 : i+6]))
 			n.Data[id] = number
 		}
+	} else {
+		n.Valid = wasValid
 	}
 	return err
 }
 
 func (n *jsonNullList) Scan(value any) error {
+	wasValid := n.Valid
 	err := n.NullString.Scan(value)
 	if n.Valid {
 		if n.Data == nil {
@@ -278,6 +282,8 @@ func (n *jsonNullList) Scan(value any) error {
 			is := n.String[i+2] != '0'
 			n.Data[id] = is
 		}
+	} else {
+		n.Valid = wasValid
 	}
 	return err
 }
