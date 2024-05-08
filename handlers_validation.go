@@ -28,3 +28,13 @@ func validationHandle(c *gin.Context) {
 /* * * * * * * * * * * * * * * * * * * * * *
  *                   POST                  *
  * * * * * * * * * * * * * * * * * * * * * */
+
+func validateGoalHandle(c *gin.Context) {
+	_ = c.GetInt("uid")
+	c.MultipartForm()
+	for id_status, action := range c.Request.PostForm {
+		fmt.Println(id_status, action)
+	}
+
+	c.Redirect(http.StatusFound, "/validation")
+}

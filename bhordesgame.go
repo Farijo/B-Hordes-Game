@@ -71,6 +71,7 @@ func main() {
 		authorized.POST("/challenge/:id/date", challengeDateHandle)
 		authorized.POST("/challenge/:id/scan", challengeScanHandle)
 		authorized.GET("/validation", validationHandle)
+		authorized.POST("/validation", validateGoalHandle)
 	}
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
