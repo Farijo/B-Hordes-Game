@@ -29,15 +29,17 @@
                             </p>
                             <table>
                                 <form action="/validation" method="post">
+                                    <tr><th>Objectifs</th><th>Précédentes</th><th>Nouvelles</th></tr>
                                 {{ range $goal := $mile.Goals }}
-                                    {{ $mm := decodeGoal $userkey $goal nil }}
+                                    {{ $mm := decodeGoal $userkey $goal.Goal nil }}
                                     <tr>
                                         <td>{{ $mm.Text }}<br><img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }}</td>
-                                        <td><input name="{{ $goal.ID }}" type="number" {{ if $goal.Amount.Valid }}value="{{ $goal.Amount.Int32 }}"{{ end }}/></td>
+                                        <td>{{ $goal.Previous.Int32 }}</td>
+                                        <td><input name="{{ $goal.ID }}" type="number" min="0" {{if $goal.Amount.Valid }}max="{{ $goal.Amount.Int32 }}"{{end}} {{if $goal.Success.Valid }}value="{{ $goal.Success.Int32 }}"{{ end }}/></td>
                                     </tr>
                                 {{ end }}
                                     <tr>
-                                        <td colspan="2">
+                                        <td colspan="3">
                                             <input type="hidden" name="user" value="{{ $mile.Milestone.User.ID }}"/>
                                             <input type="hidden" name="dt" value="{{ $mile.Milestone.Dt }}"/>
                                             <input type="submit" />

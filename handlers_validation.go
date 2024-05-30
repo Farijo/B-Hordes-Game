@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,10 +31,32 @@ func validationHandle(c *gin.Context) {
  * * * * * * * * * * * * * * * * * * * * * */
 
 func validateGoalHandle(c *gin.Context) {
-	_ = c.GetInt("uid")
+	var mileData struct {
+		User int    `form:"user"`
+		Dt   string `form:"dt"`
+	}
+	bindErr := c.Bind(&mileData)
+	if bindErr != nil {
+		fmt.Println(bindErr)
+		c.Status(http.StatusBadRequest)
+		return
+	}
 	c.MultipartForm()
-	for id_status, action := range c.Request.PostForm {
-		fmt.Println(id_status, action)
+	goalAmounts := make(map[int]int, 0)
+	for key, val := range c.Request.PostForm {
+		if len(val) > 0 {
+			goalId, atoiErrGo := strconv.Atoi(key)
+			amount, atoiErrAm := strconv.Atoi(val[0])
+			if atoiErrAm == nil && atoiErrGo == nil {
+				goalAmounts[goalId] = amount
+			}
+		}
+	}
+	insertErr := insertSuccesses(mileData.User, mileData.Dt, goalAmounts, c.GetInt("uid"))
+	if insertErr != nil {
+		fmt.Println(insertErr)
+		c.Status(http.StatusBadRequest)
+		return
 	}
 
 	c.Redirect(http.StatusFound, "/validation")

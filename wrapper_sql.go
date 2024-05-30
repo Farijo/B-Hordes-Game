@@ -746,9 +746,15 @@ func queryChallengeParticipantsForScan(challengeID, requestorID int) (string, er
 	return builder.String(), nil
 }
 
+type Acompletion struct {
+	dto.Goal
+	Previous sql.NullInt32
+	Success  sql.NullInt32
+}
+
 type Verification struct {
 	Milestone *dto.Milestone
-	Goals     []dto.Goal
+	Goals     []Acompletion
 }
 
 type Verifications []Verification
@@ -764,7 +770,7 @@ func (v Verifications) Swap(i, j int) {
 }
 
 func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
-	rows, err := dbConn().Query(`SELECT m.*, user.name, user.avatar, goal.id, goal.typ, goal.entity, goal.x, goal.y, goal.custom, success.amount
+	rows, err := dbConn().Query(`SELECT m.*, user.name, user.avatar, goal.id, goal.typ, goal.entity, goal.x, goal.y, goal.custom, goal.amount, success.amount
 	FROM (
 		SELECT m.*, challenge.id, challenge.name, (dt >= challenge.start_date) as bef FROM milestone m
 		JOIN participant ON participant.user = m.user
@@ -791,11 +797,13 @@ func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
 
 	result := make(map[dto.Challenge]Verifications)
 	milestone := new(dto.Milestone)
+	previousAcompletion := make(map[int]sql.NullInt32, 0)
 
 	for rows.Next() {
 		var before int
 		var challenge dto.Challenge
 		var goal dto.Goal
+		var successAmount sql.NullInt32
 		if err := rows.Scan(
 			&milestone.User.ID,
 			&milestone.Dt,
@@ -828,24 +836,32 @@ func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
 			&goal.X,
 			&goal.Y,
 			&goal.Custom,
-			&goal.Amount); err != nil {
+			&goal.Amount,
+			&successAmount); err != nil {
 			return nil, err
+		}
+		if goal.Typ == 2 {
+			goal.Amount.Int32 = 1
+			goal.Amount.Valid = true
 		}
 		switch before {
 		case 1:
 			if _, ok := result[challenge]; ok {
 				last := result[challenge][len(result[challenge])-1]
 				if last.Milestone.Dt == milestone.Dt && last.Milestone.User.ID == milestone.User.ID {
-					result[challenge][len(result[challenge])-1].Goals = append(last.Goals, goal)
+					result[challenge][len(result[challenge])-1].Goals = append(last.Goals, Acompletion{goal, previousAcompletion[goal.ID], successAmount})
 				} else {
-					result[challenge] = append(result[challenge], Verification{milestone, []dto.Goal{goal}})
+					result[challenge] = append(result[challenge], Verification{milestone, []Acompletion{{goal, previousAcompletion[goal.ID], successAmount}}})
 				}
 			} else {
-				result[challenge] = Verifications{{milestone, []dto.Goal{goal}}}
+				result[challenge] = Verifications{{milestone, []Acompletion{{goal, previousAcompletion[goal.ID], successAmount}}}}
 			}
 			fallthrough
 		case 2:
 			milestone = new(dto.Milestone)
+		}
+		if successAmount.Valid {
+			previousAcompletion[goal.ID] = successAmount
 		}
 	}
 
@@ -854,4 +870,69 @@ func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
 	}
 
 	return result, nil
+}
+
+func insertSuccesses(user int, dt string, amounts map[int]int, requestor int) error {
+	if len(amounts) == 0 {
+		return nil
+	}
+
+	tx, err := dbConn().Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var t int
+	if err := tx.QueryRow("SELECT 1 FROM milestone WHERE user = ? AND dt = ?", user, dt).Scan(&t); err != nil || t != 1 {
+		return err
+	}
+
+	values := make([]any, 0, 1+len(amounts))
+	values = append(values, user)
+	placeholder := ""
+	for goal := range amounts {
+		values = append(values, goal)
+		placeholder += "?,"
+	}
+	placeholder = placeholder[:len(placeholder)-1]
+
+	updates := make(map[int]int, 0)
+	rows, err := tx.Query("SELECT goal, success.amount, accomplished, IF(goal.typ = 2, 1, goal.amount) FROM success JOIN goal ON goal.id = success.goal WHERE user = ? AND goal IN ("+placeholder+")", values...)
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		var goal, amount int
+		var accomplished string
+		var max sql.NullInt32
+		if err := rows.Scan(&goal, &amount, &accomplished, &max); err != nil {
+			rows.Close()
+			return err
+		}
+		if max.Valid && amounts[goal] > int(max.Int32) {
+			amounts[goal] = int(max.Int32)
+		}
+		if newVal := amounts[goal]; newVal == amount {
+			delete(amounts, goal)
+		} else if accomplished == dt {
+			updates[goal] = newVal
+			delete(amounts, goal)
+		}
+	}
+	rows.Close()
+
+	for goal, amount := range updates {
+		if _, err := tx.Exec("UPDATE success SET amount = ? WHERE user = ? AND goal = ? AND accomplished = ?", amount, user, goal, dt); err != nil {
+			return err
+		}
+	}
+
+	for goal, amount := range amounts {
+		if _, err := tx.Exec("INSERT INTO success VALUES(?, ?, ?, ?)", user, goal, dt, amount); err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
