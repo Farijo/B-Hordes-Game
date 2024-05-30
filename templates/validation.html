@@ -29,7 +29,7 @@
                             </p>
                             <table>
                                 <form action="/validation" method="post">
-                                    <tr><th>Objectifs</th><th>Précédentes</th><th>Nouvelles</th></tr>
+                                    <tr><th>Objectif</th><th>Dernière</th><th>Nouvelle</th></tr>
                                 {{ range $goal := $mile.Goals }}
                                     {{ $mm := decodeGoal $userkey $goal.Goal nil }}
                                     <tr>
