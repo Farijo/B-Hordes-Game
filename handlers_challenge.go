@@ -127,7 +127,21 @@ func challengeHandle(c *gin.Context) {
 			"advancement":   makeChannelFor(queryChallengeAdvancements, challenge.ID),
 		})
 	case 4: // ended
-		//TODO
+		if duser, err := queryUser(challenge.Creator.ID); err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		} else {
+			challenge.Creator = duser.User
+		}
+
+		c.HTML(http.StatusOK, "challenge-progress.html", gin.H{
+			"logged":        logged,
+			"selfChallenge": false, // disable challenge action
+			"challenge":     challenge,
+			"goals":         makeChannelFor(queryChallengeGoals, challenge.ID),
+			"userkey":       key,
+			"advancement":   makeChannelFor(queryChallengeAdvancements, challenge.ID),
+		})
 	}
 }
 
@@ -225,8 +239,8 @@ func challengeDateHandle(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	switch c.PostForm("valider")[0] {
-	case "Valider"[0]:
+	switch c.PostForm("valider") {
+	case "Valider":
 		start := true
 		date := c.PostForm("start_date")
 		if date == "" {
@@ -236,8 +250,10 @@ func challengeDateHandle(c *gin.Context) {
 		if date > "" {
 			updateChallengeDate(id, c.GetInt("uid"), date, start)
 		}
-	case "Démarrer maintenant"[0]:
+	case "Démarrer maintenant":
 		updateChallengeDate(id, c.GetInt("uid"), "", true)
+	case "Terminer maintenant":
+		updateChallengeDate(id, c.GetInt("uid"), "", false)
 	}
 
 	ident := c.Query("ident")

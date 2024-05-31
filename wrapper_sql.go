@@ -908,12 +908,12 @@ func insertSuccesses(user int, dt string, amounts map[string][]string, requestor
 		return err
 	}
 
-	for k, v := range amounts {
-		if len(v) > 0 && v[0] > "" {
+	for goal, amount := range amounts {
+		if len(amount) > 0 && amount[0] > "" {
 			if _, err := tx.Exec(`INSERT INTO success SELECT ?, goal.id, ?, ? FROM goal
 			JOIN validator ON validator.challenge = goal.challenge
 			WHERE validator.user = ?
-			AND goal.id = ?`, user, dt, v[0], requestor, k); err != nil {
+			AND goal.id = ?`, user, dt, amount[0], requestor, goal); err != nil {
 				return err
 			}
 		}

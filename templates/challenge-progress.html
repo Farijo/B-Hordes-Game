@@ -129,7 +129,7 @@
         endDateInput.on('change', function () {
             if(!this.value || new Date(this.value) < new Date()) {
                 endDateInput.siblings('input').val('Terminer maintenant');
-                endDateInput.parent().attr('onsubmit', "return confirm('Le lancement du défi empechera toute modification, hormis la date de fin')");
+                endDateInput.parent().attr('onsubmit', "return confirm('Confirmer la fin du défi')");
             } else {
                 endDateInput.siblings('input').val('Valider');
                 endDateInput.parent().attr('onsubmit', "dateToISOGMT(this)");
