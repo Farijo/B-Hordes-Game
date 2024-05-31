@@ -95,7 +95,7 @@
             const d = e.title;
             if(d) {
                 const dd = new Date(d+'Z');
-                e.setAttribute("sorttable_customkey", e.getAttribute("sorttable_customkey") + (Date.now() - dd.getTime()));
+                e.setAttribute("sorttable_customkey", e.getAttribute("sorttable_customkey") + (""+(Date.now() - dd.getTime())).padStart(15, '0'));
                 e.title = dd.toLocaleString() + ',' + dd.getMilliseconds()/10;
             } else {
                 e.title = "Jamais réalisé"

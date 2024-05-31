@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,17 +41,9 @@ func validateGoalHandle(c *gin.Context) {
 		return
 	}
 	c.MultipartForm()
-	goalAmounts := make(map[int]int, 0)
-	for key, val := range c.Request.PostForm {
-		if len(val) > 0 {
-			goalId, atoiErrGo := strconv.Atoi(key)
-			amount, atoiErrAm := strconv.Atoi(val[0])
-			if atoiErrAm == nil && atoiErrGo == nil {
-				goalAmounts[goalId] = amount
-			}
-		}
-	}
-	insertErr := insertSuccesses(mileData.User, mileData.Dt, goalAmounts, c.GetInt("uid"))
+	delete(c.Request.PostForm, "user")
+	delete(c.Request.PostForm, "dt")
+	insertErr := insertSuccesses(mileData.User, mileData.Dt, c.Request.PostForm, c.GetInt("uid"))
 	if insertErr != nil {
 		fmt.Println(insertErr)
 		c.Status(http.StatusBadRequest)

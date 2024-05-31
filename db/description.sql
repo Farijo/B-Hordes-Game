@@ -52,6 +52,7 @@ CREATE TABLE success (
     goal INTEGER NOT NULL,
     accomplished DATETIME(2) NOT NULL,
     amount INT NOT NULL,
+    UNIQUE(user,goal,accomplished),
     PRIMARY KEY(user,goal,amount),
     FOREIGN KEY(goal) REFERENCES goal(id),
     FOREIGN KEY(user) REFERENCES user(id)

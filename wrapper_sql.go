@@ -182,13 +182,6 @@ func insertMilestone(milestone *dto.Milestone) error {
 		return nil
 	}
 
-	for _, success := range successes {
-		if _, err := tx.Exec(`INSERT INTO success VALUES(?, ?, UTC_TIMESTAMP(2), ?)
-		ON DUPLICATE KEY UPDATE amount = amount`, success.User, success.Goal, success.Amount); err != nil {
-			return err
-		}
-	}
-
 	rows, err = tx.Query(`SELECT isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, custom, buildings, bank, zoneItems
 	FROM milestone WHERE user = ? ORDER BY dt ASC`, milestone.User.ID)
 	if err != nil {
@@ -247,6 +240,14 @@ func insertMilestone(milestone *dto.Milestone) error {
 		milestone.Map.City.Bank,
 		milestone.Map.Zones); err != nil {
 		return err
+	}
+
+	// don't insert success without milestone
+	for _, success := range successes {
+		if _, err := tx.Exec(`INSERT INTO success VALUES(?, ?, UTC_TIMESTAMP(2), ?)
+		ON DUPLICATE KEY UPDATE amount = amount`, success.User, success.Goal, success.Amount); err != nil {
+			return err
+		}
 	}
 
 	return tx.Commit()
@@ -797,7 +798,8 @@ func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
 
 	result := make(map[dto.Challenge]Verifications)
 	milestone := new(dto.Milestone)
-	previousAcompletion := make(map[int]sql.NullInt32, 0)
+	var previousAcompletion map[int]sql.NullInt32
+	prevUser := -1
 
 	for rows.Next() {
 		var before int
@@ -844,6 +846,10 @@ func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
 			goal.Amount.Int32 = 1
 			goal.Amount.Valid = true
 		}
+		if prevUser != milestone.User.ID {
+			previousAcompletion = make(map[int]sql.NullInt32, 0)
+		}
+		prevUser = milestone.User.ID
 		switch before {
 		case 1:
 			if _, ok := result[challenge]; ok {
@@ -872,7 +878,7 @@ func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
 	return result, nil
 }
 
-func insertSuccesses(user int, dt string, amounts map[int]int, requestor int) error {
+func insertSuccesses(user int, dt string, amounts map[string][]string, requestor int) error {
 	if len(amounts) == 0 {
 		return nil
 	}
@@ -883,54 +889,33 @@ func insertSuccesses(user int, dt string, amounts map[int]int, requestor int) er
 	}
 	defer tx.Rollback()
 
-	var t int
-	if err := tx.QueryRow("SELECT 1 FROM milestone WHERE user = ? AND dt = ?", user, dt).Scan(&t); err != nil || t != 1 {
-		return err
-	}
-
 	values := make([]any, 0, 1+len(amounts))
-	values = append(values, user)
 	placeholder := ""
 	for goal := range amounts {
 		values = append(values, goal)
 		placeholder += "?,"
 	}
 	placeholder = placeholder[:len(placeholder)-1]
+	values = append(values, requestor, user, dt)
 
-	updates := make(map[int]int, 0)
-	rows, err := tx.Query("SELECT goal, success.amount, accomplished, IF(goal.typ = 2, 1, goal.amount) FROM success JOIN goal ON goal.id = success.goal WHERE user = ? AND goal IN ("+placeholder+")", values...)
-	if err != nil {
+	if _, err := tx.Exec(`DELETE success FROM success
+	JOIN goal ON goal.id = success.goal
+	JOIN validator ON validator.challenge = goal.challenge
+	WHERE success.goal IN (`+placeholder+`)
+	AND validator.user = ?
+	AND success.user = ?
+	AND success.accomplished = ?`, values...); err != nil {
 		return err
 	}
-	for rows.Next() {
-		var goal, amount int
-		var accomplished string
-		var max sql.NullInt32
-		if err := rows.Scan(&goal, &amount, &accomplished, &max); err != nil {
-			rows.Close()
-			return err
-		}
-		if max.Valid && amounts[goal] > int(max.Int32) {
-			amounts[goal] = int(max.Int32)
-		}
-		if newVal := amounts[goal]; newVal == amount {
-			delete(amounts, goal)
-		} else if accomplished == dt {
-			updates[goal] = newVal
-			delete(amounts, goal)
-		}
-	}
-	rows.Close()
 
-	for goal, amount := range updates {
-		if _, err := tx.Exec("UPDATE success SET amount = ? WHERE user = ? AND goal = ? AND accomplished = ?", amount, user, goal, dt); err != nil {
-			return err
-		}
-	}
-
-	for goal, amount := range amounts {
-		if _, err := tx.Exec("INSERT INTO success VALUES(?, ?, ?, ?)", user, goal, dt, amount); err != nil {
-			return err
+	for k, v := range amounts {
+		if len(v) > 0 && v[0] > "" {
+			if _, err := tx.Exec(`INSERT INTO success SELECT ?, goal.id, ?, ? FROM goal
+			JOIN validator ON validator.challenge = goal.challenge
+			WHERE validator.user = ?
+			AND goal.id = ?`, user, dt, v[0], requestor, k); err != nil {
+				return err
+			}
 		}
 	}
 
