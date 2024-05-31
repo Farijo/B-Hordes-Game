@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -23,10 +24,11 @@ func dbConn() (db *sql.DB) {
 		var err error
 
 		dbDriver := "mysql"
-		dbUser := "tvallar"
-		dbPass := ""
-		dbName := "hordes_challenge"
-		instance, err = sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
+		dbHostName := os.Getenv("MYSQL_HOSTNAME")
+		dbUser := os.Getenv("MYSQL_USER")
+		dbPass := os.Getenv("MYSQL_PWD")
+		dbName := os.Getenv("MYSQL_DB")
+		instance, err = sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp("+dbHostName+")/"+dbName)
 		if err != nil {
 			panic(err.Error())
 		}

@@ -14,7 +14,7 @@ func logoutHandle(c *gin.Context) {
 	if key, err := c.Cookie("user"); err != nil {
 		delete(sessions, key)
 	}
-	c.SetCookie("user", "", -1, "/", "localhost", false, true)
+	c.SetCookie("user", "", -1, "/", "bhordesgames.alwaysdata.net", false, true)
 	c.Redirect(http.StatusFound, "/")
 }
 
@@ -23,7 +23,7 @@ func logoutHandle(c *gin.Context) {
  * * * * * * * * * * * * * * * * * * * * * */
 func connectionHandle(c *gin.Context) {
 	if key := c.PostForm("key"); key > "" {
-		c.SetCookie("user", key, 24*60*60, "/", "localhost", false, true)
+		c.SetCookie("user", key, 24*60*60, "/", "bhordesgames.alwaysdata.net", false, true)
 		if err := refreshData(key); err != nil {
 			fmt.Println(err)
 			if err.Error() == "too many request" {
