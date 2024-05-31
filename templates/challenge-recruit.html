@@ -86,7 +86,7 @@
             <input type="submit" value="{{ $act }}" name="{{ $uid }}-participant" />
         {{ end }}
         <table class="sortable">
-            <tr><th>Résultats</th><th>Défis créés</th><th>Défis participés</th></tr>
+            <tr><th>Résultats</th><th>Défis créés</th><th>Participations</th></tr>
             {{ range $result := .searchResults }}
                 <tr class="item">
                     <td sorttable_customkey="{{ $result.SimplifiedName }}">
@@ -106,7 +106,7 @@
                 </tr>
             {{ end }}
             {{ if gt $challAccess 0 }}
-                <tr><th>{{ "Postulants" }}</th><th>Défis créés</th><th>Défis participés</th></tr>
+                <tr><th>{{ "Postulants" }}</th><th>Défis créés</th><th>Participations</th></tr>
                 {{ range $invit := .invitations }}
                     <tr class="item">
                         <td sorttable_customkey="{{ $invit.SimplifiedName }}">
@@ -136,7 +136,7 @@
         <table class="sortable">
 {{ end }}
 {{ $selfChall := .selfChallenge }}
-            <tr><th>Approbateurs</th><th>Défis créés</th><th>Défis participés</th></tr>
+            <tr><th>Approbateurs</th><th>Défis créés</th><th>Participations</th></tr>
             {{ range $approb := .validators }}
                 <tr class="item">
                     <td sorttable_customkey="{{ $approb.SimplifiedName }}">
@@ -154,7 +154,7 @@
                     {{ end }}
                 </tr>
             {{ end }}
-            <tr><th>Participants</th><th>Défis créés</th><th>Défis participés</th></tr>
+            <tr><th>Participants</th><th>Défis créés</th><th>Participations</th></tr>
             {{ range $partic := .participants }}
                 <tr class="item">
                     <td sorttable_customkey="{{ $partic.SimplifiedName }}">

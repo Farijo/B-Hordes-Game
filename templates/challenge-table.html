@@ -41,7 +41,6 @@
         <th>Inscrits</th>
         <th>Début</th>
         <th>Fin</th>
-        <th>Liens</th>
     </tr>
     {{ range $challdata := . }}
     <tr class="item">
@@ -58,9 +57,6 @@
         <td>{{ $challdata.ParticipantCount }}</td>
         <td {{ if $challdata.StartDate.Valid }}sorttable_customkey="{{ $challdata.StartDate.String }}" class="date" style="min-width:9em"{{ end }}></td>
         <td {{ if $challdata.EndDate.Valid }}sorttable_customkey="{{ $challdata.EndDate.String }}" class="date" style="min-width:9em"{{ end }}></td>
-        <td>
-            <a href="https://myhordes.eu/jx/forum/jump/1890332">MH</a>
-        </td>
     </tr>
     {{ end }}
 </table>
