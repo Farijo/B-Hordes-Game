@@ -10,8 +10,8 @@
     {{ template "top-bar.html" . }}
     {{ range $challenge, $verif := .validations }}
         <section>
-            <h2>{{ $challenge.Name }}</h2>
-            <ul id='timeline'>
+            <h2><a class="chlg-name" href="/challenge/{{ $challenge.ID }}">{{ $challenge.Name }}</a></h2>
+            <ul class='timeline'>
                 {{ range $mile := $verif }}
                     <li class='work'>
                         {{ $i = incr $i }}
@@ -21,7 +21,7 @@
                                 <label for=work{{$i}} class="name">{{ $mile.Milestone.User.Name }}</label>
                             </span>
                             <span class='date'>{{ $mile.Milestone.Dt }}</span>
-                            <label for=work{{$i}} class='circle' style="background:url({{ $mile.Milestone.User.Avatar.String }}) center"></label>
+                            <label for=work{{$i}} class='circle' style="background: #7e4d2a url({{ $mile.Milestone.User.Avatar.String }}) center"></label>
                         </div>
                         <div class='content'>
                             <p>

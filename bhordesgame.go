@@ -74,5 +74,9 @@ func main() {
 		authorized.POST("/validation", validateGoalHandle)
 	}
 
+	if gin.Mode() == gin.DebugMode {
+		domain = "localhost"
+	}
+
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

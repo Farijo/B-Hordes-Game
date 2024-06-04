@@ -7,6 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var (
+	domain = "bhordesgames.alwaysdata.net"
+)
+
 /* * * * * * * * * * * * * * * * * * * * * *
  *                   GET                   *
  * * * * * * * * * * * * * * * * * * * * * */
@@ -14,7 +18,7 @@ func logoutHandle(c *gin.Context) {
 	if key, err := c.Cookie("user"); err != nil {
 		delete(sessions, key)
 	}
-	c.SetCookie("user", "", -1, "/", "bhordesgames.alwaysdata.net", false, true)
+	c.SetCookie("user", "", -1, "/", domain, false, true)
 	c.Redirect(http.StatusFound, "/")
 }
 
@@ -23,7 +27,7 @@ func logoutHandle(c *gin.Context) {
  * * * * * * * * * * * * * * * * * * * * * */
 func connectionHandle(c *gin.Context) {
 	if key := c.PostForm("key"); key > "" {
-		c.SetCookie("user", key, 24*60*60, "/", "bhordesgames.alwaysdata.net", false, true)
+		c.SetCookie("user", key, 24*60*60, "/", domain, false, true)
 		if err := refreshData(key); err != nil {
 			fmt.Println(err)
 			if err.Error() == "too many request" {

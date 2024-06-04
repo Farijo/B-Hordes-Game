@@ -11,23 +11,28 @@ button {
     padding: 2px 4px;
 }
 h2 {
-    margin: 3em 0 0 0;
+    margin: 0 80px;
     font-size: 1.5em;
     letter-spacing: 2px;
     text-transform: uppercase;
+    background-color: #7e4d2a;
+    padding: 0.5em;
+    border-radius: 0.5em;
+    width: fit-content;
 }
-#timeline {
+.timeline {
     list-style: none;
-    margin: 50px 0 30px 120px;
+    margin: 0 0 0 120px;
     padding-left: 30px;
-    border-left: 8px solid #eee9dc;
+    border-left: 8px solid #7e4d2a;
+    padding-top: 0.1em;
 }
-#timeline li {
+.timeline li {
     margin: 40px 0;
      padding-left: 20px;
     position: relative;
 }
-#timeline p {
+.timeline p {
     margin: 0 0 15px;
 }
 .date {
@@ -48,8 +53,7 @@ h2 {
     left: -69px;
     width: 60px;
     height: 60px;
-    background: #5C2B20;
-    border: 5px solid #eee9dc;
+    border: 5px solid #7e4d2a;
     border-radius: 50%;
     display: block;
     position: absolute;
@@ -115,7 +119,7 @@ h2 {
 }
 .radio:checked ~ .content {
     max-height: 500px;
-    border-color: #eee9dc;
+    border-color: #7e4d2a;
     margin-right: 20px;
     -webkit-transform: translateX(20px);
     -webkit-transition: max-height 0.4s linear, border-color 0.5s linear, -webkit-transform 0.2s linear;
