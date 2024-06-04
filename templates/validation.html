@@ -11,6 +11,7 @@
     {{ range $challenge, $verif := .validations }}
         <section>
             <h2><a class="chlg-name" href="/challenge/{{ $challenge.ID }}">{{ $challenge.Name }}</a></h2>
+            <button>⟱ ⟱ ⟱</button>
             <ul class='timeline'>
                 {{ range $mile := $verif }}
                     <li class='work'>
@@ -61,6 +62,10 @@
             const date = new Date(e.innerHTML+'Z');
             e.innerHTML = `${date.toLocaleDateString()}<br><span style=\"font-size:80%\">${date.toLocaleTimeString()}</span>`;
         });
+        $('section button').click(event => {
+            event.target.innerHTML = getComputedStyle($(event.target.parentNode).children('ul').toggle()[0]).display === "none" ? '⟱ ⟱ ⟱' : '⟰ ⟰ ⟰';
+        })
+        $('ul').hide()
     </script>
 </body>
 </html>

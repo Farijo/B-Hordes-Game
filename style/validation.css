@@ -1,6 +1,7 @@
 section {
     text-align: inherit;
     width: 80%;
+    margin-top: 2em;
 }
 
 input[value="Valider"] {
@@ -9,6 +10,10 @@ input[value="Valider"] {
 
 button {
     padding: 2px 4px;
+}
+section button {
+    position: absolute;
+    font-size: 1.2em;
 }
 h2 {
     margin: 0 80px;
