@@ -14,6 +14,7 @@ button {
 section button {
     position: absolute;
     font-size: 1.2em;
+    transform: translateY(-100%);
 }
 h2 {
     margin: 0 80px;
@@ -33,12 +34,15 @@ h2 {
     padding-top: 0.1em;
 }
 .timeline li {
-    margin: 40px 0;
-     padding-left: 20px;
+    margin: 0 0 40px 0;
+    padding-left: 20px;
     position: relative;
 }
 .timeline p {
     margin: 0 0 15px;
+}
+div.timeline {
+    padding: 1em;
 }
 .date {
     margin-top: -18px;
@@ -158,4 +162,7 @@ input, textarea {
     background-color: #AA9961;
     outline: 1px solid #5C2B20;
     box-sizing: border-box;
+}
+span.utcdate {
+    display: inline-grid;
 }

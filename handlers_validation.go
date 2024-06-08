@@ -12,7 +12,7 @@ import (
  * * * * * * * * * * * * * * * * * * * * * */
 
 func validationHandle(c *gin.Context) {
-	mustValidate, err := queryValidations(c.GetInt("uid"))
+	mustValidate, order, err := queryValidations(c.GetInt("uid"))
 	if err != nil {
 		fmt.Println(err)
 		c.Status(http.StatusBadRequest)
@@ -21,6 +21,7 @@ func validationHandle(c *gin.Context) {
 	c.HTML(http.StatusOK, "validation.html", gin.H{
 		"logged":      true,
 		"validations": mustValidate,
+		"order":       order,
 		"userkey":     c.GetString("key"),
 	})
 }

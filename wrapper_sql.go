@@ -772,16 +772,16 @@ func (v Verifications) Swap(i, j int) {
 	v[i], v[j] = v[j], v[i]
 }
 
-func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
-	rows, err := dbConn().Query(`SELECT m.*, user.name, user.avatar, goal.id, goal.typ, goal.entity, goal.x, goal.y, goal.custom, goal.amount, success.amount
+func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, error) {
+	rows, err := dbConn().Query(`SELECT m.*, user.name, user.avatar, goal.id, goal.typ, goal.entity, goal.x, goal.y, goal.custom, goal.amount, success.amount, DATEDIFF(UTC_TIMESTAMP(), end_date) rem
 	FROM (
-		SELECT m.*, challenge.id, challenge.name, (dt >= challenge.start_date) as bef FROM milestone m
+		SELECT m.*, challenge.id, challenge.name, challenge.end_date, (dt >= challenge.start_date) as bef FROM milestone m
 		JOIN participant ON participant.user = m.user
 		JOIN challenge ON challenge.id = participant.challenge
 		WHERE challenge.start_date <= UTC_TIMESTAMP()
 		AND (challenge.flags & 0x30) = 0x20
 		UNION
-		SELECT DISTINCT m.user, '9999-12-31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, challenge.id, challenge.name, 2 FROM milestone m
+		SELECT DISTINCT m.user, '9999-12-31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, challenge.id, challenge.name, challenge.end_date, 2 FROM milestone m
 		JOIN participant ON participant.user = m.user
 		JOIN challenge ON challenge.id = participant.challenge
 		WHERE challenge.start_date <= UTC_TIMESTAMP()
@@ -791,12 +791,13 @@ func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
 	JOIN goal ON goal.challenge = m.id
 	JOIN validator ON validator.challenge = m.id AND validator.user = ?
 	LEFT JOIN success ON success.user = m.user AND success.accomplished = m.dt AND success.goal = goal.id
-	ORDER BY m.id, m.user, m.dt, m.bef, goal.id`, userID)
+	ORDER BY rem IS NULL OR rem < 0 DESC, rem DESC, m.id, m.user, m.dt, m.bef, goal.id`, userID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	result := make(map[dto.Challenge]Verifications)
+	result := make(map[int]Verifications)
+	resOrder := make([]*dto.Challenge, 0)
 	milestone := new(dto.Milestone)
 	var previousAcompletion map[int]sql.NullInt32
 	prevUser := -1
@@ -806,6 +807,7 @@ func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
 		var challenge dto.Challenge
 		var goal dto.Goal
 		var successAmount sql.NullInt32
+		var aux any
 		if err := rows.Scan(
 			&milestone.User.ID,
 			&milestone.Dt,
@@ -829,6 +831,7 @@ func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
 			&milestone.Map.Zones,
 			&challenge.ID,
 			&challenge.Name,
+			&challenge.EndDate,
 			&before,
 			&milestone.User.Name,
 			&milestone.User.Avatar,
@@ -839,28 +842,36 @@ func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
 			&goal.Y,
 			&goal.Custom,
 			&goal.Amount,
-			&successAmount); err != nil {
-			return nil, err
+			&successAmount,
+			&aux); err != nil {
+			return nil, nil, err
 		}
 		if goal.Typ == 2 {
 			goal.Amount.Int32 = 1
 			goal.Amount.Valid = true
 		}
+
 		if prevUser != milestone.User.ID {
 			previousAcompletion = make(map[int]sql.NullInt32, 0)
 		}
 		prevUser = milestone.User.ID
+
+		addedChallenge := len(resOrder)
+		if addedChallenge == 0 || resOrder[addedChallenge-1].ID != challenge.ID {
+			resOrder = append(resOrder, &challenge)
+		}
+
 		switch before {
 		case 1:
-			if _, ok := result[challenge]; ok {
-				last := result[challenge][len(result[challenge])-1]
+			if _, ok := result[challenge.ID]; ok {
+				last := result[challenge.ID][len(result[challenge.ID])-1]
 				if last.Milestone.Dt == milestone.Dt && last.Milestone.User.ID == milestone.User.ID {
-					result[challenge][len(result[challenge])-1].Goals = append(last.Goals, Acompletion{goal, previousAcompletion[goal.ID], successAmount})
+					result[challenge.ID][len(result[challenge.ID])-1].Goals = append(last.Goals, Acompletion{goal, previousAcompletion[goal.ID], successAmount})
 				} else {
-					result[challenge] = append(result[challenge], Verification{milestone, []Acompletion{{goal, previousAcompletion[goal.ID], successAmount}}})
+					result[challenge.ID] = append(result[challenge.ID], Verification{milestone, []Acompletion{{goal, previousAcompletion[goal.ID], successAmount}}})
 				}
 			} else {
-				result[challenge] = Verifications{{milestone, []Acompletion{{goal, previousAcompletion[goal.ID], successAmount}}}}
+				result[challenge.ID] = Verifications{{milestone, []Acompletion{{goal, previousAcompletion[goal.ID], successAmount}}}}
 			}
 			fallthrough
 		case 2:
@@ -875,7 +886,7 @@ func queryValidations(userID int) (map[dto.Challenge]Verifications, error) {
 		sort.Sort(result[k])
 	}
 
-	return result, nil
+	return result, resOrder, nil
 }
 
 func insertSuccesses(user int, dt string, amounts map[string][]string, requestor int) error {
