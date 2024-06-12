@@ -154,15 +154,6 @@ div.timeline {
     font-size: medium;
 }
 
-input, textarea {
-    color: #3B3249;
-    border: 1px solid #EFDBA8;
-    background-image: url("https://myhordes.de/build/images/assets/img/background/bg_input.52b09f76..jpg");
-    background-position: 0px -8px;
-    background-color: #AA9961;
-    outline: 1px solid #5C2B20;
-    box-sizing: border-box;
-}
 span.utcdate {
     display: inline-grid;
 }
