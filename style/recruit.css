@@ -38,7 +38,6 @@ body > form {
 
 tr input[type=submit] {
   padding: 2px 5px;
-  /* width: 100%; */
 }
 
 .sortable {
