@@ -39,20 +39,22 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
     <script src="/script/table_filter.js"></script>
     <script>
-        const table = $('.sortable');
-        const rows = table.find('.item');
-        const select = $('#type');
-        select.on('change', function(i, e) {
-            const val = this.value;
-            rows.each(function() {
-                const r = $(this);
-                if(val === '*' || r.children(':first').attr('title').includes(val)) {
-                    table.append(r);
-                } else {
-                    r.remove();
-                }
-            });
-        }).val(new URLSearchParams(window.location.search).get('selection') || select.children(':first').val()).trigger('change');
+        (function(){
+            const table = $('.sortable');
+            const rows = table.find('.item');
+            const select = $('#type');
+            select.on('change', function(i, e) {
+                const val = this.value;
+                rows.each(function() {
+                    const r = $(this);
+                    if(val === '*' || r.children(':first').attr('title').includes(val)) {
+                        table.append(r);
+                    } else {
+                        r.remove();
+                    }
+                });
+            }).val(new URLSearchParams(window.location.search).get('selection') || select.children(':first').val()).trigger('change');
+        })()
     </script>
     {{ end }}
 </body>

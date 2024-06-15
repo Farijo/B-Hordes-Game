@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,11 +31,12 @@ func Ignore[T any](t T, e error) T {
 	return t
 }
 
-//go:embed script style templates/* favicon.ico
+//go:embed gen/* favicon.ico script style templates/*
 var f embed.FS
 
 func main() {
 	r := gin.Default()
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.SetHTMLTemplate(Must(template.New("").Funcs(template.FuncMap{
 		"getAccess": getAccess,
 		"getStatus": getStatus,
