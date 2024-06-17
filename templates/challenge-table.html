@@ -7,7 +7,7 @@
                 <option>*</option>
                 {{ $access := getAccess }}
                 {{ range $a := $access }}
-                <option>{{ index $a 0 }}</option>
+                <option>{{ $a }}</option>
                 {{ end }}
             </select>
         </td>
@@ -23,7 +23,7 @@
                 <option>*</option>
                 {{ $status := getStatus }}
                 {{ range $s := $status }}
-                <option>{{ index $s 0 }}</option>
+                <option>{{ $s }}</option>
                 {{ end }}
             </select>
         </td>
