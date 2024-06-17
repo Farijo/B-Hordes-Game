@@ -37,8 +37,10 @@ func userHandle(c *gin.Context) {
 			return
 		}
 
-		insertUser(mhUser)
-		user.User = *mhUser
+		if mhUser.ID > 0 {
+			insertUser(mhUser)
+			user.User = *mhUser
+		}
 	}
 
 	ch := make(chan *dto.DetailedChallenge)
