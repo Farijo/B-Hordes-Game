@@ -78,7 +78,7 @@
                     {{ $s := index $partic.Successes $k }}
                     <td title{{ if gt $s.Amount 0 }}="{{ $s.Accomplished }}" sorttable_customkey="{{ $s.Amount }}"{{end}}>
                         {{ if ne $g.Amount 0 }}
-                            <img src="data:image/gif;base64,R0lGODlhEAAQAKIGA{{ if ge $s.Amount $g.Amount }}K2mTmU+Itv/cpZ6PP///4esPn5NKgAAACH5BAEAAAYALAAAAAAQABAAAAM0aLrc/jDKuQa4d0AbegeaAwSFYBYB8IwCQZjpGrSmEIvz+97NWJ48BseTCjksGBBlyVwmAAA7{{ else }}GU+Ip0mBLVcQoAyE86Sgf///35NKgAAACH5BAEAAAYALAAAAAAQABAAAAMmaLrc/jDKSSG4V4IhQhhABAgF0YVWQHgB+gBBd4oDC2qYW+18DyUAOw=={{ end }}" />
+                            <img {{ if ge $s.Amount $g.Amount }} on {{ else }} off {{ end }} >
                         {{ end }}
                         {{ if ne $g.Amount 1 }}
                             {{ $s.Amount }}

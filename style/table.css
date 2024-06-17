@@ -78,3 +78,7 @@ th img {
 [title="Terminé"] > img {
     content: url("data:image/png;base64,R0lGODlhEAARAMQUACglFWZXHX1tKYt7MaSRO0I6F8KUBu21CCwpGP/ba1dKF7ahQf///zc0IDEuHIpqBVxGAIx8MjQxHqWSPH5NKgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAABQALAAAAAAQABEAAAVpICWOQDmeKBAQAoC+Kuu+Z9zSZZmsLZO7scHgsCgOAgnhosQTJIXHgyDQsgkOQsF0FwgwC2ADGAww5ESIdPrQLRxmOIXhkPDRRCo5JAGHBeQPb3cUeQaGfSkrXYiJBBMRjDUACBINDighADs=")
 }
+
+img[private] {
+    content: url("https://myhordes.eu/build/images/professions/vest.dab68fee.gif")
+}

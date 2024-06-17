@@ -31,7 +31,7 @@ func Ignore[T any](t T, e error) T {
 	return t
 }
 
-//go:embed gen/* favicon.ico script style templates/*
+//go:embed gen/* favicon.ico
 var f embed.FS
 
 func main() {
@@ -51,9 +51,9 @@ func main() {
 		},
 		"decodeGoal": decodeGoal,
 		"mkmap":      mkmap,
-	}).ParseFS(f, "templates/*.html")))
-	r.StaticFS("/style", http.FS(Must(fs.Sub(f, "style"))))
-	r.StaticFS("/script", http.FS(Must(fs.Sub(f, "script"))))
+	}).ParseFS(f, "gen/templates/*.html")))
+	r.StaticFS("/style", http.FS(Must(fs.Sub(f, "gen/style"))))
+	r.StaticFS("/script", http.FS(Must(fs.Sub(f, "gen/script"))))
 	r.StaticFileFS("/favicon.ico", "favicon.ico", http.FS(f))
 	r.POST("/", connectionHandle)
 	r.GET("/", indexHandle)

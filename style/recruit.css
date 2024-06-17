@@ -62,3 +62,11 @@ td:has(input) {
 .box img {
   margin-right: 0.3em;
 }
+
+img[on] {
+  content: url("data:image/gif;base64,R0lGODlhEAAQAKIGAK2mTmU+Itv/cpZ6PP///4esPn5NKgAAACH5BAEAAAYALAAAAAAQABAAAAM0aLrc/jDKuQa4d0AbegeaAwSFYBYB8IwCQZjpGrSmEIvz+97NWJ48BseTCjksGBBlyVwmAAA7");
+}
+
+img[off] {
+  content: url("data:image/gif;base64,R0lGODlhEAAQAKIGAGU+Ip0mBLVcQoAyE86Sgf///35NKgAAACH5BAEAAAYALAAAAAAQABAAAAMmaLrc/jDKSSG4V4IhQhhABAgF0YVWQHgB+gBBd4oDC2qYW+18DyUAOw==");
+}
