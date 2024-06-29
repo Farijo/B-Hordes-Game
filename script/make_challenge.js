@@ -68,7 +68,7 @@ $('#more').on('click', addAGoal);
 
 function bindFormValues(participation, private, goals, api) {
     $('[name=participation]').val(participation).trigger('change');
-    $('[name=privat]').val(private);
+    $('[name=privat]').val(private ? 1 : 0);
     $('[name=validation_api]').prop('checked', api);
 
     let deletable = false;
