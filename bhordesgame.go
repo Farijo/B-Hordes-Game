@@ -3,6 +3,7 @@ package main
 import (
 	"bhordesgame/dto"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"html"
 	"html/template"
@@ -11,7 +12,9 @@ import (
 	"strings"
 
 	"github.com/gin-contrib/gzip"
+	"github.com/gin-contrib/i18n"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/text/language"
 )
 
 func pop[T any](a *[]T) T {
@@ -31,12 +34,22 @@ func Ignore[T any](t T, e error) T {
 	return t
 }
 
-//go:embed gen/* favicon.ico
+var acceptedLanguages = []language.Tag{language.French, language.English}
+
+//go:embed gen/* favicon.ico lang/* templates/*
 var f embed.FS
 
 func main() {
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	r.Use(i18n.Localize(i18n.WithBundle(&i18n.BundleCfg{
+		RootPath:         "lang",
+		AcceptLanguage:   acceptedLanguages,
+		DefaultLanguage:  language.English,
+		UnmarshalFunc:    json.Unmarshal,
+		FormatBundleFile: "json",
+		Loader:           &i18n.EmbedLoader{FS: f},
+	}), i18n.WithGetLngHandle(genFindBestAcceptedLng(acceptedLanguages))))
 	r.SetHTMLTemplate(Must(template.New("").Funcs(template.FuncMap{
 		"getAccess": getAccess,
 		"getStatus": getStatus,
@@ -51,7 +64,8 @@ func main() {
 		},
 		"decodeGoal": decodeGoal,
 		"mkmap":      mkmap,
-	}).ParseFS(f, "gen/templates/*.html")))
+		"translate":  i18n.GetMessage,
+	}).ParseFS(f, "templates/*.html")))
 	r.StaticFS("/style", http.FS(Must(fs.Sub(f, "gen/style"))))
 	r.StaticFS("/script", http.FS(Must(fs.Sub(f, "gen/script"))))
 	r.StaticFileFS("/favicon.ico", "favicon.ico", http.FS(f))
@@ -60,7 +74,6 @@ func main() {
 	r.GET("/logout", logoutHandle)
 	r.GET("/user/:id", userHandle)
 	r.GET("/challenge/:id", challengeHandle)
-
 	authorized := r.Group("/")
 	authorized.Use(requireAuth)
 	{

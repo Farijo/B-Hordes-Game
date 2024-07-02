@@ -15,7 +15,7 @@ import (
  *                   GET                   *
  * * * * * * * * * * * * * * * * * * * * * */
 func challengeCreationHandle(c *gin.Context) {
-	c.HTML(http.StatusOK, "challenge-creation.html", gin.H{"logged": true, "challenge": nil, "srvData": getServerData(c.GetString("key"))})
+	c.HTML(http.StatusOK, "challenge-creation.html", gin.H{"logged": true, "challenge": nil, "srvData": getServerData(c.GetString("key")), "ctx": c})
 }
 
 func challengeHandle(c *gin.Context) {
