@@ -17,26 +17,26 @@
                 <td><input type="text" name="name" maxlength="64" autocomplete="off" {{ if .challenge }} value="{{ .challenge.Name }}" {{ end }} required/></td>
             </tr>
             <tr>
-                <td><label>Participation</label></td>
+                <td><label>{{ translate .ctx "participation" }}</label></td>
                 <td>
                     <select name="participation">
-                        <option value="0">Ouvert à tous</option>
-                        <option value="1">Sur demande</option>
-                        <option value="2">Sur invitation</option>
+                        <option value="0">{{ translate .ctx "open-to-all" }}</option>
+                        <option value="1">{{ translate .ctx "on-request" }}</option>
+                        <option value="2">{{ translate .ctx "on-invite" }}</option>
                     </select>
                 </td>
             </tr>
             <tr>
-                <td><label>Visibilité</label></td>
+                <td><label>{{ translate .ctx "visibility" }}</label></td>
                 <td>
                     <select name="privat">
-                        <option value="0">Public</option>
-                        <option value="1" title="Les défis privés sont uniquement visible par les provocateurs et les participants">Privé</option>
+                        <option value="0">{{ translate .ctx "public" }}</option>
+                        <option value="1" title="{{ translate .ctx "private-desc" }}">{{ translate .ctx "private" }}</option>
                     </select>
                 </td>
             </tr>
             <tr>
-                <td><label>Objectifs</label></td>
+                <td><label>{{ translate .ctx "goals" }}</label></td>
                 <td>
                     <div id="all-goals">
                     </div>
@@ -44,17 +44,17 @@
                 </td>
             </tr>
             <tr>
-                <td><label>Modes de validation</label></td>
+                <td><label>{{ translate .ctx "validation-modes" }}</label></td>
                 <td>
-                    <label for="validation_api" class="checklabel"><input type="checkbox" name="validation_api" value="1" id="validation_api" checked/>API</label>
+                    <label for="validation_api" class="checklabel"><input type="checkbox" name="validation_api" value="1" id="validation_api" checked/>{{ translate .ctx "api" }}</label>
                 </td>
             </tr>
             <tr>
                 <td colspan="2">
-                    <input type="submit" name="act" value="Enregistrer"/>
-                    <input type="submit" name="act" value="Valider"/>
-                    <input type="submit" name="act" value="Modifier"/>
-                    <input type="submit" name="act" value="Ouvrir les inscriptions"/>
+                    <button type="submit" name="act" value="save">{{ translate .ctx "save" }}</button>
+                    <button type="submit" name="act" value="validate">{{ translate .ctx "validate" }}</button>
+                    <button type="submit" name="act" value="modify">{{ translate .ctx "modify" }}</button>
+                    <button type="submit" name="act" value="open-inscriptions">{{ translate .ctx "open-inscriptions" }}</button>
                 </td>
             </tr>
         </table>
@@ -62,7 +62,7 @@
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         crate = new Crate({
             server: '1253836492694880367', // B'Hordes Games
-            channel: '1254732352161316905',
+            channel: '{{ translate .ctx "discord-create-challenge" }}',
             color: '#371a13',
             glyph: ["data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgZmlsbD0ibm9uZSI+PGc+PHRpdGxlPkxheWVyIDE8L3RpdGxlPjxwYXRoIGlkPSJzdmdfMSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2YwZDc5ZSIgZD0ibTExLjk2NywxMi45Mzc1YzEsLTEgMiwtMS4zOTU0IDIsLTIuNWMwLC0xLjEwNDU3IC0wLjg5NTQsLTIgLTIsLTJjLTAuOTMxOSwwIC0xLjcxNSwwLjYzNzM5IC0xLjkzNywxLjVtMS45MzcsNmwwLjAxLDAiLz48L2c+PC9zdmc+", "100%"]
         })
@@ -70,27 +70,28 @@
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
 <script>
-    const goalhtml=`{{ template "goal.html" }}`;
+    const goalhtml=`{{ template "goal.html" .ctx }}`;
+    const mh_lng=`{{ translate .ctx "mh-lang" }}`;
 </script>
-<script src="/script/make_challenge.js"></script>
-<script>
+<script src="/script/make_challenge.js">
+
     {{ if .challenge }}
         const goals = [{{ range .goals }}{{ dumpStruct . }},{{ end }}];
         bindFormValues({{ .challenge.Access }}, {{ .challenge.Private }}, goals, {{ .challenge.API }})
         {{ if eq .challenge.Status 0 }}
-            $('[value=Modifier]').css('display', 'none');
-            $('[value=\"Ouvrir les inscriptions\"]').css('display', 'none');
+            $('[value=modify]').css('display', 'none');
+            $('[value=open-inscriptions]').css('display', 'none');
         {{ end }}
         {{ if eq .challenge.Status 1 }}
             $('form table *:not([type=submit])').prop('disabled', true);
             $('#more').css('cursor', 'not-allowed').prop('onclick', null).off('click');
-            $('[value=Enregistrer]').css('display', 'none');
-            $('[value=Valider]').css('display', 'none');
+            $('[value=save]').css('display', 'none');
+            $('[value=validate]').css('display', 'none');
         {{ end }}
     {{ else }}
         addAGoal(false);
-        $('[value=Modifier]').css('display', 'none');
-        $('[value=\"Ouvrir les inscriptions\"]').css('display', 'none');
+        $('[value=modify]').css('display', 'none');
+        $('[value=open-inscriptions]').css('display', 'none');
     {{ end }}
 </script>
 </html>

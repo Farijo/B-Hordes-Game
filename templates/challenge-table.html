@@ -14,8 +14,8 @@
         <td>
             <select>
                 <option>*</option>
-                <option>Oui</option>
-                <option>Non</option>
+                <option>{{ translate .ctx "yes" }}</option>
+                <option>{{ translate .ctx "no" }}</option>
             </select>
         </td>
         <td>
@@ -33,16 +33,16 @@
         <td></td>
     </tr>
     <tr>
-        <th>Createur</th>
-        <th class="sorttable_alpha">Défi</th>
-        <th>Accès</th>
-        <th>Privé</th>
-        <th>Status</th>
-        <th>Inscrits</th>
-        <th>Début</th>
-        <th>Fin</th>
+        <th>{{ translate .ctx "creator" }}</th>
+        <th class="sorttable_alpha">{{ translate .ctx "challenge" }}</th>
+        <th>{{ translate .ctx "access" }}</th>
+        <th>{{ translate .ctx "private" }}</th>
+        <th>{{ translate .ctx "status" }}</th>
+        <th>{{ translate .ctx "registered" }}</th>
+        <th>{{ translate .ctx "start" }}</th>
+        <th>{{ translate .ctx "end" }}</th>
     </tr>
-    {{ range $challdata := . }}
+    {{ range $challdata := .challenges }}
     <tr class="item">
         <td sorttable_customkey="{{ $challdata.Creator.SimplifiedName }}" title="{{ $challdata.Role }}">
             <a href="/user/{{ $challdata.Creator.ID }}">
@@ -52,7 +52,7 @@
         </td>
         <td><a class="chlg-name" href="/challenge/{{ .ID }}">{{ $challdata.Name }}</a></td>
         <td sorttable_customkey="{{ $challdata.Access }}" title="{{ index $access $challdata.Access }}"><img/></td>
-        <td>{{ if $challdata.Private }}<img title=Oui private />{{ else }}<img title=Non alt=Non />{{ end }}</td>
+        <td>{{ if $challdata.Private }}<img title={{ translate .ctx "yes" }} private />{{ else }}<img title={{ translate .ctx "no" }} alt={{ translate .ctx "no" }} />{{ end }}</td>
         <td sorttable_customkey="{{ $challdata.Status }}" title="{{ index $status $challdata.Status }}"><img/></td>
         <td>{{ $challdata.ParticipantCount }}</td>
         <td {{ if $challdata.StartDate.Valid }}sorttable_customkey="{{ $challdata.StartDate.String }}" class="date" style="min-width:9em"{{ end }}></td>
