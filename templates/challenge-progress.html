@@ -45,10 +45,11 @@
         {{ end }}
     </div>
     <div class="container">
+        {{ $ctx := .ctx }}
         {{ $userkey := .userkey }}
         {{ $goalHeaders := mkmap }}
         {{ range $goal := .goals }}
-            {{ $mm := decodeGoal $userkey $goal $goalHeaders }}
+            {{ $mm := decodeGoal $ctx $userkey $goal $goalHeaders }}
             <div class="box">
                 {{ if $mm.Text }}
                     <div class="line1">{{ $mm.Text }}</div>

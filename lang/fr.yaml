@@ -25,7 +25,7 @@ stack-picto: Accumuler les pictos
 be-on: Être sur la case
 build: Construire
 have-in-bank: Avoir en banque
-custom: Personnalisé
+custom-goal: Personnalisé
 delete-goal: ⚠️ Supprimer cet objectif ⚠️
 with: Avec
 empty-desc: "Si vide : l'objectif est d'en accumuler le maximum"
@@ -82,3 +82,27 @@ running: En cours
 over: Terminé
 previous: Précédent
 current: Actuel
+ghost: Fantôme
+played-maps: Nombre d'incarnation
+rewards: Pictos
+dead: Mort
+out: Dehors
+ban: Banni
+base-def: Défense de maison
+job: Métier
+basic: Habitant
+dig: Fouineur
+vest: Éclaireur
+shield: Gardien
+book: Ermite
+tamer: Apprivoiseur
+tech: Technicien
+map: Ville
+wid: Largeur
+hei: Hauteur
+days: Jours
+conspiracy: Insurection
+custom: Custom
+buildings: Chantiers
+bank: Banque
+items: Objets au sol

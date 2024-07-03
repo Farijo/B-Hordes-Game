@@ -8,6 +8,9 @@ import (
 	"html/template"
 	"strconv"
 	"strings"
+
+	"github.com/gin-contrib/i18n"
+	"github.com/gin-gonic/gin"
 )
 
 func getAccess() []string {
@@ -34,7 +37,8 @@ type GoalHeader struct {
 	Amount  uint32
 }
 
-func decodeGoal(key string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
+func decodeGoal(ctx *gin.Context, key string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
+	lang := i18n.MustGetMessage(ctx, "mh-lang")
 	amountStr, header := "le plus de", "+"
 	if goal.Amount.Valid {
 		amountStr = strconv.Itoa(int(goal.Amount.Int32))
@@ -44,10 +48,10 @@ func decodeGoal(key string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
 	switch goal.Typ {
 	case 0:
 		out.Text = template.HTML(fmt.Sprintf("Accumuler <b>%s</b> pictos", amountStr))
-		out.Icon, out.Label = getServerDataKey(goal.Entity, "pictos", key)
+		out.Icon, out.Label = getServerDataKey(goal.Entity, "pictos", key, lang)
 		header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 	case 1:
-		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key)
+		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key, lang)
 		var txt string
 		if goal.X.Valid {
 			if goal.Y.Valid {
@@ -68,13 +72,13 @@ func decodeGoal(key string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
 		}
 		out.Text = template.HTML(txt)
 	case 2:
-		out.Text = "Construire"
-		out.Icon, out.Label = getServerDataKey(goal.Entity, "buildings", key)
+		out.Text = template.HTML(i18n.MustGetMessage(ctx, "build"))
+		out.Icon, out.Label = getServerDataKey(goal.Entity, "buildings", key, lang)
 		header = "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 		goal.Amount.Int32 = 1
 	case 3:
-		out.Text = template.HTML(fmt.Sprintf("Avoir en banque <b>%s</b>", amountStr))
-		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key)
+		out.Text = template.HTML(fmt.Sprintf(i18n.MustGetMessage(ctx, "have-in-bank")+" <b>%s</b>", amountStr))
+		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key, lang)
 		header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 	case 4:
 		out.Label = goal.Custom.String
@@ -90,29 +94,45 @@ func mkmap() map[int]GoalHeader {
 	return make(map[int]GoalHeader, 0)
 }
 
-func dumpMile(mile *dto.Milestone, userkey string) template.HTML {
+type yn struct {
+	yes, no string
+}
+
+func (i yn) boolToStr(b bool) string {
+	if b {
+		return i.yes
+	} else {
+		return i.no
+	}
+}
+
+var jobList = []string{"basic", "dig", "vest", "shield", "book", "tamer", "tech"}
+
+func dumpMile(ctx *gin.Context, mile *dto.Milestone, userkey string) template.HTML {
+	lang := i18n.MustGetMessage(ctx, "mh-lang")
+	conv := yn{i18n.MustGetMessage(ctx, "yes"), i18n.MustGetMessage(ctx, "no")}
 	res := make(map[string]any, 0)
 	if mile.IsGhost.Valid {
-		res["Fantôme"] = mile.IsGhost.Bool
+		res[i18n.MustGetMessage(ctx, "ghost")] = conv.boolToStr(mile.IsGhost.Bool)
 	}
 	if mile.PlayedMaps.Valid {
-		res["Nombre d'incarnation"] = mile.PlayedMaps.Int64
+		res[i18n.MustGetMessage(ctx, "played-maps")] = mile.PlayedMaps.Int64
 	}
 	if mile.Rewards.Valid {
 		pictoMap := make(map[string]uint32)
 		for k, v := range mile.Rewards.Data {
-			_, n := getServerDataKey(k, "pictos", userkey)
+			_, n := getServerDataKey(k, "pictos", userkey, lang)
 			pictoMap[n] = v
 		}
 		if len(pictoMap) > 0 {
-			res["Pictos"] = pictoMap
+			res[i18n.MustGetMessage(ctx, "rewards")] = pictoMap
 		}
 	}
 	if mile.Dead.Valid {
-		res["Mort"] = mile.Dead.Bool
+		res[i18n.MustGetMessage(ctx, "dead")] = conv.boolToStr(mile.Dead.Bool)
 	}
 	if mile.Out.Valid {
-		res["Dehors"] = mile.Out.Bool
+		res[i18n.MustGetMessage(ctx, "out")] = conv.boolToStr(mile.Out.Bool)
 		if mile.Out.Bool {
 			if mile.X.Valid {
 				res["X"] = mile.X.Int16
@@ -123,62 +143,62 @@ func dumpMile(mile *dto.Milestone, userkey string) template.HTML {
 		}
 	}
 	if mile.Ban.Valid {
-		res["Banni"] = mile.Ban.Bool
+		res[i18n.MustGetMessage(ctx, "ban")] = conv.boolToStr(mile.Ban.Bool)
 	}
 	if mile.BaseDef.Valid {
-		res["Défense de maison"] = mile.BaseDef.Byte
+		res[i18n.MustGetMessage(ctx, "base-def")] = mile.BaseDef.Byte
 	}
 	if mile.Job.Valid {
-		res["Métier"] = []string{"Habitant", "Fouineur", "Éclaireur", "Gardien", "Ermite", "Apprivoiseur", "Technicien"}[mile.Job.Byte]
+		res[i18n.MustGetMessage(ctx, "job")] = i18n.MustGetMessage(ctx, jobList[mile.Job.Byte])
 	}
 	mapMap := make(map[string]any)
 	if mile.Map.Wid.Valid {
-		mapMap["Largeur"] = mile.Map.Wid.Byte
+		mapMap[i18n.MustGetMessage(ctx, "wid")] = mile.Map.Wid.Byte
 	}
 	if mile.Map.Hei.Valid {
-		mapMap["Hauteur"] = mile.Map.Hei.Byte
+		mapMap[i18n.MustGetMessage(ctx, "hei")] = mile.Map.Hei.Byte
 	}
 	if mile.Map.Days.Valid {
-		mapMap["Jours"] = mile.Map.Days.Byte
+		mapMap[i18n.MustGetMessage(ctx, "days")] = mile.Map.Days.Byte
 	}
 	if mile.Map.Conspiracy.Valid {
-		mapMap["Insurection"] = mile.Map.Conspiracy.Bool
+		mapMap[i18n.MustGetMessage(ctx, "conspiracy")] = conv.boolToStr(mile.Map.Conspiracy.Bool)
 	}
 	if mile.Map.Custom.Valid {
-		mapMap["Custom"] = mile.Map.Custom.Bool
+		mapMap[i18n.MustGetMessage(ctx, "custom")] = conv.boolToStr(mile.Map.Custom.Bool)
 	}
 	if mile.Map.City.Buildings.Valid {
 		buildingsMap := make([]string, len(mile.Map.City.Buildings.Data))
 		i := 0
 		for k := range mile.Map.City.Buildings.Data {
-			_, buildingsMap[i] = getServerDataKey(k, "buildings", userkey)
+			_, buildingsMap[i] = getServerDataKey(k, "buildings", userkey, lang)
 			i++
 		}
 		if len(buildingsMap) > 0 {
-			mapMap["Chantiers"] = buildingsMap
+			mapMap[i18n.MustGetMessage(ctx, "buildings")] = buildingsMap
 		}
 	}
 	if mile.Map.City.Bank.Valid {
 		itemMap := make(map[string]uint32)
 		for k, v := range mile.Map.City.Bank.Data {
-			_, n := getServerDataKey(k, "items", userkey)
+			_, n := getServerDataKey(k, "items", userkey, lang)
 			itemMap[n] = v
 		}
 		if len(itemMap) > 0 {
-			mapMap["Banque"] = itemMap
+			mapMap[i18n.MustGetMessage(ctx, "bank")] = itemMap
 		}
 	}
 	if len(mapMap) > 0 {
-		res["Ville"] = mapMap
+		res[i18n.MustGetMessage(ctx, "map")] = mapMap
 	}
 	if mile.Map.Zones.Valid {
 		itemMap := make(map[string]uint32)
 		for k, v := range mile.Map.Zones.Data {
-			_, n := getServerDataKey(k, "items", userkey)
+			_, n := getServerDataKey(k, "items", userkey, lang)
 			itemMap[n] = v
 		}
 		if len(itemMap) > 0 {
-			res["Objets au sol"] = itemMap
+			res[i18n.MustGetMessage(ctx, "items")] = itemMap
 		}
 	}
 	s, _ := json.MarshalIndent(res, "", "&nbsp;&nbsp;")

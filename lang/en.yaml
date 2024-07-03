@@ -25,7 +25,7 @@ stack-picto: Stack pictos
 be-on: Stand on place
 build: Build
 have-in-bank: Have in bank
-custom: Personnalized
+custom-goal: Personnalized
 delete-goal: ⚠️ Delete this goal ⚠️
 with: With
 empty-desc: "If empty: the goal is to stack the maximum"
@@ -82,3 +82,27 @@ running: Running
 over: Over
 previous: Previous
 current: Current
+ghost: Ghost
+played-maps: Played maps
+rewards: Rewards
+dead: Dead
+out: Out
+ban: Ban
+base-def: Base defense
+job: Job
+basic: todo-Habitant
+dig: todo-Fouineur
+vest: todo-Éclaireur
+shield: todo-Gardien
+book: todo-Ermite
+tamer: todo-Apprivoiseur
+tech: todo-Technicien
+map: Map
+wid: Width
+hei: Height
+days: Days
+conspiracy: Conspiracy
+custom: Custom
+buildings: Buildings
+bank: Bank
+items: Items
