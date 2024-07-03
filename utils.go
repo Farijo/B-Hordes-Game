@@ -10,6 +10,9 @@ import (
 
 func genFindBestAcceptedLng(languages []language.Tag) func(*gin.Context, string) string {
 	return func(context *gin.Context, defaultLng string) string {
+		if found := context.GetString("lng found"); found > "" {
+			return found
+		}
 		lngSplited := strings.Split(context.GetHeader("Accept-Language"), ",")
 		qualityValueList := make([][]string, len(lngSplited))
 		for i, lngQValued := range lngSplited {
@@ -52,11 +55,13 @@ func genFindBestAcceptedLng(languages []language.Tag) func(*gin.Context, string)
 			lng := language.Make(strings.TrimSpace(lng[0]))
 			for _, acceptedLang := range languages {
 				if lng == acceptedLang {
-					return acceptedLang.String()
+					context.Set("lng found", defaultLng) //acceptedLang.String())
+					return defaultLng                    //acceptedLang.String()
 				}
 			}
 		}
 
+		context.Set("lng found", defaultLng)
 		return defaultLng
 	}
 }
