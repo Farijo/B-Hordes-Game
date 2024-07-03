@@ -4,6 +4,7 @@ import (
 	"bhordesgame/dto"
 	"encoding/json"
 	"fmt"
+	"html"
 	"html/template"
 	"strconv"
 	"strings"
@@ -15,6 +16,12 @@ func getAccess() []string {
 
 func getStatus() []string {
 	return []string{"creation", "proofreading", "inscriptions", "running", "over"}
+}
+
+func dumpStruct(strct *dto.Goal) template.JS {
+	rep := `"`
+	strct.Custom.String = rep + html.EscapeString(strct.Custom.String) + rep
+	return template.JS(strings.ReplaceAll(fmt.Sprintf("%+v", *strct), " ", ","))
 }
 
 type GoalHTML struct {

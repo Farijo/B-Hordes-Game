@@ -10,13 +10,13 @@
 <body>
     {{template "top-bar.html" . }}
     {{ if eq "" .user.Name }}
-    <h2>Joueur introuvable</h2>
+    <h2>{{ translate .ctx "player-not-found" }}</h2>
     {{ else }}
     <table>
         <tr>
-            <th>Joueur</th>
-            <th>Défis créés</th>
-            <th>Participations</th>
+            <th>{{ translate .ctx "player" }}</th>
+            <th>{{ translate .ctx "created-challenge" }}</th>
+            <th>{{ translate .ctx "participations" }}</th>
         </tr>
         <tr>
             <td><img class="avatar" src="{{ .user.Avatar.String }}"><span class="name">{{ .user.Name }}</span></td>
@@ -25,37 +25,20 @@
         </tr>
     </table>
     
-    <h2>Défis en tant que
+    <h2>{{ translate .ctx "challenge-as" }}
         <select id=type>
             <option>*</option>
-            <option>Participant</option>
-            <option>Créateur</option>
-            <option>Approbateur</option>
-            <option>Postulant</option>
-            <option>Invité</option>
+            <option>{{ translate .ctx "participant" }}</option>
+            <option>{{ translate .ctx "creator" }}</option>
+            <option>{{ translate .ctx "approbator" }}</option>
+            <option>{{ translate .ctx "requestor" }}</option>
+            <option>{{ translate .ctx "guest" }}</option>
         </select>
     </h2>
     {{template "challenge-table.html" . }}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
     <script src="/script/table_filter.js"></script>
-    <script>
-        (function(){
-            const table = $('.sortable');
-            const rows = table.find('.item');
-            const select = $('#type');
-            select.on('change', function(i, e) {
-                const val = this.value;
-                rows.each(function() {
-                    const r = $(this);
-                    if(val === '*' || r.children(':first').attr('title').includes(val)) {
-                        table.append(r);
-                    } else {
-                        r.remove();
-                    }
-                });
-            }).val(new URLSearchParams(window.location.search).get('selection') || select.children(':first').val()).trigger('change');
-        })()
-    </script>
+    <script src="/script/user_filter.js"></script>
     {{ end }}
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         crate = new Crate({

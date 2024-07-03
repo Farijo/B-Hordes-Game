@@ -1,12 +1,8 @@
 package main
 
 import (
-	"bhordesgame/dto"
 	"embed"
-	"fmt"
-	"html"
 	"html/template"
-	"strings"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/i18n"
@@ -49,17 +45,11 @@ func main() {
 		Loader:           &i18n.EmbedLoader{FS: f},
 	}), i18n.WithGetLngHandle(genFindBestAcceptedLng(acceptedLanguages))))
 	r.SetHTMLTemplate(Must(template.New("").Funcs(template.FuncMap{
-		"getAccess": getAccess,
-		"getStatus": getStatus,
-		"dumpStruct": func(strct *dto.Goal) template.JS {
-			rep := `"`
-			strct.Custom.String = rep + html.EscapeString(strct.Custom.String) + rep
-			return template.JS(strings.ReplaceAll(fmt.Sprintf("%+v", *strct), " ", ","))
-		},
-		"dumpMile": dumpMile,
-		"incr": func(i int) int {
-			return i + 1
-		},
+		"getAccess":  getAccess,
+		"getStatus":  getStatus,
+		"dumpStruct": dumpStruct,
+		"dumpMile":   dumpMile,
+		"incr":       func(i int) int { return i + 1 },
 		"decodeGoal": decodeGoal,
 		"mkmap":      mkmap,
 		"translate":  i18n.GetMessage,

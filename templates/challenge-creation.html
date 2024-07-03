@@ -20,9 +20,11 @@
                 <td><label>{{ translate .ctx "participation" }}</label></td>
                 <td>
                     <select name="participation">
-                        <option value="0">{{ translate .ctx "open-to-all" }}</option>
-                        <option value="1">{{ translate .ctx "on-request" }}</option>
-                        <option value="2">{{ translate .ctx "on-invite" }}</option>
+                        {{ $ctx := .ctx }}
+                        {{ $access := getAccess }}
+                        {{ range $idx, $a := $access }}
+                        <option value="{{ $idx }}">{{ translate $ctx $a }}</option>
+                        {{ end }}
                     </select>
                 </td>
             </tr>

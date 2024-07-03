@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="/style/validation.css">
 </head>
 <body>
+    {{ $ctx := .ctx }}
     {{ $userkey := .userkey }}
     {{ $i := 0 }}
     {{ template "top-bar.html" . }}
@@ -14,7 +15,7 @@
         <section>
             <h2><a class="chlg-name" href="/challenge/{{ $challenge.ID }}">{{ $challenge.Name }}</a></h2>
             <button>⟱ ⟱ ⟱</button>
-            <div class="timeline">{{ if $challenge.EndDate.Valid }}Fin : <span class="utcdate">{{ $challenge.EndDate.String }}</span>{{ else }}En cours{{ end }}</div>
+            <div class="timeline">{{ if $challenge.EndDate.Valid }}{{ translate $ctx "end" }} : <span class="utcdate">{{ $challenge.EndDate.String }}</span>{{ else }}{{ translate $ctx "running" }}{{ end }}</div>
             <ul class='timeline'>
                 {{ range $mile := $verif }}
                     <li class='work'>
@@ -33,7 +34,7 @@
                             </p>
                             <table>
                                 <form action="/validation" method="post">
-                                    <tr><th>Objectif</th><th>Précédent</th><th>Actuel</th></tr>
+                                    <tr><th>{{ translate $ctx "goals" }}</th><th>{{ translate $ctx "previous" }}</th><th>{{ translate $ctx "current" }}</th></tr>
                                 {{ range $goal := $mile.Goals }}
                                     {{ $mm := decodeGoal $userkey $goal.Goal nil }}
                                     <tr>
@@ -76,7 +77,7 @@
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         crate = new Crate({
             server: '1253836492694880367', // B'Hordes Games
-            channel: '1254191235653042256',
+            channel: '{{ translate $ctx "discord-desc-validation" }}',
             color: '#371a13',
             glyph: ["/question-mark.svg", "100%"]
         })

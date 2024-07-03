@@ -19,6 +19,7 @@ discord-create-challenge: "1254732352161316905"
 discord-desc-challenge: "1254191205332418701"
 discord-desc-invite: "1254732301867417703"
 discord-main: "1254191087883649137"
+discord-desc-validation: "1254191235653042256"
 mh-lang: fr
 stack-picto: Accumuler les pictos
 be-on: Être sur la case
@@ -79,3 +80,5 @@ proofreading: Relecture
 inscriptions: Inscriptions
 running: En cours
 over: Terminé
+previous: Précédent
+current: Actuel
