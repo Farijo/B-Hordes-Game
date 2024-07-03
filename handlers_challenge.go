@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/gin-contrib/i18n"
 	"github.com/gin-gonic/gin"
 )
 
@@ -42,6 +43,7 @@ func challengeHandle(c *gin.Context) {
 	case 0, 1: // draft, review
 		if selfChallenge {
 			c.HTML(http.StatusOK, "challenge-creation.html", gin.H{
+				"ctx":       c,
 				"logged":    true,
 				"challenge": challenge,
 				"goals":     makeChannelFor(queryChallengeGoals, challenge.ID),
@@ -97,6 +99,7 @@ func challengeHandle(c *gin.Context) {
 		}
 
 		c.HTML(http.StatusOK, "challenge-recruit.html", gin.H{
+			"ctx":           c,
 			"logged":        logged,
 			"selfChallenge": selfChallenge,
 			"selfID":        uid,
@@ -119,6 +122,7 @@ func challengeHandle(c *gin.Context) {
 		}
 
 		c.HTML(http.StatusOK, "challenge-progress.html", gin.H{
+			"ctx":           c,
 			"logged":        logged,
 			"selfChallenge": selfChallenge,
 			"challenge":     challenge,
@@ -135,6 +139,7 @@ func challengeHandle(c *gin.Context) {
 		}
 
 		c.HTML(http.StatusOK, "challenge-progress.html", gin.H{
+			"ctx":           c,
 			"logged":        logged,
 			"selfChallenge": false, // disable challenge action
 			"challenge":     challenge,
@@ -181,9 +186,9 @@ func updateChallengeHandle(c *gin.Context) {
 
 	var err error
 	switch formChallenge.Act {
-	case "Modifier":
+	case "modify":
 		err = updateChallengeStatus(id, c.GetInt("uid"), 0)
-	case "Ouvrir les inscriptions":
+	case "open-inscriptions":
 		err = updateChallengeStatus(id, c.GetInt("uid"), 2)
 	default:
 		challenge := formChallenge.buildChallenge(c.GetInt("uid"))
@@ -214,11 +219,7 @@ func challengeMembersHandle(c *gin.Context) {
 			add := true
 			switch action[0][0] {
 			// case "✓", "+ Approbateur", "+ Invité", "Rejoindre", "Faire une demande", "Accepter l'invitation":
-			case "Annuler la demande"[0]:
-				if action[0][1] == "Annuler la demande"[1] {
-					add = false
-				}
-			case "x"[0], "Se retirer"[0]:
+			case "x"[0], "cancel-request"[0], "retire"[0]:
 				add = false
 			}
 			insertOrDeleteChallengeMember(id, c.GetInt("uid"), targetId, idst[1] == "validator", add)
@@ -239,8 +240,8 @@ func challengeDateHandle(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	switch c.PostForm("valider") {
-	case "Valider":
+	switch c.PostForm("validation") {
+	case i18n.MustGetMessage(c, "validate"):
 		start := true
 		date := c.PostForm("start_date")
 		if date == "" {
@@ -250,9 +251,9 @@ func challengeDateHandle(c *gin.Context) {
 		if date > "" {
 			updateChallengeDate(id, c.GetInt("uid"), date, start)
 		}
-	case "Démarrer maintenant":
+	case i18n.MustGetMessage(c, "start-now"):
 		updateChallengeDate(id, c.GetInt("uid"), "", true)
-	case "Terminer maintenant":
+	case i18n.MustGetMessage(c, "end-now"):
 		updateChallengeDate(id, c.GetInt("uid"), "", false)
 	}
 
@@ -316,20 +317,20 @@ func makeChannelActionString(logged bool, challenge dto.DetailedChallenge, uid i
 			defer close(action)
 			invited, participate := queryChallengeUserStatus(challenge.ID, uid)
 			if participate {
-				action <- "Se retirer"
+				action <- "retire"
 			} else {
 				switch challenge.Access {
 				case 0:
-					action <- "Rejoindre"
+					action <- "join"
 				case 1:
 					if invited {
-						action <- "Annuler la demande"
+						action <- "cancel-request"
 					} else {
-						action <- "Faire une demande"
+						action <- "send-request"
 					}
 				case 2:
 					if invited {
-						action <- "Accepter l'invitation"
+						action <- "accept-invite"
 					}
 				}
 			}

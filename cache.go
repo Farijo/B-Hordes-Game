@@ -58,6 +58,9 @@ type SrvData struct {
 	Img  string `json:"img"`
 	Name struct {
 		Fr string `json:"fr"`
+		En string `json:"en"`
+		Es string `json:"es"`
+		De string `json:"de"`
 	} `json:"name"`
 }
 

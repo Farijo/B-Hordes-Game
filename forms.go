@@ -24,7 +24,7 @@ func (form *FormChallenge) buildChallenge(creatorId int) *dto.Challenge {
 	if !form.ValidationApi {
 		result.Flags |= 0x08
 	}
-	if form.Act == "Valider" {
+	if form.Act == "validate" {
 		result.Flags |= 1 << 4
 	} else {
 		result.Flags &= 0x0F

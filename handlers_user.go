@@ -48,7 +48,7 @@ func userHandle(c *gin.Context) {
 	currentUser, ok := sessions[key]
 	go queryChallengesRelatedTo(ch, id, currentUser)
 
-	c.HTML(http.StatusOK, "user.html", gin.H{"logged": cookieErr == nil && ok, "challenges": ch, "user": &user})
+	c.HTML(http.StatusOK, "user.html", gin.H{"logged": cookieErr == nil && ok, "challenges": ch, "user": &user, "ctx": c})
 }
 
 /* * * * * * * * * * * * * * * * * * * * * *

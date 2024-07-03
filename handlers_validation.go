@@ -19,6 +19,7 @@ func validationHandle(c *gin.Context) {
 		return
 	}
 	c.HTML(http.StatusOK, "validation.html", gin.H{
+		"ctx":         c,
 		"logged":      true,
 		"validations": mustValidate,
 		"order":       order,

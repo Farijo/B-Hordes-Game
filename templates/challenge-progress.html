@@ -13,14 +13,14 @@
     <h2>{{ .challenge.Name }}</h2>
     <div class="container">
         <a class="box" href="/user/{{ .challenge.Creator.ID }}">
-            <div class="line1">Par</div>
+            <div class="line1">{{ translate .ctx "by" }}</div>
             <div class="line2">
                 <img class="avatar" src="{{ .challenge.Creator.Avatar.String }}">
                 <span class="name">{{ .challenge.Creator.Name }}</span>
             </div>
         </a>
         <div class="box">
-            <div class="line1">Début</div>
+            <div class="line1">{{ translate .ctx "start" }}</div>
             <p></p>
         </div>
         {{ if .selfChallenge }}
@@ -31,14 +31,14 @@
                 }
             </script>
             <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onsubmit="dateToISOGMT(this)">
-                <div class="line1">Fin</div>
+                <div class="line1">{{ translate .ctx "end" }}</div>
                 <input class="line2" name="end_date" step="60" type="datetime-local" style="margin:0.5em"/>
-                <input type="submit" name="valider" value="Valider">
+                <input type="submit" name="validation" value="{{ translate .ctx "validate" }}"/>
             </form>
         {{ else }}
             {{ if .challenge.EndDate.Valid }}
                 <div class="box">
-                    <div class="line1">Fin</div>
+                    <div class="line1">{{ translate .ctx "end" }}</div>
                     <p></p>
                 </div>
             {{ end }}
@@ -61,11 +61,11 @@
     </div>
     {{ if .selfChallenge }}
         <form method="post" action="{{ .challenge.ID }}/scan" style="margin: 4em auto 0 auto;display: block;">
-            <input type="submit" name="scan" value="Scanner les participants"/>
+            <input type="submit" name="scan" value="{{ translate .ctx "scan-participants" }}"/>
         </form>
     {{ end }}
     <table class="sortable">
-        <tr><th>Participants</th>{{ range $_, $goalHeader := $goalHeaders }}<th>{{ $goalHeader.Content }}</th>{{ end }}
+        <tr><th>{{ translate .ctx "participant"}}</th>{{ range $_, $goalHeader := $goalHeaders }}<th>{{ $goalHeader.Content }}</th>{{ end }}
         {{ range $partic := .advancement }}
             <tr class="item">
                 <td sorttable_customkey="{{ $partic.SimplifiedName }}">
@@ -97,7 +97,7 @@
                 e.setAttribute("sorttable_customkey", e.getAttribute("sorttable_customkey") + (""+(Date.now() - dd.getTime())).padStart(15, '0'));
                 e.title = dd.toLocaleString() + ',' + dd.getMilliseconds()/10;
             } else {
-                e.title = "Jamais réalisé"
+                e.title = {{ translate .ctx "never-realized" }}
             }
         });
 
@@ -127,10 +127,10 @@
 
         endDateInput.on('change', function () {
             if(!this.value || new Date(this.value) < new Date()) {
-                endDateInput.siblings('input').val('Terminer maintenant');
-                endDateInput.parent().attr('onsubmit', "return confirm('Confirmer la fin du défi')");
+                endDateInput.siblings('input').val({{ translate .ctx "end-now" }});
+                endDateInput.parent().attr('onsubmit', "return confirm('{{ translate .ctx "confirm-end" }}')");
             } else {
-                endDateInput.siblings('input').val('Valider');
+                endDateInput.siblings('input').val({{ translate .ctx "validate" }});
                 endDateInput.parent().attr('onsubmit', "dateToISOGMT(this)");
             }
         }).trigger('change');
@@ -142,9 +142,9 @@
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         crate = new Crate({
             server: '1253836492694880367', // B'Hordes Games
-            channel: '1254191205332418701',
+            channel: '{{ translate .ctx "discord-desc-challenge" }}',
             color: '#371a13',
-            glyph: ["data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgZmlsbD0ibm9uZSI+PGc+PHRpdGxlPkxheWVyIDE8L3RpdGxlPjxwYXRoIGlkPSJzdmdfMSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2YwZDc5ZSIgZD0ibTExLjk2NywxMi45Mzc1YzEsLTEgMiwtMS4zOTU0IDIsLTIuNWMwLC0xLjEwNDU3IC0wLjg5NTQsLTIgLTIsLTJjLTAuOTMxOSwwIC0xLjcxNSwwLjYzNzM5IC0xLjkzNywxLjVtMS45MzcsNmwwLjAxLDAiLz48L2c+PC9zdmc+", "100%"]
+            glyph: ["/question-mark.svg", "100%"]
         })
     </script>
 </body>

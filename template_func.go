@@ -10,7 +10,7 @@ import (
 )
 
 func getAccess() []string {
-	return []string{"open-to-all", "on-request", "by-invite"}
+	return []string{"open-to-all", "on-request", "on-invite"}
 }
 
 func getStatus() []string {

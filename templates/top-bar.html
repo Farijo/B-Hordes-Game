@@ -9,20 +9,20 @@
     }
 </style>
 <div id="top-bar">
-    <a href="/">Accueil</a>
+    <a href="/">{{ translate .ctx "home" }}</a>
     {{ if .logged }}
     <form method="post" action="/user">
-        <input type="submit" name="refresh" value="Mise à jour" style="font-size:1rem">
+        <input type="submit" name="refresh" value="{{ translate .ctx "update" }}" style="font-size:1rem">
         <input type="hidden" name="redirect">
         <script>document.getElementsByName("redirect").item(0).value=window.location.href</script>
     </form>
-    <a href="/challenge">Créer un défi</a>
-    <a href="/user">Profil</a>
-    <a href="/validation">Validations</a>
-    <a href="/logout">Déconnexion</a>
+    <a href="/challenge">{{ translate .ctx "create-challenge" }}</a>
+    <a href="/user">{{ translate .ctx "profile" }}</a>
+    <a href="/validation">{{ translate .ctx "validations" }}</a>
+    <a href="/logout">{{ translate .ctx "logout" }}</a>
     {{ else }}
-    <a href="https://myhordes.eu/jx/disclaimer/26">Connexion</a>
+    <a href="https://myhordes.eu/jx/disclaimer/26">{{ translate .ctx "login" }}</a>
     {{ end }}
 </div>
-<a class="chlg-name" style="position: absolute; right: 0; top: 0; font-size: 80%;" href="https://myhordes.eu/jx/soul/1251">Contact MH</a>
-<a class="chlg-name" style="position: absolute; right: 0; top: 1.5em; font-size: 80%;" href="mailto:bhordesgames@alwaysdata.net">Email</a>
+<a class="chlg-name" style="position: absolute; right: 0; top: 0; font-size: 80%;" href="https://myhordes.eu/jx/soul/1251">{{ translate .ctx "mh-contact" }}</a>
+<a class="chlg-name" style="position: absolute; right: 0; top: 1.5em; font-size: 80%;" href="mailto:bhordesgames@alwaysdata.net">{{ translate .ctx "email" }}</a>
