@@ -80,5 +80,5 @@ img[over] {
 }
 
 img[private] {
-    content: url("https://myhordes.eu/build/images/professions/vest.dab68fee.gif")
+    content: url("data:image/png;base64,R0lGODlhEAAQALMLAAAAAFBQLaBmPaChW8aMY3h5RHk/FsPEb4yNT+ethLN5UH5NKgAAAAAAAAAAAAAAACH5BAEAAAsALAAAAAAQABAAAARmcMlJq10gg0tB+cLGAQJRDKVYAUNyvAQxqJJ3aBpKAwSuBb0OIeALpDosXMDQU5ESgQExEAWGMAKX9DDoBgqlEIA7QCC+S4PgQxxLBQoEyqBGZwgKo0AuoAuobQRnH3wGaFQ+iYkRADs=")
 }
