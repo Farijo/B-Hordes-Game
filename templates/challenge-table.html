@@ -54,6 +54,13 @@
         <td sorttable_customkey="{{ $challdata.Access }}" title="{{ index $access $challdata.Access }}"><img/></td>
         <td>{{ if $challdata.Private }}<img title={{ translate .ctx "yes" }} private />{{ else }}<img title={{ translate .ctx "no" }} alt={{ translate .ctx "no" }} />{{ end }}</td>
         <td sorttable_customkey="{{ $challdata.Status }}" title="{{ index $status $challdata.Status }}"><img/></td>
+=======
+        {{ $accessKey := index $access $challdata.Access }}
+        <td sorttable_customkey="{{ $challdata.Access }}" title="{{ translate .ctx $accessKey }}"><img {{ $accessKey }} /></td>
+        <td>{{ if $challdata.Private }}<img title=Oui private />{{ else }}<img title=Non alt=Non />{{ end }}</td>
+        {{ $statusKey := index $status $challdata.Status }}
+        <td sorttable_customkey="{{ $challdata.Status }}" title="{{ translate .ctx $statusKey }}"><img {{ $statusKey }} /></td>
+>>>>>>> 72600d3851a4f12da9814d20b642bb8329b961d7
         <td>{{ $challdata.ParticipantCount }}</td>
         <td {{ if $challdata.StartDate.Valid }}sorttable_customkey="{{ $challdata.StartDate.String }}" class="date" style="min-width:9em"{{ end }}></td>
         <td {{ if $challdata.EndDate.Valid }}sorttable_customkey="{{ $challdata.EndDate.String }}" class="date" style="min-width:9em"{{ end }}></td>

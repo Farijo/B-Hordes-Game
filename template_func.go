@@ -10,11 +10,11 @@ import (
 )
 
 func getAccess() []string {
-	return []string{"Ouvert à tous", "Sur demande", "Sur invitation"}
+	return []string{"open-to-all", "on-request", "by-invite"}
 }
 
 func getStatus() []string {
-	return []string{"Création", "Relecture", "Inscriptions", "En cours", "Terminé"}
+	return []string{"creation", "proofreading", "inscriptions", "running", "over"}
 }
 
 type GoalHTML struct {
