@@ -3,18 +3,16 @@ package main
 import (
 	"bhordesgame/dto"
 	"embed"
-	"encoding/json"
 	"fmt"
 	"html"
 	"html/template"
-	"io/fs"
-	"net/http"
 	"strings"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/i18n"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/text/language"
+	"gopkg.in/yaml.v3"
 )
 
 func pop[T any](a *[]T) T {
@@ -36,7 +34,7 @@ func Ignore[T any](t T, e error) T {
 
 var acceptedLanguages = []language.Tag{language.French, language.English}
 
-//go:embed gen/* favicon.ico lang/* templates/*
+//go:embed gen/* lang/* templates/*
 var f embed.FS
 
 func main() {
@@ -46,8 +44,8 @@ func main() {
 		RootPath:         "lang",
 		AcceptLanguage:   acceptedLanguages,
 		DefaultLanguage:  language.English,
-		UnmarshalFunc:    json.Unmarshal,
-		FormatBundleFile: "json",
+		UnmarshalFunc:    yaml.Unmarshal,
+		FormatBundleFile: "yaml",
 		Loader:           &i18n.EmbedLoader{FS: f},
 	}), i18n.WithGetLngHandle(genFindBestAcceptedLng(acceptedLanguages))))
 	r.SetHTMLTemplate(Must(template.New("").Funcs(template.FuncMap{
@@ -66,9 +64,10 @@ func main() {
 		"mkmap":      mkmap,
 		"translate":  i18n.GetMessage,
 	}).ParseFS(f, "templates/*.html")))
-	r.StaticFS("/style", http.FS(Must(fs.Sub(f, "gen/style"))))
-	r.StaticFS("/script", http.FS(Must(fs.Sub(f, "gen/script"))))
-	r.StaticFileFS("/favicon.ico", "favicon.ico", http.FS(f))
+	r.Static("/style", "style")
+	r.Static("/script", "script")
+	r.StaticFile("/question-mark.svg", "asset/question-mark.svg")
+	r.StaticFile("/favicon.ico", "asset/favicon.ico")
 	r.POST("/", connectionHandle)
 	r.GET("/", indexHandle)
 	r.GET("/logout", logoutHandle)
