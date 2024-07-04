@@ -8,9 +8,11 @@ import (
 	"golang.org/x/text/language"
 )
 
+const LNG_KEY = "lng found"
+
 func languageSelector(langs []language.Tag) func(*gin.Context) {
 	return func(context *gin.Context) {
-		if found := context.GetString("lng found"); found > "" {
+		if found := context.GetString(LNG_KEY); found > "" {
 			return
 		}
 		lngSplited := strings.Split(context.GetHeader("Accept-Language"), ",")
@@ -55,11 +57,12 @@ func languageSelector(langs []language.Tag) func(*gin.Context) {
 			lng := language.Make(strings.TrimSpace(lng[0]))
 			for _, acceptedLang := range langs {
 				if lng == acceptedLang {
-					context.Set("lng found", acceptedLang.String())
+					context.Set(LNG_KEY, acceptedLang.String())
+					return
 				}
 			}
 		}
 
-		context.Set("lng found", langs[0].String())
+		context.Set(LNG_KEY, langs[0].String())
 	}
 }

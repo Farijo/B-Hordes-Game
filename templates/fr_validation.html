@@ -7,7 +7,7 @@
 <body>
     {{ $userkey := .userkey }}
     {{ $i := 0 }}
-    {{ template "top-bar.html" . }}
+    {{ template "fr_top-bar.html" . }}
     {{ $validations := .validations }}
     {{ range $challenge := .order }}
         {{ $verif := index $validations $challenge.ID }}

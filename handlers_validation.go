@@ -18,7 +18,7 @@ func validationHandle(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	c.HTML(http.StatusOK, "validation.html", gin.H{
+	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_validation.html", gin.H{
 		"logged":      true,
 		"validations": mustValidate,
 		"order":       order,

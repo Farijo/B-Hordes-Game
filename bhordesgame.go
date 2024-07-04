@@ -3,8 +3,6 @@ package main
 import (
 	"embed"
 	"html/template"
-	"io/fs"
-	"net/http"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -46,9 +44,9 @@ func main() {
 		"decodeGoal": decodeGoal,
 		"mkmap":      mkmap,
 	}).ParseFS(f, "templates/*.html")))
-	r.StaticFS("/style", http.FS(Must(fs.Sub(f, "gen/style"))))
-	r.StaticFS("/script", http.FS(Must(fs.Sub(f, "gen/script"))))
-	r.StaticFileFS("/favicon.ico", "favicon.ico", http.FS(f))
+	r.Static("/style", "style")
+	r.Static("/script", "script")
+	r.StaticFile("/favicon.ico", "favicon.ico")
 
 	lngHandler := languageSelector(availableLangs)
 
