@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/text/language"
 )
 
 func pop[T any](a *[]T) T {
@@ -27,13 +28,15 @@ func Ignore[T any](t T, e error) T {
 	return t
 }
 
+var availableLangs = []language.Tag{language.English, language.French}
+
 //go:embed gen/* favicon.ico lang templates/*
 var f embed.FS
 
 func main() {
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
-	loadTranslations(f)
+	loadTranslations(f, availableLangs)
 	r.SetHTMLTemplate(Must(template.New("").Funcs(template.FuncMap{
 		"getAccess":  getAccess,
 		"getStatus":  getStatus,
@@ -46,24 +49,27 @@ func main() {
 	r.StaticFS("/style", http.FS(Must(fs.Sub(f, "gen/style"))))
 	r.StaticFS("/script", http.FS(Must(fs.Sub(f, "gen/script"))))
 	r.StaticFileFS("/favicon.ico", "favicon.ico", http.FS(f))
+
+	lngHandler := languageSelector(availableLangs)
+
 	r.POST("/", connectionHandle)
-	r.GET("/", indexHandle)
+	r.GET("/", lngHandler, indexHandle)
 	r.GET("/logout", logoutHandle)
-	r.GET("/user/:id", userHandle)
-	r.GET("/challenge/:id", challengeHandle)
+	r.GET("/user/:id", lngHandler, userHandle)
+	r.GET("/challenge/:id", lngHandler, challengeHandle)
 
 	authorized := r.Group("/")
 	authorized.Use(requireAuth)
 	{
 		authorized.POST("/user", refreshHandle)
-		authorized.GET("/user", selfHandle)
+		authorized.GET("/user", lngHandler, selfHandle)
 		authorized.POST("/challenge", createChallengeHandle)
-		authorized.GET("/challenge", challengeCreationHandle)
+		authorized.GET("/challenge", lngHandler, challengeCreationHandle)
 		authorized.POST("/challenge/:id", updateChallengeHandle)
 		authorized.POST("/challenge/:id/members", challengeMembersHandle)
 		authorized.POST("/challenge/:id/date", challengeDateHandle)
 		authorized.POST("/challenge/:id/scan", challengeScanHandle)
-		authorized.GET("/validation", validationHandle)
+		authorized.GET("/validation", lngHandler, validationHandle)
 		authorized.POST("/validation", validateGoalHandle)
 	}
 

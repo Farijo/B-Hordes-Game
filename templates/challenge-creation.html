@@ -20,9 +20,10 @@
                 <td><label>Participation</label></td>
                 <td>
                     <select name="participation">
-                        <option value="0">Ouvert à tous</option>
-                        <option value="1">Sur demande</option>
-                        <option value="2">Sur invitation</option>
+                        {{ $access := getAccess "fr" }}
+                        {{ range $index, $access := $access }}
+                            <option value="{{ $index }}">{{ $access }}</option>
+                        {{ end }}
                     </select>
                 </td>
             </tr>

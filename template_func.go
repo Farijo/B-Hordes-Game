@@ -10,15 +10,45 @@ import (
 	"strconv"
 	"strings"
 
+	"golang.org/x/text/language"
 	"gopkg.in/yaml.v3"
 )
 
-func getAccess() []string {
-	return []string{"Ouvert à tous", "Sur demande", "Sur invitation"}
+var translations map[string]map[string]string
+
+func loadTranslations(fs fs.FS, langs []language.Tag) {
+	translations = make(map[string]map[string]string)
+	for _, lng := range langs {
+		lng := lng.String()
+		translations[lng] = make(map[string]string)
+		f, err := fs.Open("lang/" + lng + ".yaml")
+		if err != nil {
+			fmt.Println("loadTranslations ", err)
+		} else {
+			if err := yaml.NewDecoder(f).Decode(translations[lng]); err != nil {
+				fmt.Println("loadTranslations ", err)
+			}
+			if err := f.Close(); err != nil {
+				fmt.Println("loadTranslations ", err)
+			}
+		}
+	}
 }
 
-func getStatus() []string {
-	return []string{"Création", "Relecture", "Inscriptions", "En cours", "Terminé"}
+func getAccess(lang string) []string {
+	res := []string{"open-to-all", "on-request", "on-invite"}
+	for i, k := range res {
+		res[i] = translations[lang][k]
+	}
+	return res
+}
+
+func getStatus(lang string) []string {
+	res := []string{"creation", "proofreading", "inscriptions", "running", "over"}
+	for i, k := range res {
+		res[i] = translations[lang][k]
+	}
+	return res
 }
 
 func dumpStruct(strct *dto.Goal) template.JS {
@@ -91,26 +121,6 @@ func decodeGoal(key, lng string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML 
 
 func mkmap() map[int]GoalHeader {
 	return make(map[int]GoalHeader, 0)
-}
-
-var translations map[string]map[string]string
-
-func loadTranslations(fs fs.FS) {
-	translations = make(map[string]map[string]string)
-	translations["en"] = make(map[string]string)
-	f, err := fs.Open("lang/en.yaml")
-	if err != nil {
-		fmt.Println("loadTranslations ", err)
-	} else if err := yaml.NewDecoder(f).Decode(translations["en"]); err != nil {
-		fmt.Println("loadTranslations ", err)
-	}
-	translations["fr"] = make(map[string]string)
-	f, err = fs.Open("lang/fr.yaml")
-	if err != nil {
-		fmt.Println("loadTranslations", err)
-	} else if err := yaml.NewDecoder(f).Decode(translations["fr"]); err != nil {
-		fmt.Println("loadTranslations", err)
-	}
 }
 
 func dumpMile(mile *dto.Milestone, userkey, lng string) template.HTML {
