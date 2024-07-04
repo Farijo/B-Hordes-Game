@@ -28,13 +28,12 @@ func Ignore[T any](t T, e error) T {
 
 var availableLangs = []language.Tag{language.English, language.French}
 
-//go:embed gen/* favicon.ico lang templates/*
+//go:embed gen/* lang templates/*
 var f embed.FS
 
 func main() {
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
-	loadTranslations(f, availableLangs)
 	r.SetHTMLTemplate(Must(template.New("").Funcs(template.FuncMap{
 		"getAccess":  getAccess,
 		"getStatus":  getStatus,
@@ -46,8 +45,10 @@ func main() {
 	}).ParseFS(f, "templates/*.html")))
 	r.Static("/style", "style")
 	r.Static("/script", "script")
-	r.StaticFile("/favicon.ico", "favicon.ico")
+	r.StaticFile("/favicon.ico", "asset/favicon.ico")
+	r.StaticFile("/question.svg", "asset/question.svg")
 
+	loadTranslations(f, availableLangs)
 	lngHandler := languageSelector(availableLangs)
 
 	r.POST("/", connectionHandle)
