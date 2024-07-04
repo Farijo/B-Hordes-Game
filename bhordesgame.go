@@ -1,14 +1,10 @@
 package main
 
 import (
-	"bhordesgame/dto"
 	"embed"
-	"fmt"
-	"html"
 	"html/template"
 	"io/fs"
 	"net/http"
-	"strings"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -31,27 +27,22 @@ func Ignore[T any](t T, e error) T {
 	return t
 }
 
-//go:embed gen/* favicon.ico
+//go:embed gen/* favicon.ico lang templates/*
 var f embed.FS
 
 func main() {
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	loadTranslations(f)
 	r.SetHTMLTemplate(Must(template.New("").Funcs(template.FuncMap{
-		"getAccess": getAccess,
-		"getStatus": getStatus,
-		"dumpStruct": func(strct *dto.Goal) template.JS {
-			rep := `"`
-			strct.Custom.String = rep + html.EscapeString(strct.Custom.String) + rep
-			return template.JS(strings.ReplaceAll(fmt.Sprintf("%+v", *strct), " ", ","))
-		},
-		"dumpMile": dumpMile,
-		"incr": func(i int) int {
-			return i + 1
-		},
+		"getAccess":  getAccess,
+		"getStatus":  getStatus,
+		"dumpStruct": dumpStruct,
+		"dumpMile":   dumpMile,
+		"incr":       func(i int) int { return i + 1 },
 		"decodeGoal": decodeGoal,
 		"mkmap":      mkmap,
-	}).ParseFS(f, "gen/templates/*.html")))
+	}).ParseFS(f, "templates/*.html")))
 	r.StaticFS("/style", http.FS(Must(fs.Sub(f, "gen/style"))))
 	r.StaticFS("/script", http.FS(Must(fs.Sub(f, "gen/script"))))
 	r.StaticFileFS("/favicon.ico", "favicon.ico", http.FS(f))

@@ -58,6 +58,9 @@ type SrvData struct {
 	Img  string `json:"img"`
 	Name struct {
 		Fr string `json:"fr"`
+		En string `json:"en"`
+		Es string `json:"es"`
+		De string `json:"de"`
 	} `json:"name"`
 }
 
@@ -100,13 +103,22 @@ func getServerData(userkey string) template.JS {
 	return templateSrvData
 }
 
-func getServerDataKey(id uint16, datakey, userkey string) (img, name string) {
+func getServerDataKey(id uint16, datakey, userkey, lang string) (img, name string) {
 	if serverData == nil {
 		getServerData(userkey)
 	}
 	for _, v := range serverData[datakey] {
 		if v.Id == id {
-			return v.Img, v.Name.Fr
+			switch lang {
+			case "fr":
+				return v.Img, v.Name.Fr
+			case "es":
+				return v.Img, v.Name.Es
+			case "de":
+				return v.Img, v.Name.De
+			default:
+				return v.Img, v.Name.En
+			}
 		}
 	}
 	return

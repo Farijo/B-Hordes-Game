@@ -1,0 +1,108 @@
+name: Name
+participation: Participation
+participations: Participations
+open-to-all: Open to all
+on-request: On request
+on-invite: By invitation
+visibility: Visibility
+public: Public
+private: Private
+private-desc: Private challenges are only visible by creator and participants
+goals: Goals
+validation-modes: Validation modes
+api: API
+save: Save
+validate: Validate
+modify: Modify
+open-inscriptions: Open inscriptions
+discord-create-challenge: "1254732352161316905"
+discord-desc-challenge: "1254191205332418701"
+discord-desc-invite: "1254732301867417703"
+discord-main: "1254191087883649137"
+discord-desc-validation: "1254191235653042256"
+mh-lang: en
+stack-picto: Stack pictos
+be-on: Stand on place
+build: Build
+have-in-bank: Have in bank
+custom-goal: Personnalized
+delete-goal: ⚠️ Delete this goal ⚠️
+with: With
+empty-desc: "If empty: the goal is to stack the maximum"
+by: By
+start: Start
+end: End
+start-now: Start now
+end-now: End now
+scan-participants: Span participants
+participant: Participant
+never-realized: Never realized
+confirm-end: Confirm challenge end
+add-approbators: Add approbators
+send-invitations: Send invitations
+name-id: Name ID
+search-title: Enter a list of names or IDs separed with spaces
+search: Search
+result: Result
+challenge-created: Challenges created
+approbator: Approbator
+guest: Guest
+requestor: Requestor
+start-date-must-be-set: A start date must be set first
+challenge-start-warning: Challenge start will prevent any modification, except end date
+join: Join
+retire: Retire
+cancel-request: Cancel request
+send-request: Send a request
+accept-invite: Accept invitation
+yes: Yes
+no: No
+creator: Creator
+challenge: Challenge
+access: Access
+status: Status
+registered: Registered
+home: Home
+update: Update
+create-challenge: Create challenge
+profile: Profile
+validations: Validations
+logout: Logout
+login: Login
+mh-contact: MH contact
+email: E-mail
+player-not-found: Player not found
+player: Player
+created-challenge: Created challenge
+challenge-as: Challenge as
+creation: Creation
+proofreading: Proofreading
+inscriptions: Inscriptions
+running: Running
+over: Over
+previous: Previous
+current: Current
+ghost: Ghost
+played-maps: Played maps
+rewards: Rewards
+dead: Dead
+out: Out
+ban: Ban
+base-def: Base defense
+job: Job
+basic: todo-Habitant
+dig: todo-Fouineur
+vest: todo-Éclaireur
+shield: todo-Gardien
+book: todo-Ermite
+tamer: todo-Apprivoiseur
+tech: todo-Technicien
+map: Map
+wid: Width
+hei: Height
+days: Days
+conspiracy: Conspiracy
+custom: Custom
+buildings: Buildings
+bank: Bank
+items: Items

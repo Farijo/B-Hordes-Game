@@ -29,13 +29,13 @@
                         </div>
                         <div class='content'>
                             <p>
-                                {{ dumpMile $mile.Milestone $userkey }}
+                                {{ dumpMile $mile.Milestone $userkey "fr" }}
                             </p>
                             <table>
                                 <form action="/validation" method="post">
                                     <tr><th>Objectif</th><th>Précédent</th><th>Actuel</th></tr>
                                 {{ range $goal := $mile.Goals }}
-                                    {{ $mm := decodeGoal $userkey $goal.Goal nil }}
+                                    {{ $mm := decodeGoal $userkey "fr" $goal.Goal nil }}
                                     <tr>
                                         <td>{{ $mm.Text }}<br><img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }}</td>
                                         <td>{{ $goal.Previous.Int32 }}</td>

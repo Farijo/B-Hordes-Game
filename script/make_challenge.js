@@ -15,13 +15,13 @@ const selectOpt = [[pictos, "alp"], [items, "eslc aeb"], [buildings, "c"]].map((
     for(dataItem in dataMap) {
         let ii;
         for (ii=0; ii<opt.length; ++ii) {
-            if (dataMap[dataItem].name.fr < opt[ii][1]) {
-                opt.splice(ii, 0, [dataItem, dataMap[dataItem].name.fr]);
+            if (dataMap[dataItem].name[mh_lang] < opt[ii][1]) {
+                opt.splice(ii, 0, [dataItem, dataMap[dataItem].name[mh_lang]]);
                 break;
             }
         }
         if (ii == opt.length) {
-            opt.push([dataItem, dataMap[dataItem].name.fr]);
+            opt.push([dataItem, dataMap[dataItem].name[mh_lang]]);
         }
     }
     return opt.reduce((acc, [val, name]) => acc + `<option class="${c}" value="${val}">${name}</option>`, '');
