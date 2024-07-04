@@ -106,3 +106,11 @@ custom: Custom
 buildings: Buildings
 bank: Bank
 items: Items
+the-most-of: the most of
+goal-stack-rewards: Stack <b>%[1]s</b> rewards
+goal-stand-x-y: Stand on <b>cell</b> [ <b>%[1]d</b> / <b>%[2]d</b> ] with <b>%[3]s</b>
+goal-stand-x: Stand on <b>line %[1]d</b> with <b>%[2]s</b>
+goal-stand-y: Stand on <b>column %[1]d</b> with <b>%[2]s</b>
+goal-stand: Stand outside with <b>%[1]s</b>
+goal-build: Build
+goal-bank: Have in bank <b>%[1]s</b>

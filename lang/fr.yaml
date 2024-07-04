@@ -106,3 +106,11 @@ custom: Custom
 buildings: Chantiers
 bank: Banque
 items: Objets au sol
+the-most-of: le plus de
+goal-stack-rewards: Accumuler <b>%[1]s</b> pictos
+goal-stand-x-y: Etre sur la <b>case</b> [ <b>%[1]d</b> / <b>%[2]d</b> ] de l'OM avec <b>%[3]s</b>
+goal-stand-x: Etre sur la <b>ligne %[1]d</b> de l'OM avec <b>%[2]s</b>
+goal-stand-y: Etre sur la <b>colonne %[1]d</b> de l'OM avec <b>%[2]s</b>
+goal-stand: Etre dans l'OM avec <b>%[1]s</b>
+goal-build: Construire
+goal-bank: Avoir en banque <b>%[1]s</b>

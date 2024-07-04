@@ -17,7 +17,7 @@ import (
 var translations map[string]map[string]string
 
 func loadTranslations(fs fs.FS, langs []language.Tag) {
-	translations = make(map[string]map[string]string)
+	translations = make(map[string]map[string]string, len(langs))
 	for _, lng := range langs {
 		lng := lng.String()
 		translations[lng] = make(map[string]string)
@@ -36,19 +36,23 @@ func loadTranslations(fs fs.FS, langs []language.Tag) {
 }
 
 func getAccess(lang string) []string {
-	res := []string{"open-to-all", "on-request", "on-invite"}
-	for i, k := range res {
-		res[i] = translations[lang][k]
+	lngData := translations[lang]
+	return []string{
+		lngData["open-to-all"],
+		lngData["on-request"],
+		lngData["on-invite"],
 	}
-	return res
 }
 
 func getStatus(lang string) []string {
-	res := []string{"creation", "proofreading", "inscriptions", "running", "over"}
-	for i, k := range res {
-		res[i] = translations[lang][k]
+	lngData := translations[lang]
+	return []string{
+		lngData["creation"],
+		lngData["proofreading"],
+		lngData["inscriptions"],
+		lngData["running"],
+		lngData["over"],
 	}
-	return res
 }
 
 func dumpStruct(strct *dto.Goal) template.JS {
@@ -68,7 +72,8 @@ type GoalHeader struct {
 }
 
 func decodeGoal(key, lng string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
-	amountStr, header := "le plus de", "+"
+	lngData := translations[lng]
+	amountStr, header := lngData["the-most-of"], "+"
 	if goal.Amount.Valid {
 		amountStr = strconv.Itoa(int(goal.Amount.Int32))
 		header = amountStr + " "
@@ -76,7 +81,7 @@ func decodeGoal(key, lng string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML 
 	var out GoalHTML
 	switch goal.Typ {
 	case 0:
-		out.Text = template.HTML(fmt.Sprintf("Accumuler <b>%s</b> pictos", amountStr))
+		out.Text = template.HTML(fmt.Sprintf(lngData["goal-stack-rewards"], amountStr))
 		out.Icon, out.Label = getServerDataKey(goal.Entity, "pictos", key, lng)
 		header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 	case 1:
@@ -84,29 +89,29 @@ func decodeGoal(key, lng string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML 
 		var txt string
 		if goal.X.Valid {
 			if goal.Y.Valid {
-				txt = fmt.Sprintf("Etre sur la <b>case</b> [ <b>%d</b> / <b>%d</b> ] de l'OM avec <b>%s</b>", goal.X.Int16, goal.Y.Int16, amountStr)
+				txt = fmt.Sprintf(lngData["goal-stand-x-y"], goal.X.Int16, goal.Y.Int16, amountStr)
 				header = fmt.Sprintf("[%d/%d] %s<img src=\"https://myhordes.eu/build/images/%s\">", goal.X.Int16, goal.Y.Int16, header, out.Icon)
 			} else {
-				txt = fmt.Sprintf("Etre sur la <b>ligne %d</b> de l'OM avec <b>%s</b>", goal.X.Int16, amountStr)
+				txt = fmt.Sprintf(lngData["goal-stand-x"], goal.X.Int16, amountStr)
 				header = fmt.Sprintf("[%d/_] %s<img src=\"https://myhordes.eu/build/images/%s\">", goal.X.Int16, header, out.Icon)
 			}
 		} else {
 			if goal.Y.Valid {
-				txt = fmt.Sprintf("Etre sur la <b>colonne %d</b> de l'OM avec <b>%s</b>", goal.Y.Int16, amountStr)
+				txt = fmt.Sprintf(lngData["goal-stand-y"], goal.Y.Int16, amountStr)
 				header = fmt.Sprintf("[_/%d] %s<img src=\"https://myhordes.eu/build/images/%s\">", goal.Y.Int16, header, out.Icon)
 			} else {
-				txt = fmt.Sprintf("Etre dans l'OM avec <b>%s</b>", amountStr)
+				txt = fmt.Sprintf(lngData["goal-stand"], amountStr)
 				header = fmt.Sprintf("[_/_] %s<img src=\"https://myhordes.eu/build/images/%s\">", header, out.Icon)
 			}
 		}
 		out.Text = template.HTML(txt)
 	case 2:
-		out.Text = "Construire"
+		out.Text = template.HTML(lngData["goal-build"])
 		out.Icon, out.Label = getServerDataKey(goal.Entity, "buildings", key, lng)
 		header = "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 		goal.Amount.Int32 = 1
 	case 3:
-		out.Text = template.HTML(fmt.Sprintf("Avoir en banque <b>%s</b>", amountStr))
+		out.Text = template.HTML(fmt.Sprintf(lngData["goal-bank"], amountStr))
 		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key, lng)
 		header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 	case 4:
