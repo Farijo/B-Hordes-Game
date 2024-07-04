@@ -1,87 +1,16 @@
-name: Nom
-participation: Participation
-participations: Participations
 open-to-all: Ouvert à tous
 on-request: Sur demande
 on-invite: Sur invitation
-visibility: Visibilité
-public: Public
-private: Privé
-private-desc: Les défis privés sont uniquement visible par le créateur et les participants
-goals: Objectifs
-validation-modes: Modes de validation
-api: API
-save: Enregistrer
-validate: Valider
-modify: Modifier
-open-inscriptions: Ouvrir les inscriptions
-discord-create-challenge: "1254732352161316905"
-discord-desc-challenge: "1254191205332418701"
-discord-desc-invite: "1254732301867417703"
-discord-main: "1254191087883649137"
-discord-desc-validation: "1254191235653042256"
-mh-lang: fr
-stack-picto: Accumuler les pictos
-be-on: Être sur la case
-build: Construire
-have-in-bank: Avoir en banque
-custom-goal: Personnalisé
-delete-goal: ⚠️ Supprimer cet objectif ⚠️
-with: Avec
-empty-desc: "Si vide : l'objectif est d'en accumuler le maximum"
-by: Par
-start: Début
-end: Fin
-start-now: Démarrer maintenant
-end-now: Terminer maintenant
-scan-participants: Scanner les participants
-participant: Participant
-never-realized: Jamais réalisé
-confirm-end: Confirmer la fin du défi
-add-approbators: Ajouter des approbateurs
-send-invitations: Envoyer des invitations
-name-id: Nom ID
-search-title: Entrer une liste de noms ou d'ids séparés par des espaces
-search: Chercher
-result: Résultat
-challenge-created: Défis créés
-approbator: Approbateur
-guest: Invité
-requestor: Postulant
-start-date-must-be-set: Une date de début doit d'abord être renseignée
-challenge-start-warning: Le lancement du défi empechera toute modification, hormis la date de fin
 join: Rejoindre
 retire: Se retirer
 cancel-request: Annuler la demande
 send-request: Faire une demande
 accept-invite: Accepter l'invitation
-yes: Oui
-no: Non
-creator: Créateur
-challenge: Défi
-access: Accès
-status: Status
-registered: Inscrits
-home: Accueil
-update: Mise à jour
-create-challenge: Créer un défi
-profile: Profil
-validations: Validations
-logout: Déconnexion
-login: Connexion
-mh-contact: Contact MH
-email: E-mail
-player-not-found: Joueur introuvable
-player: Joueur
-created-challenge: Défis créés
-challenge-as: Défis en tant que
 creation: Création
 proofreading: Relecture
 inscriptions: Inscriptions
 running: En cours
 over: Terminé
-previous: Précédent
-current: Actuel
 ghost: Fantôme
 played-maps: Nombre d'incarnation
 rewards: Pictos
