@@ -53,7 +53,7 @@
         <td><a class="chlg-name" href="/challenge/{{ .ID }}">{{ $challdata.Name }}</a></td>
         <td sorttable_customkey="{{ $challdata.Access }}" title="{{ index $access $challdata.Access }}"><img data-access="{{ $challdata.Access }}" /></td>
         <td>{{ if $challdata.Private }}<img title=Oui private />{{ else }}<img title=Non alt=Non />{{ end }}</td>
-        <td sorttable_customkey="{{ $challdata.Status }}" title="{{ index $status $challdata.Status }}"><img data-status="{{ $challdata.Access }}" /></td>
+        <td sorttable_customkey="{{ $challdata.Status }}" title="{{ index $status $challdata.Status }}"><img data-status="{{ $challdata.Status }}" /></td>
         <td>{{ $challdata.ParticipantCount }}</td>
         <td {{ if $challdata.StartDate.Valid }}sorttable_customkey="{{ $challdata.StartDate.String }}" class="date" style="min-width:9em"{{ end }}></td>
         <td {{ if $challdata.EndDate.Valid }}sorttable_customkey="{{ $challdata.EndDate.String }}" class="date" style="min-width:9em"{{ end }}></td>

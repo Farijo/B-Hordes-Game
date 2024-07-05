@@ -78,7 +78,7 @@
 <script>
     {{ if .challenge }}
         const goals = [{{ range .goals }}{{ dumpStruct . }},{{ end }}];
-        bindFormValues({{ .challenge.Access }}, {{ .challenge.Private }}, goals, {{ .challenge.API }})
+        bindFormValues({{ .challenge.Access }}, {{ .challenge.Private }}, goals, {{ .challenge.API }});
         {{ if eq .challenge.Status 0 }}
             $('[value=Modifier]').css('display', 'none');
             $('[value=\"Ouvrir les inscriptions\"]').css('display', 'none');

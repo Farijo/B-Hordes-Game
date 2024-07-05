@@ -33,7 +33,7 @@
             <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onsubmit="dateToISOGMT(this)">
                 <div class="line1">Fin</div>
                 <input class="line2" name="end_date" step="60" type="datetime-local" style="margin:0.5em"/>
-                <input type="submit" name="valider" value="Valider">
+                <button type="submit" name="validation" value="validate">Valider</button>
             </form>
         {{ else }}
             {{ if .challenge.EndDate.Valid }}
@@ -112,12 +112,12 @@
 
         const endDateInput = $('[name=end_date]');
 
-        const startDate = new Date("{{ .challenge.StartDate.String }}Z")
+        const startDate = new Date("{{ .challenge.StartDate.String }}Z");
         endDateInput.prop('min', startDate.toLocaleString('sv').substring(0, 16));
         $('.box p').first().text(startDate.toLocaleString());
 
         {{ if .challenge.EndDate.Valid }}
-            const endDate = new Date("{{ .challenge.EndDate.String }}Z").toLocaleString('sv').substring(0, 16)
+            const endDate = new Date("{{ .challenge.EndDate.String }}Z").toLocaleString('sv').substring(0, 16);
             if(endDateInput.length) {
                 endDateInput.val(endDate);
             } else {
@@ -127,10 +127,12 @@
 
         endDateInput.on('change', function () {
             if(!this.value || new Date(this.value) < new Date()) {
-                endDateInput.siblings('input').val('Terminer maintenant');
+                endDateInput.siblings('button').val('end-now');
+                endDateInput.siblings('button').text('Terminer maintenant');
                 endDateInput.parent().attr('onsubmit', "return confirm('Confirmer la fin du défi')");
             } else {
-                endDateInput.siblings('input').val('Valider');
+                endDateInput.siblings('button').val('validate');
+                endDateInput.siblings('button').text('Valider');
                 endDateInput.parent().attr('onsubmit', "dateToISOGMT(this)");
             }
         }).trigger('change');

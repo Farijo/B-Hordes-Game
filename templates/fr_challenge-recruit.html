@@ -190,7 +190,7 @@
         const endDateInput = $('[name=end_date]');
 
         {{ if .challenge.StartDate.Valid }}
-            const startDate = new Date("{{ .challenge.StartDate.String }}Z").toLocaleString('sv').substring(0, 16)
+            const startDate = new Date("{{ .challenge.StartDate.String }}Z").toLocaleString('sv').substring(0, 16);
             startDateInput.val(startDate);
             endDateInput.prop('min', startDate);
             const sdd = new Date(startDate);
@@ -209,11 +209,11 @@
                 }, 1000);
             }
         {{ else }}
-            endDateInput.parent().prop('title', "Une date de début doit d'abord être renseignée").children('input').prop('disabled', true)
+            endDateInput.parent().prop('title', "Une date de début doit d'abord être renseignée").children('input').prop('disabled', true);
         {{ end }}
 
         {{ if .challenge.EndDate.Valid }}
-            const endDate = new Date("{{ .challenge.EndDate.String }}Z").toLocaleString('sv').substring(0, 16)
+            const endDate = new Date("{{ .challenge.EndDate.String }}Z").toLocaleString('sv').substring(0, 16);
             startDateInput.prop('max', endDate);
             endDateInput.val(endDate);
             $('.box p').last().text(new Date(endDate).toLocaleString());
