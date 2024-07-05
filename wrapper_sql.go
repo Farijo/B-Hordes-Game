@@ -92,12 +92,18 @@ func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 	}
 }
 
-func queryChallenge(id int) (challenge dto.DetailedChallenge, err error) {
+func queryChallenge(id, requestor int) (challenge dto.DetailedChallenge, err error) {
 	var untilStart, untilEnd sql.NullString
 	row := dbConn().QueryRow(`SELECT name, creator, flags, start_date, end_date
 	, TIMEDIFF(start_date,UTC_TIMESTAMP()) as rem_start, TIMEDIFF(end_date,UTC_TIMESTAMP()) as rem_end
 	 FROM challenge
-	 WHERE id=?`, id)
+	 WHERE id=?
+	 AND (flags & 0x04 = 0
+	   OR creator = ?
+	   OR EXISTS (SELECT 1 FROM participant WHERE user = ? AND challenge = ?)
+	   OR EXISTS (SELECT 1 FROM validator WHERE user = ? AND challenge = ?)
+	   OR EXISTS (SELECT 1 FROM invitation WHERE user = ? AND challenge = ?)
+	)`, id, requestor, id, requestor, id, requestor, id, requestor)
 
 	if err = row.Scan(&challenge.Name, &challenge.Creator.ID, &challenge.Flags, &challenge.StartDate, &challenge.EndDate, &untilStart, &untilEnd); err != nil {
 		return
@@ -330,7 +336,7 @@ func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, view
 	 LEFT JOIN validator   ON challenge.id = validator.challenge AND validator.user = ?
 	 LEFT JOIN invitation  ON challenge.id = invitation.challenge AND invitation.user = ? AND participant.user IS NULL
 	 WHERE ? IN (challenge.creator, participant.user, validator.user, invitation.user)
-	 AND (challenge.flags & 0x04 = 0 OR ? in (challenge.creator, participant.user, validator.user))
+	 AND (challenge.flags & 0x04 = 0 OR ? in (challenge.creator, participant.user, validator.user, invitation.user))
 	 AND (?=? OR (challenge.flags & 0x30) = 0x20 AND challenge.flags & 0x03 < 2)
 	 GROUP BY challenge.id, challenge.name, challenge.end_date, created, participate, validate, invited
 	 ORDER BY ended, started, challenge.flags & 0x30`, userId, userId, userId, userId, userId, viewer, userId, viewer)

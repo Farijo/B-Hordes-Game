@@ -25,16 +25,16 @@ func challengeHandle(c *gin.Context) {
 		return
 	}
 
-	challenge, err := queryChallenge(id)
+	key, cookieErr := c.Cookie("user")
+	uid, ok := sessions[key]
+	logged := cookieErr == nil && ok
+
+	challenge, err := queryChallenge(id, uid)
 	if err != nil {
 		fmt.Println(err)
 		c.Status(http.StatusNotFound)
 		return
 	}
-
-	key, cookieErr := c.Cookie("user")
-	uid, ok := sessions[key]
-	logged := cookieErr == nil && ok
 
 	selfChallenge := challenge.Creator.ID == uid && logged
 
