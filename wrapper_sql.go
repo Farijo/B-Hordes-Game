@@ -366,24 +366,22 @@ func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, view
 		}
 		detailedChall.UpdateDetailedProperties(Started.Bool, Ended.Bool)
 
-		tmp := []string{}
+		detailedChall.Role = make([]int8, 0)
 		if created {
-			tmp = append(tmp, "Créateur")
+			detailedChall.Role = append(detailedChall.Role, 0)
 		}
 		if participate {
-			tmp = append(tmp, "Participant")
+			detailedChall.Role = append(detailedChall.Role, 1)
 		} else if invited {
 			if detailedChall.Access == 2 {
-				tmp = append(tmp, "Invité")
+				detailedChall.Role = append(detailedChall.Role, 2)
 			} else {
-				tmp = append(tmp, "Postulant")
+				detailedChall.Role = append(detailedChall.Role, 3)
 			}
 		}
 		if validate {
-			tmp = append(tmp, "Approbateur")
+			detailedChall.Role = append(detailedChall.Role, 4)
 		}
-
-		detailedChall.Role = strings.Join(tmp, ", ")
 
 		ch <- &detailedChall
 	}

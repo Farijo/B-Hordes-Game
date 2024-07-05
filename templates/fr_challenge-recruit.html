@@ -105,7 +105,7 @@
                 </tr>
             {{ end }}
             {{ if gt $challAccess 0 }}
-                <tr><th>{{ "Postulants" }}</th><th>Défis créés</th><th>Participations</th></tr>
+                <tr><th>{{ if eq $challAccess 2 }}Invités{{ else }}Postulants{{ end }}</th><th>Défis créés</th><th>Participations</th></tr>
                 {{ range $invit := .invitations }}
                     <tr class="item">
                         <td sorttable_customkey="{{ $invit.SimplifiedName }}">

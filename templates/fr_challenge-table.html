@@ -44,7 +44,7 @@
     </tr>
     {{ range $challdata := . }}
     <tr class="item">
-        <td sorttable_customkey="{{ $challdata.Creator.SimplifiedName }}" title="{{ $challdata.Role }}">
+        <td sorttable_customkey="{{ $challdata.Creator.SimplifiedName }}" title="{{ $roles := getRoles "fr" }}{{ range $r := $challdata.Role }}{{ index $roles $r }} {{ end }}">
             <a href="/user/{{ $challdata.Creator.ID }}">
             <img class="avatar" src="{{ $challdata.Creator.Avatar.String }}">
             <span class="name">{{ $challdata.Creator.Name }}</span>

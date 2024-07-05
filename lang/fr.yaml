@@ -43,3 +43,8 @@ goal-stand-y: Etre sur la <b>colonne %[1]d</b> de l'OM avec <b>%[2]s</b>
 goal-stand: Etre dans l'OM avec <b>%[1]s</b>
 goal-build: Construire
 goal-bank: Avoir en banque <b>%[1]s</b>
+creator: Créateur
+participant: Participant
+guest: Invité
+candidate: Postulant
+approbator: Approbateur

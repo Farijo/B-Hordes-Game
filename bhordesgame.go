@@ -37,6 +37,7 @@ func main() {
 	r.SetHTMLTemplate(Must(template.New("").Funcs(template.FuncMap{
 		"getAccess":  getAccess,
 		"getStatus":  getStatus,
+		"getRoles":   getRoles,
 		"dumpStruct": dumpStruct,
 		"dumpMile":   dumpMile,
 		"incr":       func(i int) int { return i + 1 },

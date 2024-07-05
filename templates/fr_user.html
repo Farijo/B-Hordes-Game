@@ -28,11 +28,10 @@
     <h2>Défis en tant que
         <select id=type>
             <option>*</option>
-            <option>Participant</option>
-            <option>Créateur</option>
-            <option>Approbateur</option>
-            <option>Postulant</option>
-            <option>Invité</option>
+            {{ $roles := getRoles "fr" }}
+            {{ range $r := $roles }}
+            <option>{{ $r }}</option>
+            {{ end }}
         </select>
     </h2>
     {{template "fr_challenge-table.html" .challenges }}

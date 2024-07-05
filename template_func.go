@@ -55,6 +55,17 @@ func getStatus(lang string) []string {
 	}
 }
 
+func getRoles(lang string) []string {
+	lngData := translations[lang]
+	return []string{
+		lngData["creator"],
+		lngData["participant"],
+		lngData["guest"],
+		lngData["candidate"],
+		lngData["approbator"],
+	}
+}
+
 func dumpStruct(strct *dto.Goal) template.JS {
 	rep := `"`
 	strct.Custom.String = rep + html.EscapeString(strct.Custom.String) + rep

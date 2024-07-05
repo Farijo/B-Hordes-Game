@@ -43,3 +43,8 @@ goal-stand-y: Stand on <b>column %[1]d</b> with <b>%[2]s</b>
 goal-stand: Stand outside with <b>%[1]s</b>
 goal-build: Build
 goal-bank: Have in bank <b>%[1]s</b>
+creator: Creator
+participant: Participant
+guest: Guest
+candidate: Candidate
+approbator: Approbator

@@ -18,7 +18,7 @@ type DetailedChallenge struct {
 	Private          bool
 	API              bool
 	Status           int8
-	Role             string
+	Role             []int8
 }
 
 func (challenge *DetailedChallenge) UpdateDetailedProperties(started, ended bool) {
