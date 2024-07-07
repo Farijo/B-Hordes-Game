@@ -106,6 +106,7 @@ func getServerData(userkey string) template.JS {
 	wg.Wait()
 	for _, resource := range []string{"pictos", "buildings", "items"} {
 		if serverData[resource] == nil {
+			// if at least one is nil, don't cache result
 			return template.JS(builder.String())
 		}
 	}

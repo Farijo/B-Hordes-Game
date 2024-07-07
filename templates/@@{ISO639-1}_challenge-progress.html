@@ -13,14 +13,14 @@
     <h2>{{ .challenge.Name }}</h2>
     <div class="container">
         <a class="box" href="/user/{{ .challenge.Creator.ID }}">
-            <div class="line1">Par</div>
+            <div class="line1">@@{by}</div>
             <div class="line2">
                 <img class="avatar" src="{{ .challenge.Creator.Avatar.String }}">
                 <span class="name">{{ .challenge.Creator.Name }}</span>
             </div>
         </a>
         <div class="box">
-            <div class="line1">Début</div>
+            <div class="line1">@@{start}</div>
             <p></p>
         </div>
         {{ if .selfChallenge }}
@@ -31,14 +31,14 @@
                 }
             </script>
             <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onsubmit="dateToISOGMT(this)">
-                <div class="line1">Fin</div>
+                <div class="line1">@@{end}</div>
                 <input class="line2" name="end_date" step="60" type="datetime-local" style="margin:0.5em"/>
-                <button type="submit" name="validation" value="validate">Valider</button>
+                <button type="submit" name="validation" value="validate">@@{validate}</button>
             </form>
         {{ else }}
             {{ if .challenge.EndDate.Valid }}
                 <div class="box">
-                    <div class="line1">Fin</div>
+                    <div class="line1">@@{end}</div>
                     <p></p>
                 </div>
             {{ end }}
@@ -48,7 +48,7 @@
         {{ $userkey := .userkey }}
         {{ $goalHeaders := mkmap }}
         {{ range $goal := .goals }}
-            {{ $mm := decodeGoal $userkey "fr" $goal $goalHeaders }}
+            {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal $goalHeaders }}
             <div class="box">
                 {{ if $mm.Text }}
                     <div class="line1">{{ $mm.Text }}</div>
@@ -61,11 +61,11 @@
     </div>
     {{ if .selfChallenge }}
         <form method="post" action="{{ .challenge.ID }}/scan" style="margin: 4em auto 0 auto;display: block;">
-            <input type="submit" name="scan" value="Scanner les participants"/>
+            <input type="submit" name="scan" value="@@{scan-participants}"/>
         </form>
     {{ end }}
     <table class="sortable">
-        <tr><th>Participants</th>{{ range $_, $goalHeader := $goalHeaders }}<th>{{ $goalHeader.Content }}</th>{{ end }}
+        <tr><th>@@{participant}</th>{{ range $_, $goalHeader := $goalHeaders }}<th>{{ $goalHeader.Content }}</th>{{ end }}
         {{ range $partic := .advancement }}
             <tr class="item">
                 <td sorttable_customkey="{{ $partic.SimplifiedName }}">
@@ -97,7 +97,7 @@
                 e.setAttribute("sorttable_customkey", e.getAttribute("sorttable_customkey") + (""+(Date.now() - dd.getTime())).padStart(15, '0'));
                 e.title = dd.toLocaleString() + ',' + dd.getMilliseconds()/10;
             } else {
-                e.title = "Jamais réalisé"
+                e.title = @@{never-realized}
             }
         });
 
@@ -127,12 +127,10 @@
 
         endDateInput.on('change', function () {
             if(!this.value || new Date(this.value) < new Date()) {
-                endDateInput.siblings('button').val('end-now');
-                endDateInput.siblings('button').text('Terminer maintenant');
-                endDateInput.parent().attr('onsubmit', "return confirm('Confirmer la fin du défi')");
+                endDateInput.siblings('input').val(@@{end-now});
+                endDateInput.parent().attr('onsubmit', "return confirm('@@{confirm-end}')");
             } else {
-                endDateInput.siblings('button').val('validate');
-                endDateInput.siblings('button').text('Valider');
+                endDateInput.siblings('input').val(@@{validate});
                 endDateInput.parent().attr('onsubmit', "dateToISOGMT(this)");
             }
         }).trigger('change');
@@ -144,7 +142,7 @@
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         crate = new Crate({
             server: '1253836492694880367', // B'Hordes Games
-            channel: '1254191205332418701',
+            channel: '@@{discord-desc-challenge}',
             color: '#371a13',
             glyph: ["/question.svg", "100%"]
         })

@@ -35,8 +35,17 @@ func loadTranslations(fs fs.FS, langs []language.Tag) {
 	}
 }
 
+func getTrad(lang string) map[string]string {
+	lngData, ok := translations[lang]
+	if ok {
+		return lngData
+	} else {
+		return translations[availableLangs[0].String()]
+	}
+}
+
 func getAccess(lang string) []string {
-	lngData := translations[lang]
+	lngData := getTrad(lang)
 	return []string{
 		lngData["open-to-all"],
 		lngData["on-request"],
@@ -45,7 +54,7 @@ func getAccess(lang string) []string {
 }
 
 func getStatus(lang string) []string {
-	lngData := translations[lang]
+	lngData := getTrad(lang)
 	return []string{
 		lngData["creation"],
 		lngData["proofreading"],
@@ -56,7 +65,7 @@ func getStatus(lang string) []string {
 }
 
 func getRoles(lang string) []string {
-	lngData := translations[lang]
+	lngData := getTrad(lang)
 	return []string{
 		lngData["creator"],
 		lngData["participant"],
@@ -82,8 +91,8 @@ type GoalHeader struct {
 	Amount  uint32
 }
 
-func decodeGoal(key, lng string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
-	lngData := translations[lng]
+func decodeGoal(key, lang string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
+	lngData := getTrad(lang)
 	amountStr, header := lngData["the-most-of"], "+"
 	if goal.Amount.Valid {
 		amountStr = strconv.Itoa(int(goal.Amount.Int32))
@@ -93,10 +102,10 @@ func decodeGoal(key, lng string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML 
 	switch goal.Typ {
 	case 0:
 		out.Text = template.HTML(fmt.Sprintf(lngData["goal-stack-rewards"], amountStr))
-		out.Icon, out.Label = getServerDataKey(goal.Entity, "pictos", key, lng)
+		out.Icon, out.Label = getServerDataKey(goal.Entity, "pictos", key, lang)
 		header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 	case 1:
-		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key, lng)
+		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key, lang)
 		var txt string
 		if goal.X.Valid {
 			if goal.Y.Valid {
@@ -118,12 +127,12 @@ func decodeGoal(key, lng string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML 
 		out.Text = template.HTML(txt)
 	case 2:
 		out.Text = template.HTML(lngData["goal-build"])
-		out.Icon, out.Label = getServerDataKey(goal.Entity, "buildings", key, lng)
+		out.Icon, out.Label = getServerDataKey(goal.Entity, "buildings", key, lang)
 		header = "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 		goal.Amount.Int32 = 1
 	case 3:
 		out.Text = template.HTML(fmt.Sprintf(lngData["goal-bank"], amountStr))
-		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key, lng)
+		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key, lang)
 		header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
 	case 4:
 		out.Label = goal.Custom.String
