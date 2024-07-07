@@ -72,7 +72,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
 <script>
     const goalhtml=`{{ template "@@{ISO639-1}_goal.html" }}`;
-    const mh_lang=`@@{ISO639-1}`;
+    let mh_lang=(l=>['de','fr','es'].includes(l)?l:'en')(`@@{ISO639-1}`);
 </script>
 <script src="/script/make_challenge.js"></script>
 <script>
