@@ -14,7 +14,7 @@
         <section>
             <h2><a class="chlg-name" href="/challenge/{{ $challenge.ID }}">{{ $challenge.Name }}</a></h2>
             <button>⟱ ⟱ ⟱</button>
-            <div class="timeline">{{ if $challenge.EndDate.Valid }}Fin : <span class="utcdate">{{ $challenge.EndDate.String }}</span>{{ else }}En cours{{ end }}</div>
+            <div class="timeline">{{ if $challenge.EndDate.Valid }}@@{end} : <span class="utcdate">{{ $challenge.EndDate.String }}</span>{{ else }}@@{running}{{ end }}</div>
             <ul class='timeline'>
                 {{ range $mile := $verif }}
                     <li class='work'>
@@ -29,13 +29,13 @@
                         </div>
                         <div class='content'>
                             <p>
-                                {{ dumpMile $mile.Milestone $userkey "fr" }}
+                                {{ dumpMile $mile.Milestone $userkey "@@{ISO639-1}" }}
                             </p>
                             <table>
                                 <form action="/validation" method="post">
-                                    <tr><th>Objectif</th><th>Précédent</th><th>Actuel</th></tr>
+                                    <tr><th>@@{goals}</th><th>@@{previous}</th><th>@@{current}</th></tr>
                                 {{ range $goal := $mile.Goals }}
-                                    {{ $mm := decodeGoal $userkey "fr" $goal.Goal nil }}
+                                    {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal.Goal nil }}
                                     <tr>
                                         <td>{{ $mm.Text }}<br><img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }}</td>
                                         <td>{{ $goal.Previous.Int32 }}</td>
@@ -76,7 +76,7 @@
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         crate = new Crate({
             server: '1253836492694880367', // B'Hordes Games
-            channel: '1254191235653042256',
+            channel: '@@{discord-desc-validation}',
             color: '#371a13',
             glyph: ["/question.svg", "100%"]
         })

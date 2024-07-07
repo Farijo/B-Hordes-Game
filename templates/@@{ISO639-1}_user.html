@@ -10,13 +10,13 @@
 <body>
     {{template "@@{ISO639-1}_top-bar.html" . }}
     {{ if eq "" .user.Name }}
-    <h2>Joueur introuvable</h2>
+    <h2>@@{player-not-found}</h2>
     {{ else }}
     <table>
         <tr>
-            <th>Joueur</th>
-            <th>Défis créés</th>
-            <th>Participations</th>
+            <th>@@{player}</th>
+            <th>@@{created-challenge}</th>
+            <th>@@{participations}</th>
         </tr>
         <tr>
             <td><img class="avatar" src="{{ .user.Avatar.String }}"><span class="name">{{ .user.Name }}</span></td>
@@ -25,10 +25,10 @@
         </tr>
     </table>
     
-    <h2>Défis en tant que
+    <h2>@@{challenge-as}
         <select id=type>
             <option>*</option>
-            {{ $roles := getRoles "fr" }}
+            {{ $roles := getRoles "@@{ISO639-1}" }}
             {{ range $r := $roles }}
             <option>{{ $r }}</option>
             {{ end }}
@@ -37,29 +37,12 @@
     {{template "@@{ISO639-1}_challenge-table.html" .challenges }}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
     <script src="/script/table_filter.js"></script>
-    <script>
-        (function(){
-            const table = $('.sortable');
-            const rows = table.find('.item');
-            const select = $('#type');
-            select.on('change', function(i, e) {
-                const val = this.value;
-                rows.each(function() {
-                    const r = $(this);
-                    if(val === '*' || r.children(':first').attr('title').includes(val)) {
-                        table.append(r);
-                    } else {
-                        r.remove();
-                    }
-                });
-            }).val(new URLSearchParams(window.location.search).get('selection') || select.children(':first').val()).trigger('change');
-        })()
-    </script>
+    <script src="/script/user_filter.js"></script>
     {{ end }}
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         crate = new Crate({
             server: '1253836492694880367', // B'Hordes Games
-            channel: '1254191087883649137',
+            channel: '@@{discord-main}',
             color: '#371a13',
             glyph: ["/question.svg", "100%"]
         })
