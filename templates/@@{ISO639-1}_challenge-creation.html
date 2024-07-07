@@ -13,14 +13,14 @@
     <form method="POST" style="width:fit-content">
         <table>
             <tr>
-                <td><label>Nom</label></td>
+                <td><label>@@{name}</label></td>
                 <td><input type="text" name="name" maxlength="64" autocomplete="off" {{ if .challenge }} value="{{ .challenge.Name }}" {{ end }} required/></td>
             </tr>
             <tr>
-                <td><label>Participation</label></td>
+                <td><label>@@{participation}</label></td>
                 <td>
                     <select name="participation">
-                        {{ $access := getAccess "fr" }}
+                        {{ $access := getAccess "@@{ISO639-1}" }}
                         {{ range $index, $access := $access }}
                             <option value="{{ $index }}">{{ $access }}</option>
                         {{ end }}
@@ -28,34 +28,34 @@
                 </td>
             </tr>
             <tr>
-                <td><label>Visibilité</label></td>
+                <td><label>@@{visibility}</label></td>
                 <td>
                     <select name="privat">
-                        <option value="0">Public</option>
-                        <option value="1" title="Les défis privés sont uniquement visible par les provocateurs et les participants">Privé</option>
+                        <option value="0">@@{public}</option>
+                        <option value="1" title="@@{private-desc}">@@{private}</option>
                     </select>
                 </td>
             </tr>
             <tr>
-                <td><label>Objectifs</label></td>
+                <td><label>@@{goals}</label></td>
                 <td>
                     <div id="all-goals">
                     </div>
-                    <img src="https://myhordes.eu/build/images/icons/small_more.6bbc2bc2.gif" id="more"/>
+                    <img id="more"/>
                 </td>
             </tr>
             <tr>
-                <td><label>Modes de validation</label></td>
+                <td><label>@@{validation-modes}</label></td>
                 <td>
-                    <label for="validation_api" class="checklabel"><input type="checkbox" name="validation_api" value="1" id="validation_api" checked/>API</label>
+                    <label for="validation_api" class="checklabel"><input type="checkbox" name="validation_api" value="1" id="validation_api" checked/>@@{api}</label>
                 </td>
             </tr>
             <tr>
                 <td colspan="2">
-                    <input type="submit" name="act" value="Enregistrer"/>
-                    <input type="submit" name="act" value="Valider"/>
-                    <input type="submit" name="act" value="Modifier"/>
-                    <input type="submit" name="act" value="Ouvrir les inscriptions"/>
+                    <button type="submit" name="act" value="save">@@{save}</button>
+                    <button type="submit" name="act" value="validate">@@{validate}</button>
+                    <button type="submit" name="act" value="modify">@@{modify}</button>
+                    <button type="submit" name="act" value="open-inscriptions">@@{open-inscriptions}</button>
                 </td>
             </tr>
         </table>
@@ -63,7 +63,7 @@
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         crate = new Crate({
             server: '1253836492694880367', // B'Hordes Games
-            channel: '1254732352161316905',
+            channel: '@@{discord-create-challenge}',
             color: '#371a13',
             glyph: ["/question.svg", "100%"]
         })
@@ -72,7 +72,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
 <script>
     const goalhtml=`{{ template "@@{ISO639-1}_goal.html" }}`;
-    const mh_lang=`fr`;
+    const mh_lang=`@@{ISO639-1}`;
 </script>
 <script src="/script/make_challenge.js"></script>
 <script>
@@ -80,19 +80,19 @@
         const goals = [{{ range .goals }}{{ dumpStruct . }},{{ end }}];
         bindFormValues({{ .challenge.Access }}, {{ .challenge.Private }}, goals, {{ .challenge.API }});
         {{ if eq .challenge.Status 0 }}
-            $('[value=Modifier]').css('display', 'none');
-            $('[value=\"Ouvrir les inscriptions\"]').css('display', 'none');
+            $('[value=modify]').css('display', 'none');
+            $('[value=open-inscriptions]').css('display', 'none');
         {{ end }}
         {{ if eq .challenge.Status 1 }}
             $('form table *:not([type=submit])').prop('disabled', true);
             $('#more').css('cursor', 'not-allowed').prop('onclick', null).off('click');
-            $('[value=Enregistrer]').css('display', 'none');
-            $('[value=Valider]').css('display', 'none');
+            $('[value=save]').css('display', 'none');
+            $('[value=validate]').css('display', 'none');
         {{ end }}
     {{ else }}
         addAGoal(false);
-        $('[value=Modifier]').css('display', 'none');
-        $('[value=\"Ouvrir les inscriptions\"]').css('display', 'none');
+        $('[value=modify]').css('display', 'none');
+        $('[value=open-inscriptions]').css('display', 'none');
     {{ end }}
 </script>
 </html>

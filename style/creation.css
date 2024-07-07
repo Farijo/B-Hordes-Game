@@ -31,6 +31,7 @@ input[name="act"] {
     display: block; 
     cursor: pointer;
     margin-top: 0.4rem;
+    content: url('data:image/gif;base64,R0lGODlhEAAQALMAAE0pDlBjE/6yXNOTS7V4Oo5cLNf/W//Mav///7fSQ+v/rf//0HFIJGA8HwAAAAAAACH5BAAAAAAALAAAAAAQABAAAARqEMhJq1zraCEO/8LVNExRlAWREiFwMEQczMFgs9KxDgGi1LZBSxCz9QzAAc5VoAUUSJowR+hBDYaEttY6VK9YLIIrEfBoiehs6TU10wH30hwMGMbBOaEuvR3KezFuKzF/ACCIHwcLFo0UEQA7');
 }
 .checklabel {
     display: flex;
