@@ -13,7 +13,7 @@
     <h2>{{ .challenge.Name }}</h2>
     <div class="container">
         <a class="box" href="/user/{{ .challenge.Creator.ID }}">
-            <div class="line1">Par</div>
+            <div class="line1">@@{by}</div>
             <div class="line2">
                 <img class="avatar" src="{{ .challenge.Creator.Avatar.String }}">
                 <span class="name">{{ .challenge.Creator.Name }}</span>
@@ -27,19 +27,19 @@
                 }
             </script>
             <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onsubmit="dateToISOGMT(this)">
-                <div class="line1">Début</div>
+                <div class="line1">@@{start}</div>
                 <input class="line2" name="start_date" step="60" type="datetime-local" style="margin:0.5em"/>
-                <button type="submit" name="validation" value="validate">Valider</button>
+                <input type="submit" name="validation" value="validate">@@{validate}</button>
             </form>
             <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onsubmit="dateToISOGMT(this)">
-                <div class="line1">Fin</div>
+                <div class="line1">@@{end}</div>
                 <input class="line2" name="end_date" step="60" type="datetime-local" required style="margin:0.5em"/>
-                <button type="submit" name="validation" value="validate">Valider</button>
+                <button type="submit" name="validation" value="validate">@@{validate}</button>
             </form>
         {{ else }}
             {{ if .challenge.StartDate.Valid }}
                 <div class="box">
-                    <div class="line1">Début</div>
+                    <div class="line1">@@{start}</div>
                     <p></p>
                     {{ if lt .challenge.Status 3 }}
                         <span class="time-remaining"></span>
@@ -48,7 +48,7 @@
             {{ end }}
             {{ if .challenge.EndDate.Valid }}
                 <div class="box">
-                    <div class="line1">Fin</div>
+                    <div class="line1">@@{end}</div>
                     <p></p>
                     {{ if lt .challenge.Status 4 }}
                         <span class="time-remaining"></span>
@@ -60,7 +60,7 @@
     <div class="container">
         {{ $userkey := .userkey }}
         {{ range $goal := .goals }}
-            {{ $mm := decodeGoal $userkey "fr" $goal nil }}
+            {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal nil }}
             <div class="box">
                 {{ if $mm.Text }}
                     <div class="line1">{{ $mm.Text }}</div>
@@ -74,9 +74,9 @@
 {{ $challAccess := .challenge.Access }}
 {{ if .selfChallenge }}
     <form>
-        <h4>Ajouter des approbateurs{{ if eq $challAccess 2 }} / Envoyer des invitations {{ end }}</h4>
-        <input type="text" name="ident" placeholder="Nom ID" title="Entrer une liste de noms ou d'ids séparés par des espaces" />
-        <input style="padding:2px 5px" type="submit" value="Chercher" />
+        <h4>@@{add-approbators}{{ if eq $challAccess 2 }} / @@{send-invitations}{{ end }}</h4>
+        <input type="text" name="ident" placeholder="@@{name-id}" title="@@{search-title}" />
+        <input style="padding:2px 5px" type="submit" value="@@{search}" />
     </form>
 
     <form method="POST" action="{{ .challenge.ID }}/members{{ .ident }}" style="width: fit-content;">
@@ -85,8 +85,8 @@
             <button type="submit" value="{{ index $act 0 }}" name="{{ $uid }}-participant">{{ index $act 1 }}</button>
         {{ end }}
         <table class="sortable">
-            <tr><th>Résultats</th><th>Défis créés</th><th>Participations</th></tr>
-            {{ range $result := .searchResults }}
+            <tr><th>@@{result}</th><th>@@{challenge-created}</th><th>@@{participations}</th></tr>
+                {{ range $result := .searchResults }}
                 <tr class="item">
                     <td sorttable_customkey="{{ $result.SimplifiedName }}">
                         <a href="/user/{{ $result.ID }}">
@@ -97,15 +97,15 @@
                     <td>{{ .CreationCount }}</td>
                     <td>{{ .ParticipationCount }}</td>
                     <td>
-                        <input name="{{ $result.ID }}-validator" type=submit value="+ Approbateur"/>
+                        <input name="{{ $result.ID }}-validator" type=submit value="+ @@{approbator}"/>
                         {{ if eq $challAccess 2 }}
-                            <br><input name="{{ $result.ID }}-invitation" type=submit value="+ Invité"/>
+                            <br><input name="{{ $result.ID }}-invitation" type=submit value="+ @@{guest}"/>
                         {{ end }}
                     </td>
                 </tr>
             {{ end }}
             {{ if gt $challAccess 0 }}
-                <tr><th>{{ if eq $challAccess 2 }}Invités{{ else }}Postulants{{ end }}</th><th>Défis créés</th><th>Participations</th></tr>
+                <tr><th>{{ if eq $challAccess 2 }}@@{guest}{{ else }}@@{requestor}{{ end }}</th><th>Défis créés</th><th>Participations</th></tr>
                 {{ range $invit := .invitations }}
                     <tr class="item">
                         <td sorttable_customkey="{{ $invit.SimplifiedName }}">
@@ -130,12 +130,12 @@
 
         {{ $uid := .selfID }}
         {{ range $act := .action }}
-            <input type="submit" value="{{ $act }}" name="{{ $uid }}-participant" />
+            <button type="submit" value="{{ index $act 0 }}" name="{{ $uid }}-participant">{{ index $act 1 }}</button>
         {{ end }}
         <table class="sortable">
 {{ end }}
 {{ $selfChall := .selfChallenge }}
-            <tr><th>Approbateurs</th><th>Défis créés</th><th>Participations</th></tr>
+            <tr><th>@@{approbator}</th><th>@@{challenge-created}</th><th>@@{participations}</th></tr>
             {{ range $approb := .validators }}
                 <tr class="item">
                     <td sorttable_customkey="{{ $approb.SimplifiedName }}">
@@ -153,7 +153,7 @@
                     {{ end }}
                 </tr>
             {{ end }}
-            <tr><th>Participants</th><th>Défis créés</th><th>Participations</th></tr>
+            <tr><th>@@{participant}</th><th>@@{challenge-created}</th><th>@@{participations}</th></tr>
             {{ range $partic := .participants }}
                 <tr class="item">
                     <td sorttable_customkey="{{ $partic.SimplifiedName }}">
@@ -209,7 +209,7 @@
                 }, 1000);
             }
         {{ else }}
-            endDateInput.parent().prop('title', "Une date de début doit d'abord être renseignée").children('input').prop('disabled', true);
+            endDateInput.parent().prop('title', "@@{start-date-must-be-set}").children('input').prop('disabled', true);
         {{ end }}
 
         {{ if .challenge.EndDate.Valid }}
@@ -222,11 +222,11 @@
         startDateInput.on('change', function () {
             if(!this.value || new Date(this.value) < new Date()) {
                 startDateInput.siblings('button').val('start-now');
-                startDateInput.siblings('button').text('Démarrer maintenant');
-                startDateInput.parent().attr('onsubmit', "return confirm('Le lancement du défi empechera toute modification, hormis la date de fin')");
+                startDateInput.siblings('button').text('@@{start-now}');
+                startDateInput.parent().attr('onsubmit', "return confirm('@@{challenge-start-warning}')");
             } else {
                 startDateInput.siblings('button').val('validate');
-                startDateInput.siblings('button').text('Valider');
+                startDateInput.siblings('button').text('@@{validate}');
                 startDateInput.parent().attr('onsubmit', "dateToISOGMT(this)");
             }
         }).trigger('change');
@@ -238,7 +238,7 @@
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         crate = new Crate({
             server: '1253836492694880367', // B'Hordes Games
-            channel: '1254732301867417703',
+            channel: '@@{discord-desc-invite}',
             color: '#371a13',
             glyph: ["/question.svg", "100%"]
         })
