@@ -5,7 +5,7 @@
         <td>
             <select>
                 <option>*</option>
-                {{ $access := getAccess "fr" }}
+                {{ $access := getAccess "@@{ISO639-1}" }}
                 {{ range $a := $access }}
                 <option>{{ $a }}</option>
                 {{ end }}
@@ -14,14 +14,14 @@
         <td>
             <select>
                 <option>*</option>
-                <option>Oui</option>
-                <option>Non</option>
+                <option>@@{yes}</option>
+                <option>@@{no}</option>
             </select>
         </td>
         <td>
             <select>
                 <option>*</option>
-                {{ $status := getStatus "fr" }}
+                {{ $status := getStatus "@@{ISO639-1}" }}
                 {{ range $s := $status }}
                 <option>{{ $s }}</option>
                 {{ end }}
@@ -33,18 +33,18 @@
         <td></td>
     </tr>
     <tr>
-        <th>Createur</th>
-        <th class="sorttable_alpha">Défi</th>
-        <th>Accès</th>
-        <th>Privé</th>
-        <th>Status</th>
-        <th>Inscrits</th>
-        <th>Début</th>
-        <th>Fin</th>
+        <th>@@{creator}</th>
+        <th class="sorttable_alpha">@@{challenge}</th>
+        <th>@@{access}</th>
+        <th>@@{private}</th>
+        <th>@@{status}</th>
+        <th>@@{registered}</th>
+        <th>@@{start}</th>
+        <th>@@{end}</th>
     </tr>
     {{ range $challdata := . }}
     <tr class="item">
-        <td sorttable_customkey="{{ $challdata.Creator.SimplifiedName }}" title="{{ $roles := getRoles "fr" }}{{ range $r := $challdata.Role }}{{ index $roles $r }} {{ end }}">
+        <td sorttable_customkey="{{ $challdata.Creator.SimplifiedName }}" title="{{ $roles := getRoles "@@{ISO639-1}" }}{{ range $r := $challdata.Role }}{{ index $roles $r }} {{ end }}">
             <a href="/user/{{ $challdata.Creator.ID }}">
             <img class="avatar" src="{{ $challdata.Creator.Avatar.String }}">
             <span class="name">{{ $challdata.Creator.Name }}</span>
@@ -52,7 +52,7 @@
         </td>
         <td><a class="chlg-name" href="/challenge/{{ .ID }}">{{ $challdata.Name }}</a></td>
         <td sorttable_customkey="{{ $challdata.Access }}" title="{{ index $access $challdata.Access }}"><img data-access="{{ $challdata.Access }}" /></td>
-        <td>{{ if $challdata.Private }}<img title=Oui private />{{ else }}<img title=Non alt=Non />{{ end }}</td>
+        <td>{{ if $challdata.Private }}<img title=@@{yes} private />{{ else }}<img title=@@{no} alt=@@{no} />{{ end }}</td>
         <td sorttable_customkey="{{ $challdata.Status }}" title="{{ index $status $challdata.Status }}"><img data-status="{{ $challdata.Status }}" /></td>
         <td>{{ $challdata.ParticipantCount }}</td>
         <td {{ if $challdata.StartDate.Valid }}sorttable_customkey="{{ $challdata.StartDate.String }}" class="date" style="min-width:9em"{{ end }}></td>
