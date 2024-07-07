@@ -73,6 +73,9 @@ func getServerData(userkey string) template.JS {
 	if templateSrvData > "" {
 		return templateSrvData
 	}
+	if userkey == "" {
+		return ""
+	}
 	globalMtx.Lock()
 	defer globalMtx.Unlock()
 	if templateSrvData > "" {
@@ -83,28 +86,35 @@ func getServerData(userkey string) template.JS {
 	var builder strings.Builder
 	var wg sync.WaitGroup
 	for _, resource := range []string{"pictos", "buildings", "items"} {
-		wg.Add(1)
-		go func(rsc string) {
-			defer wg.Done()
-			serverData[rsc] = requestServerData(rsc, userkey)
-			if serverData[rsc] != nil {
-				if marsh, err := json.Marshal(serverData[rsc]); err == nil {
-					builderMtx.Lock()
-					builder.WriteString("const " + rsc + "=")
-					builder.Write(marsh)
-					builder.WriteByte(';')
-					builderMtx.Unlock()
+		if serverData[resource] == nil {
+			wg.Add(1)
+			go func(rsc string) {
+				defer wg.Done()
+				serverData[rsc] = requestServerData(rsc, userkey)
+				if serverData[rsc] != nil {
+					if marsh, err := json.Marshal(serverData[rsc]); err == nil {
+						builderMtx.Lock()
+						builder.WriteString("const " + rsc + "=")
+						builder.Write(marsh)
+						builder.WriteByte(';')
+						builderMtx.Unlock()
+					}
 				}
-			}
-		}(resource)
+			}(resource)
+		}
 	}
 	wg.Wait()
+	for _, resource := range []string{"pictos", "buildings", "items"} {
+		if serverData[resource] == nil {
+			return template.JS(builder.String())
+		}
+	}
 	templateSrvData = template.JS(builder.String())
 	return templateSrvData
 }
 
 func getServerDataKey(id uint16, datakey, userkey, lang string) (img, name string) {
-	if serverData == nil {
+	if serverData == nil || serverData[datakey] == nil {
 		getServerData(userkey)
 	}
 	for _, v := range serverData[datakey] {
