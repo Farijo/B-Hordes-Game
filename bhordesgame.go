@@ -28,7 +28,7 @@ func Ignore[T any](t T, e error) T {
 
 var availableLangs = []language.Tag{language.English, language.French}
 
-//go:embed gen/* lang templates/*
+//go:embed lang templates/*
 var f embed.FS
 
 func main() {
@@ -51,6 +51,7 @@ func main() {
 
 	loadTranslations(f, availableLangs)
 	lngHandler := languageSelector(availableLangs)
+	lngHandler = func(ctx *gin.Context) { ctx.Set(LNG_KEY, "@@{ISO639-1}") }
 
 	r.POST("/", connectionHandle)
 	r.GET("/", lngHandler, indexHandle)

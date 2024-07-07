@@ -9,7 +9,7 @@
     <title>β'Hordes Games</title>
 </head>
 <body>
-    {{ template "fr_top-bar.html" . }}
+    {{ template "@@{ISO639-1}_top-bar.html" . }}
     <h2>{{ .challenge.Name }}</h2>
     <div class="container">
         <a class="box" href="/user/{{ .challenge.Creator.ID }}">

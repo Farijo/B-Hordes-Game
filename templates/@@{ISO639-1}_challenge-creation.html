@@ -9,7 +9,7 @@
     <title>β'Hordes Games</title>
 </head>
 <body>
-    {{ template "fr_top-bar.html" . }}
+    {{ template "@@{ISO639-1}_top-bar.html" . }}
     <form method="POST" style="width:fit-content">
         <table>
             <tr>
@@ -71,7 +71,7 @@
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
 <script>
-    const goalhtml=`{{ template "fr_goal.html" }}`;
+    const goalhtml=`{{ template "@@{ISO639-1}_goal.html" }}`;
     const mh_lang=`fr`;
 </script>
 <script src="/script/make_challenge.js"></script>
