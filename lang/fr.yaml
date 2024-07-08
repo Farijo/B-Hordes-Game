@@ -83,7 +83,6 @@ end: Fin
 start-now: Démarrer maintenant
 end-now: Terminer maintenant
 scan-participants: Scanner les participants
-participant: Participant
 never-realized: Jamais réalisé
 confirm-end: Confirmer la fin du défi
 add-approbators: Ajouter des approbateurs
@@ -93,14 +92,11 @@ search-title: Entrer une liste de noms ou d'ids séparés par des espaces
 search: Chercher
 result: Résultat
 challenge-created: Défis créés
-approbator: Approbateur
-guest: Invité
 requestor: Postulant
 start-date-must-be-set: Une date de début doit d'abord être renseignée
 challenge-start-warning: Le lancement du défi empechera toute modification, hormis la date de fin
 "yes": "Oui"
 "no": "Non"
-creator: Créateur
 challenge: Défi
 access: Accès
 status: Status

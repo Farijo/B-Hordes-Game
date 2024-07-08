@@ -18,6 +18,7 @@ class GoTemplate(Template):
     idpattern = '(?a:[\-_a-z][\-_a-z0-9]*)'
 
 for file in args.template_file:
+    print(file)
     outfile = basename(file)
 
     with open(file) as f:

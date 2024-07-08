@@ -97,7 +97,7 @@
                 e.setAttribute("sorttable_customkey", e.getAttribute("sorttable_customkey") + (""+(Date.now() - dd.getTime())).padStart(15, '0'));
                 e.title = dd.toLocaleString() + ',' + dd.getMilliseconds()/10;
             } else {
-                e.title = @@{never-realized}
+                e.title = '@@{never-realized}';
             }
         });
 
@@ -127,10 +127,10 @@
 
         endDateInput.on('change', function () {
             if(!this.value || new Date(this.value) < new Date()) {
-                endDateInput.siblings('input').val(@@{end-now});
+                endDateInput.siblings('input').val('@@{end-now}');
                 endDateInput.parent().attr('onsubmit', "return confirm('@@{confirm-end}')");
             } else {
-                endDateInput.siblings('input').val(@@{validate});
+                endDateInput.siblings('input').val('@@{validate}');
                 endDateInput.parent().attr('onsubmit', "dateToISOGMT(this)");
             }
         }).trigger('change');
