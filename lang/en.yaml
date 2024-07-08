@@ -69,7 +69,6 @@ discord-desc-challenge: "1254191205332418701"
 discord-desc-invite: "1254732301867417703"
 discord-main: "1254191087883649137"
 discord-desc-validation: "1254191235653042256"
-mh-lang: en
 stack-picto: Stack pictos
 be-on: Stand on place
 build: Build
@@ -99,8 +98,8 @@ guest: Guest
 requestor: Requestor
 start-date-must-be-set: A start date must be set first
 challenge-start-warning: Challenge start will prevent any modification, except end date
-yes: Yes
-no: No
+"yes": "Yes"
+"no": "No"
 creator: Creator
 challenge: Challenge
 access: Access

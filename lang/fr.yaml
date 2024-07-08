@@ -69,7 +69,6 @@ discord-desc-challenge: "1254191205332418701"
 discord-desc-invite: "1254732301867417703"
 discord-main: "1254191087883649137"
 discord-desc-validation: "1254191235653042256"
-mh-lang: fr
 stack-picto: Accumuler les pictos
 be-on: Être sur la case
 build: Construire
@@ -99,8 +98,8 @@ guest: Invité
 requestor: Postulant
 start-date-must-be-set: Une date de début doit d'abord être renseignée
 challenge-start-warning: Le lancement du défi empechera toute modification, hormis la date de fin
-yes: Oui
-no: Non
+"yes": "Oui"
+"no": "Non"
 creator: Créateur
 challenge: Défi
 access: Accès
