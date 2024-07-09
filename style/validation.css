@@ -153,3 +153,7 @@ div.timeline {
 span.utcdate {
     display: inline-grid;
 }
+
+ul {
+    display: none;
+}
