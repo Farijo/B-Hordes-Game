@@ -29,7 +29,7 @@
             <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onsubmit="dateToISOGMT(this)">
                 <div class="line1">@@{start}</div>
                 <input class="line2" name="start_date" step="60" type="datetime-local" style="margin:0.5em"/>
-                <input type="submit" name="validation" value="validate">@@{validate}</button>
+                <button type="submit" name="validation" value="validate">@@{validate}</button>
             </form>
             <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onsubmit="dateToISOGMT(this)">
                 <div class="line1">@@{end}</div>
@@ -209,7 +209,7 @@
                 }, 1000);
             }
         {{ else }}
-            endDateInput.parent().prop('title', "@@{start-date-must-be-set}").children('input').prop('disabled', true);
+            endDateInput.parent().prop('title', "@@{start-date-must-be-set}").children('[name]').prop('disabled', true);
         {{ end }}
 
         {{ if .challenge.EndDate.Valid }}

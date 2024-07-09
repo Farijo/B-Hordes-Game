@@ -84,7 +84,7 @@
             $('[value=open-inscriptions]').css('display', 'none');
         {{ end }}
         {{ if eq .challenge.Status 1 }}
-            $('form table *:not([type=submit])').prop('disabled', true);
+            $('form table *:not([name=act])').prop('disabled', true);
             $('#more').css('cursor', 'not-allowed').prop('onclick', null).off('click');
             $('[value=save]').css('display', 'none');
             $('[value=validate]').css('display', 'none');
