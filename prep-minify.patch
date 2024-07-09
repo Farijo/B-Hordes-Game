@@ -1,0 +1,165 @@
+diff --git a/templates/@@{ISO639-1}_challenge-creation.html b/templates/@@{ISO639-1}_challenge-creation.html
+index 6212053..0d07a24 100644
+--- a/templates/@@{ISO639-1}_challenge-creation.html
++++ b/templates/@@{ISO639-1}_challenge-creation.html
+@@ -4,7 +4,7 @@
+     <link rel="stylesheet" href="/style/theme.css">
+     <link rel="stylesheet" href="/style/creation.css">
+     <script>
+-        {{ .srvData }}
++        "{{ .srvData }}"
+     </script>
+     <title>β'Hordes Games</title>
+ </head>
+@@ -20,10 +20,10 @@
+                 <td><label>@@{participation}</label></td>
+                 <td>
+                     <select name="participation">
+-                        {{ $access := getAccess "@@{ISO639-1}" }}
+-                        {{ range $index, $access := $access }}
++                        <!-- {{ $access := getAccess "@@{ISO639-1}" }}
++                        {{ range $index, $access := $access }} -->
+                             <option value="{{ $index }}">{{ $access }}</option>
+-                        {{ end }}
++                        <!-- {{ end }} -->
+                     </select>
+                 </td>
+             </tr>
+@@ -76,23 +76,23 @@
+ </script>
+ <script src="/script/make_challenge.js"></script>
+ <script>
+-    {{ if .challenge }}
+-        const goals = [{{ range .goals }}{{ dumpStruct . }},{{ end }}];
+-        bindFormValues({{ .challenge.Access }}, {{ .challenge.Private }}, goals, {{ .challenge.API }});
+-        {{ if eq .challenge.Status 0 }}
++    "{{ if .challenge }}"
++        const goals = ["{{ range .goals }}{{ dumpStruct . }},{{ end }}"];
++        bindFormValues("{{ .challenge.Access }}, {{ .challenge.Private }}, goals, {{ .challenge.API }}");
++        "{{ if eq .challenge.Status 0 }}"
+             $('[value=modify]').css('display', 'none');
+             $('[value=open-inscriptions]').css('display', 'none');
+-        {{ end }}
+-        {{ if eq .challenge.Status 1 }}
++        "{{ end }}"
++        "{{ if eq .challenge.Status 1 }}"
+             $('form table *:not([name=act])').prop('disabled', true);
+             $('#more').css('cursor', 'not-allowed').prop('onclick', null).off('click');
+             $('[value=save]').css('display', 'none');
+             $('[value=validate]').css('display', 'none');
+-        {{ end }}
+-    {{ else }}
++        "{{ end }}"
++    "{{ else }}"
+         addAGoal(false);
+         $('[value=modify]').css('display', 'none');
+         $('[value=open-inscriptions]').css('display', 'none');
+-    {{ end }}
++    "{{ end }}"
+ </script>
+ </html>
+diff --git a/templates/@@{ISO639-1}_challenge-progress.html b/templates/@@{ISO639-1}_challenge-progress.html
+index 9a6fb5b..a46708d 100644
+--- a/templates/@@{ISO639-1}_challenge-progress.html
++++ b/templates/@@{ISO639-1}_challenge-progress.html
+@@ -116,14 +116,14 @@
+         endDateInput.prop('min', startDate.toLocaleString('sv').substring(0, 16));
+         $('.box p').first().text(startDate.toLocaleString());
+ 
+-        {{ if .challenge.EndDate.Valid }}
++        "{{ if .challenge.EndDate.Valid }}"
+             const endDate = new Date("{{ .challenge.EndDate.String }}Z").toLocaleString('sv').substring(0, 16);
+             if(endDateInput.length) {
+                 endDateInput.val(endDate);
+             } else {
+                 $('.box p').last().text(new Date(endDate).toLocaleString());
+             }
+-        {{ end }}
++        "{{ end }}"
+ 
+         endDateInput.on('change', function () {
+             if(!this.value || new Date(this.value) < new Date()) {
+diff --git a/templates/@@{ISO639-1}_challenge-recruit.html b/templates/@@{ISO639-1}_challenge-recruit.html
+index 6f9fce9..86c960f 100644
+--- a/templates/@@{ISO639-1}_challenge-recruit.html
++++ b/templates/@@{ISO639-1}_challenge-recruit.html
+@@ -189,7 +189,7 @@
+         const startDateInput = $('[name=start_date]');
+         const endDateInput = $('[name=end_date]');
+ 
+-        {{ if .challenge.StartDate.Valid }}
++        "{{ if .challenge.StartDate.Valid }}"
+             const startDate = new Date("{{ .challenge.StartDate.String }}Z").toLocaleString('sv').substring(0, 16);
+             startDateInput.val(startDate);
+             endDateInput.prop('min', startDate);
+@@ -208,16 +208,16 @@
+                     sp.text(decomposeTemps(rem));
+                 }, 1000);
+             }
+-        {{ else }}
++        "{{ else }}"
+             endDateInput.parent().prop('title', "@@{start-date-must-be-set}").children('[name]').prop('disabled', true);
+-        {{ end }}
++        "{{ end }}"
+ 
+-        {{ if .challenge.EndDate.Valid }}
++        "{{ if .challenge.EndDate.Valid }}"
+             const endDate = new Date("{{ .challenge.EndDate.String }}Z").toLocaleString('sv').substring(0, 16);
+             startDateInput.prop('max', endDate);
+             endDateInput.val(endDate);
+             $('.box p').last().text(new Date(endDate).toLocaleString());
+-        {{ end }}
++        "{{ end }}"
+ 
+         startDateInput.on('change', function () {
+             if(!this.value || new Date(this.value) < new Date()) {
+diff --git a/templates/@@{ISO639-1}_challenge-table.html b/templates/@@{ISO639-1}_challenge-table.html
+index f0b8731..9cb27f3 100644
+--- a/templates/@@{ISO639-1}_challenge-table.html
++++ b/templates/@@{ISO639-1}_challenge-table.html
+@@ -5,10 +5,10 @@
+         <td>
+             <select>
+                 <option>*</option>
+-                {{ $access := getAccess "@@{ISO639-1}" }}
+-                {{ range $a := $access }}
++                <!-- {{ $access := getAccess "@@{ISO639-1}" }}
++                {{ range $a := $access }} -->
+                 <option>{{ $a }}</option>
+-                {{ end }}
++                <!-- {{ end }} -->
+             </select>
+         </td>
+         <td>
+@@ -21,10 +21,10 @@
+         <td>
+             <select>
+                 <option>*</option>
+-                {{ $status := getStatus "@@{ISO639-1}" }}
+-                {{ range $s := $status }}
++                <!-- {{ $status := getStatus "@@{ISO639-1}" }}
++                {{ range $s := $status }} -->
+                 <option>{{ $s }}</option>
+-                {{ end }}
++                <!-- {{ end }} -->
+             </select>
+         </td>
+         <td></td>
+diff --git a/templates/@@{ISO639-1}_user.html b/templates/@@{ISO639-1}_user.html
+index e7af16b..24e13aa 100644
+--- a/templates/@@{ISO639-1}_user.html
++++ b/templates/@@{ISO639-1}_user.html
+@@ -28,10 +28,10 @@
+     <h2>@@{challenge-as}
+         <select id=type>
+             <option>*</option>
+-            {{ $roles := getRoles "@@{ISO639-1}" }}
+-            {{ range $r := $roles }}
++            <!-- {{ $roles := getRoles "@@{ISO639-1}" }}
++            {{ range $r := $roles }} -->
+             <option>{{ $r }}</option>
+-            {{ end }}
++            <!-- {{ end }} -->
+         </select>
+     </h2>
+     {{template "@@{ISO639-1}_challenge-table.html" .challenges }}
