@@ -1,5 +1,5 @@
 diff --git a/templates/@@{ISO639-1}_challenge-creation.html b/templates/@@{ISO639-1}_challenge-creation.html
-index 6212053..0d07a24 100644
+index c953a76..8282b29 100644
 --- a/templates/@@{ISO639-1}_challenge-creation.html
 +++ b/templates/@@{ISO639-1}_challenge-creation.html
 @@ -4,7 +4,7 @@
@@ -25,35 +25,25 @@ index 6212053..0d07a24 100644
                      </select>
                  </td>
              </tr>
-@@ -76,23 +76,23 @@
+@@ -79,15 +79,15 @@
  </script>
  <script src="/script/make_challenge.js"></script>
  <script>
 -    {{ if .challenge }}
 -        const goals = [{{ range .goals }}{{ dumpStruct . }},{{ end }}];
 -        bindFormValues({{ .challenge.Access }}, {{ .challenge.Private }}, goals, {{ .challenge.API }});
--        {{ if eq .challenge.Status 0 }}
+-        {{ if eq .challenge.Status 1 }}
 +    "{{ if .challenge }}"
 +        const goals = ["{{ range .goals }}{{ dumpStruct . }},{{ end }}"];
 +        bindFormValues("{{ .challenge.Access }}, {{ .challenge.Private }}, goals, {{ .challenge.API }}");
-+        "{{ if eq .challenge.Status 0 }}"
-             $('[value=modify]').css('display', 'none');
-             $('[value=open-inscriptions]').css('display', 'none');
--        {{ end }}
--        {{ if eq .challenge.Status 1 }}
-+        "{{ end }}"
 +        "{{ if eq .challenge.Status 1 }}"
              $('form table *:not([name=act])').prop('disabled', true);
              $('#more').css('cursor', 'not-allowed').prop('onclick', null).off('click');
-             $('[value=save]').css('display', 'none');
-             $('[value=validate]').css('display', 'none');
 -        {{ end }}
 -    {{ else }}
 +        "{{ end }}"
 +    "{{ else }}"
          addAGoal(false);
-         $('[value=modify]').css('display', 'none');
-         $('[value=open-inscriptions]').css('display', 'none');
 -    {{ end }}
 +    "{{ end }}"
  </script>
