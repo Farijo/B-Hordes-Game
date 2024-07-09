@@ -60,16 +60,12 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
     <script>
-        $('span.date').each((i, e) => {
+        $('span.date,span.utcdate').each((i, e) => {
             const date = new Date(e.innerHTML+'Z');
             e.innerHTML = `${date.toLocaleDateString()}<br><span style=\"font-size:80%\">${date.toLocaleTimeString()}</span>`;
         });
         $('section button').click(event => {
             event.target.innerHTML = getComputedStyle($(event.target.parentNode).children('ul').toggle()[0]).display === "none" ? '⟱ ⟱ ⟱' : '⟰ ⟰ ⟰';
-        });
-        $('span.utcdate').each((i, e) => {
-            const date = new Date(e.innerHTML+'Z');
-            e.innerHTML = `${date.toLocaleDateString()}<br><span style=\"font-size:80%\">${date.toLocaleTimeString()}</span>`;
         });
     </script>
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
