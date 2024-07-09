@@ -89,6 +89,7 @@
         {{ end }}
     </table>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
+    <script src="/script/date_format.js"></script>
     <script>
         $('td[title]').each((i, e) => {
             const d = e.title;
@@ -100,17 +101,6 @@
                 e.title = '@@{never-realized}';
             }
         });
-
-        document.addEventListener("DOMContentLoaded", function(event) { 
-            var scrollpos = localStorage.getItem('scrollpos');
-            if (scrollpos) window.scrollTo(0, scrollpos);
-        });
-
-        window.onbeforeunload = function(e) {
-            localStorage.setItem('scrollpos', window.scrollY);
-        };
-
-        const endDateInput = $('[name=end_date]');
 
         const startDate = new Date("{{ .challenge.StartDate.String }}Z");
         endDateInput.prop('min', startDate.toLocaleString('sv').substring(0, 16));
@@ -125,19 +115,7 @@
             }
         {{ end }}
 
-        endDateInput.on('change', function () {
-            if(!this.value || new Date(this.value) < new Date()) {
-                endDateInput.siblings('input').val('@@{end-now}');
-                endDateInput.parent().attr('onsubmit', "return confirm('@@{confirm-end}')");
-            } else {
-                endDateInput.siblings('input').val('@@{validate}');
-                endDateInput.parent().attr('onsubmit', "dateToISOGMT(this)");
-            }
-        }).trigger('change');
-
-        function decomposeTemps(duree) {
-            return `~ ${Math.floor(duree / 3600).padStart(2, '0')}:${Math.floor((duree % 3600) / 60).padStart(2, '0')}:${(duree % 60).padStart(2, '0')}`;
-        }
+        setupDateReactions(endDateInput, '@@{end-now}', 'end-now', '@@{confirm-end}', '@@{validate}');
     </script>
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         new Crate({

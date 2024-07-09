@@ -176,18 +176,9 @@
     </form>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
+    <script src="/script/date_format.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function(event) { 
-            var scrollpos = localStorage.getItem('scrollpos');
-            if (scrollpos) window.scrollTo(0, scrollpos);
-        });
-
-        window.onbeforeunload = function(e) {
-            localStorage.setItem('scrollpos', window.scrollY);
-        };
-
         const startDateInput = $('[name=start_date]');
-        const endDateInput = $('[name=end_date]');
 
         {{ if .challenge.StartDate.Valid }}
             const startDate = new Date("{{ .challenge.StartDate.String }}Z").toLocaleString('sv').substring(0, 16);
@@ -219,21 +210,7 @@
             $('.box p').last().text(new Date(endDate).toLocaleString());
         {{ end }}
 
-        startDateInput.on('change', function () {
-            if(!this.value || new Date(this.value) < new Date()) {
-                startDateInput.siblings('button').val('start-now');
-                startDateInput.siblings('button').text('@@{start-now}');
-                startDateInput.parent().attr('onsubmit', "return confirm('@@{challenge-start-warning}')");
-            } else {
-                startDateInput.siblings('button').val('validate');
-                startDateInput.siblings('button').text('@@{validate}');
-                startDateInput.parent().attr('onsubmit', "dateToISOGMT(this)");
-            }
-        }).trigger('change');
-
-        function decomposeTemps(duree) {
-            return `~ ${Math.floor(duree / 3600).padStart(2, '0')}:${Math.floor((duree % 3600) / 60).padStart(2, '0')}:${(duree % 60).padStart(2, '0')}`;
-        }
+        setupDateReactions(endDateInput, '@@{start-now}', 'start-now', '@@{challenge-start-warning}', '@@{validate}');
     </script>
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         new Crate({
