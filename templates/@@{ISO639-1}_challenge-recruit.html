@@ -210,7 +210,7 @@
             $('.box p').last().text(new Date(endDate).toLocaleString());
         {{ end }}
 
-        setupDateReactions(endDateInput, '@@{start-now}', 'start-now', '@@{challenge-start-warning}', '@@{validate}');
+        setupDateReactions(startDateInput, '@@{start-now}', 'start-now', '@@{challenge-start-warning}', '@@{validate}');
     </script>
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         new Crate({
