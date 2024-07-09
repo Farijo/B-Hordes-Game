@@ -70,7 +70,7 @@ index a51fec5..5cc2e87 100644
          setupDateReactions(endDateInput, '@@{end-now}', 'end-now', '@@{confirm-end}', '@@{validate}');
      </script>
 diff --git a/templates/@@{ISO639-1}_challenge-recruit.html b/templates/@@{ISO639-1}_challenge-recruit.html
-index be89ced..c3abfb0 100644
+index fc694eb..2fc9de6 100644
 --- a/templates/@@{ISO639-1}_challenge-recruit.html
 +++ b/templates/@@{ISO639-1}_challenge-recruit.html
 @@ -180,7 +180,7 @@
@@ -101,7 +101,7 @@ index be89ced..c3abfb0 100644
 -        {{ end }}
 +        "{{ end }}"
  
-         setupDateReactions(endDateInput, '@@{start-now}', 'start-now', '@@{challenge-start-warning}', '@@{validate}');
+         setupDateReactions(startDateInput, '@@{start-now}', 'start-now', '@@{challenge-start-warning}', '@@{validate}');
      </script>
 diff --git a/templates/@@{ISO639-1}_challenge-table.html b/templates/@@{ISO639-1}_challenge-table.html
 index f0b8731..9cb27f3 100644
