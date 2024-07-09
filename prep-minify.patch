@@ -49,10 +49,10 @@ index c953a76..8282b29 100644
  </script>
  </html>
 diff --git a/templates/@@{ISO639-1}_challenge-progress.html b/templates/@@{ISO639-1}_challenge-progress.html
-index 9a6fb5b..a46708d 100644
+index a51fec5..5cc2e87 100644
 --- a/templates/@@{ISO639-1}_challenge-progress.html
 +++ b/templates/@@{ISO639-1}_challenge-progress.html
-@@ -116,14 +116,14 @@
+@@ -106,14 +106,14 @@
          endDateInput.prop('min', startDate.toLocaleString('sv').substring(0, 16));
          $('.box p').first().text(startDate.toLocaleString());
  
@@ -67,22 +67,22 @@ index 9a6fb5b..a46708d 100644
 -        {{ end }}
 +        "{{ end }}"
  
-         endDateInput.on('change', function () {
-             if(!this.value || new Date(this.value) < new Date()) {
+         setupDateReactions(endDateInput, '@@{end-now}', 'end-now', '@@{confirm-end}', '@@{validate}');
+     </script>
 diff --git a/templates/@@{ISO639-1}_challenge-recruit.html b/templates/@@{ISO639-1}_challenge-recruit.html
-index 6f9fce9..86c960f 100644
+index be89ced..c3abfb0 100644
 --- a/templates/@@{ISO639-1}_challenge-recruit.html
 +++ b/templates/@@{ISO639-1}_challenge-recruit.html
-@@ -189,7 +189,7 @@
+@@ -180,7 +180,7 @@
+     <script>
          const startDateInput = $('[name=start_date]');
-         const endDateInput = $('[name=end_date]');
  
 -        {{ if .challenge.StartDate.Valid }}
 +        "{{ if .challenge.StartDate.Valid }}"
              const startDate = new Date("{{ .challenge.StartDate.String }}Z").toLocaleString('sv').substring(0, 16);
              startDateInput.val(startDate);
              endDateInput.prop('min', startDate);
-@@ -208,16 +208,16 @@
+@@ -199,16 +199,16 @@
                      sp.text(decomposeTemps(rem));
                  }, 1000);
              }
@@ -101,8 +101,8 @@ index 6f9fce9..86c960f 100644
 -        {{ end }}
 +        "{{ end }}"
  
-         startDateInput.on('change', function () {
-             if(!this.value || new Date(this.value) < new Date()) {
+         setupDateReactions(endDateInput, '@@{start-now}', 'start-now', '@@{challenge-start-warning}', '@@{validate}');
+     </script>
 diff --git a/templates/@@{ISO639-1}_challenge-table.html b/templates/@@{ISO639-1}_challenge-table.html
 index f0b8731..9cb27f3 100644
 --- a/templates/@@{ISO639-1}_challenge-table.html
