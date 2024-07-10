@@ -30,6 +30,7 @@ func requestMe(userkey string) (*dto.Milestone, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New(resp.Status)
 	}
@@ -37,10 +38,19 @@ func requestMe(userkey string) (*dto.Milestone, error) {
 	var flat struct {
 		*dto.User
 		dto.Milestone
+		Error string
 	}
 	flat.User = &flat.Milestone.User
 
-	return &flat.Milestone, json.NewDecoder(resp.Body).Decode(&flat)
+	if err := json.NewDecoder(resp.Body).Decode(&flat); err != nil {
+		return nil, err
+	}
+
+	if flat.Error > "" {
+		return nil, errors.New(flat.Error)
+	}
+
+	return &flat.Milestone, nil
 }
 
 func requestUser(userkey string, id int) (*dto.User, error) {
@@ -57,8 +67,20 @@ func requestUser(userkey string, id int) (*dto.User, error) {
 		return nil, errors.New(resp.Status)
 	}
 
-	var user dto.User
-	return &user, json.NewDecoder(resp.Body).Decode(&user)
+	var flat struct {
+		dto.User
+		Error string
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&flat); err != nil {
+		return nil, err
+	}
+
+	if flat.Error > "" {
+		return nil, errors.New(flat.Error)
+	}
+
+	return &flat.User, nil
 }
 
 func requestMultipleUsers(userkey, ids string) ([]dto.Milestone, error) {
