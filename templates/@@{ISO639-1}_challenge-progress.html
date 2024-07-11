@@ -24,13 +24,7 @@
             <p></p>
         </div>
         {{ if .selfChallenge }}
-            <script>
-                function dateToISOGMT(e) {
-                    const input = $(e).children('[type="datetime-local"]');
-                    input.val(new Date(input.val()).toISOString().substring(0, 16));
-                }
-            </script>
-            <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onsubmit="dateToISOGMT(this)">
+            <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onformdata="dateToISOGMT(event.formData, 'end_date')">
                 <div class="line1">@@{end}</div>
                 <input class="line2" name="end_date" step="60" type="datetime-local" style="margin:0.5em"/>
                 <button type="submit" name="validation" value="validate">@@{validate}</button>

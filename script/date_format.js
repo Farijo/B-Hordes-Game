@@ -18,11 +18,15 @@ function setupDateReactions(dateInput, oldDateTxt, oldDateVal, oldDateConfirm, n
         } else {
             dateInput.siblings('button').text(newDateTxt);
             dateInput.siblings('button').val('validate');
-            dateInput.parent().attr('onsubmit', "dateToISOGMT(this)");
+            dateInput.parent().attr('onsubmit', null);
         }
     }).trigger('change');
 }
 
 function decomposeTemps(duree) {
     return `~ ${Math.floor(duree / 3600).padStart(2, '0')}:${Math.floor((duree % 3600) / 60).padStart(2, '0')}:${(duree % 60).padStart(2, '0')}`;
+}
+
+function dateToISOGMT(formData, field) {
+    formData.set(field, new Date(formData.get(field)).toISOString().substring(0,16));
 }
