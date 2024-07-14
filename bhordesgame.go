@@ -48,6 +48,7 @@ func main() {
 	r.Static("/script", "script")
 	r.StaticFile("/favicon.ico", "asset/favicon.ico")
 	r.StaticFile("/question.svg", "asset/question.svg")
+	r.StaticFile("/gear.svg", "asset/gear.svg")
 
 	loadTranslations(f, availableLangs)
 	lngHandler := languageSelector(availableLangs)
@@ -55,6 +56,7 @@ func main() {
 
 	r.POST("/", connectionHandle)
 	r.GET("/", lngHandler, indexHandle)
+	r.POST("/settings", settingsHandle)
 	r.GET("/logout", logoutHandle)
 	r.GET("/user/:id", lngHandler, userHandle)
 	r.GET("/challenge/:id", lngHandler, challengeHandle)

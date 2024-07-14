@@ -15,7 +15,7 @@ import (
  *                   GET                   *
  * * * * * * * * * * * * * * * * * * * * * */
 func challengeCreationHandle(c *gin.Context) {
-	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-creation.html", gin.H{"logged": true, "challenge": nil, "srvData": getServerData(c.GetString("key"))})
+	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-creation.html", gin.H{"faq": wantFAQ(c.Cookie(NOFAQ)), "logged": true, "challenge": nil, "srvData": getServerData(c.GetString("key"))})
 }
 
 func challengeHandle(c *gin.Context) {
@@ -42,6 +42,7 @@ func challengeHandle(c *gin.Context) {
 	case 0, 1: // draft, review
 		if selfChallenge {
 			c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-creation.html", gin.H{
+				"faq":       wantFAQ(c.Cookie(NOFAQ)),
 				"logged":    true,
 				"challenge": challenge,
 				"goals":     makeChannelFor(queryChallengeGoals, challenge.ID),
@@ -97,6 +98,7 @@ func challengeHandle(c *gin.Context) {
 		}
 
 		c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-recruit.html", gin.H{
+			"faq":           wantFAQ(c.Cookie(NOFAQ)),
 			"logged":        logged,
 			"selfChallenge": selfChallenge,
 			"selfID":        uid,
@@ -119,6 +121,7 @@ func challengeHandle(c *gin.Context) {
 		}
 
 		c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-progress.html", gin.H{
+			"faq":           wantFAQ(c.Cookie(NOFAQ)),
 			"logged":        logged,
 			"selfChallenge": selfChallenge,
 			"challenge":     challenge,
@@ -135,6 +138,7 @@ func challengeHandle(c *gin.Context) {
 		}
 
 		c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-progress.html", gin.H{
+			"faq":           wantFAQ(c.Cookie(NOFAQ)),
 			"logged":        logged,
 			"selfChallenge": false, // disable challenge action
 			"challenge":     challenge,

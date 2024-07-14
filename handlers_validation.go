@@ -19,6 +19,7 @@ func validationHandle(c *gin.Context) {
 		return
 	}
 	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_validation.html", gin.H{
+		"faq":         wantFAQ(c.Cookie(NOFAQ)),
 		"logged":      true,
 		"validations": mustValidate,
 		"order":       order,

@@ -39,6 +39,7 @@
     <script src="/script/table_filter.js"></script>
     <script src="/script/user_filter.js"></script>
     {{ end }}
+    {{ if .faq }}
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
         new Crate({
             server: '1253836492694880367', // B'Hordes Games
@@ -47,5 +48,6 @@
             glyph: ["/question.svg", "100%"]
         })
     </script>
+    {{ end }}
 </body>
 </html>

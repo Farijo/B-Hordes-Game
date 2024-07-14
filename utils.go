@@ -8,12 +8,23 @@ import (
 	"golang.org/x/text/language"
 )
 
-const LNG_KEY = "lng found"
+const LNG_KEY = "lng_found"
+const NOFAQ = "nofaq"
 
 func languageSelector(langs []language.Tag) func(*gin.Context) {
 	return func(context *gin.Context) {
 		if found := context.GetString(LNG_KEY); found > "" {
 			return
+		}
+		if ck, err := context.Cookie(LNG_KEY); err == nil && ck > "" {
+			switch ck {
+			case "fr":
+			case "en":
+			case "de":
+			case "es":
+				context.Set(LNG_KEY, ck)
+				return
+			}
 		}
 		lngSplited := strings.Split(context.GetHeader("Accept-Language"), ",")
 		qualityValueList := make([][]string, len(lngSplited))
@@ -65,4 +76,8 @@ func languageSelector(langs []language.Tag) func(*gin.Context) {
 
 		context.Set(LNG_KEY, langs[0].String())
 	}
+}
+
+func wantFAQ(cookie string, _ error) bool {
+	return cookie != "1"
 }
