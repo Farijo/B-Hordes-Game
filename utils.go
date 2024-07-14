@@ -19,8 +19,11 @@ func languageSelector(langs []language.Tag) func(*gin.Context) {
 		if ck, err := context.Cookie(LNG_KEY); err == nil && ck > "" {
 			switch ck {
 			case "fr":
+				fallthrough
 			case "en":
+				fallthrough
 			case "de":
+				fallthrough
 			case "es":
 				context.Set(LNG_KEY, ck)
 				return
