@@ -74,38 +74,44 @@ function bindFormValues(participation, private, goals, api) {
     let deletable = false;
 
     for (const goal of goals) {
-        
         addAGoal(deletable);
         deletable = true;
-
-        $(`[name=type]:last`).val(goal.Typ).trigger('change');
-
-        switch (goal.Typ) {
-            case 1: // case
-                if(goal.X.Valid) $(`[name=x]:last`).val(goal.X.Byte).trigger('change');
-                if(goal.Y.Valid) $(`[name=y]:last`).val(goal.Y.Byte).trigger('change');
-            case 0: // picto
-            case 3: // banque
-                if(goal.Amount.Valid) $(`[name=count]:last`).val(goal.Amount.Int32).trigger('change');
-            case 2: // construire
-                const nval = goal.Entity;
-                for (var key in pictImg[goal.Typ]) {
-                    if (pictImg[goal.Typ][key].id == nval) {
-                        $(`.goal-list:last`).val(key).trigger('change');
-                        break;
-                    }
-                }
-                break;
-            case 4: // perso
-                const ta = document.createElement('textarea');
-                ta.innerHTML = goal.Custom.String;
-                if(goal.Custom.Valid) $(`[name=custom]:last`).val(ta.value).trigger('change');
-            default:
-                break;
-        }
+        bindGoal(goal);
     }
 
     if(!deletable) {
         addAGoal(false);
     }
+}
+
+function bindGoal(goal) {
+    $(`[name=type]:last`).val(goal.Typ).trigger('change');
+
+    switch (goal.Typ) {
+        case 1: // case
+            if(goal.X.Valid) $(`[name=x]:last`).val(goal.X.Byte).trigger('change');
+            if(goal.Y.Valid) $(`[name=y]:last`).val(goal.Y.Byte).trigger('change');
+        case 0: // picto
+        case 3: // banque
+            if(goal.Amount.Valid) $(`[name=count]:last`).val(goal.Amount.Int32).trigger('change');
+        case 2: // construire
+            const nval = goal.Entity;
+            for (var key in pictImg[goal.Typ]) {
+                if (pictImg[goal.Typ][key].id == nval) {
+                    $(`.goal-list:last`).val(key).trigger('change');
+                    break;
+                }
+            }
+            break;
+        case 4: // perso
+            const ta = document.createElement('textarea');
+            ta.innerHTML = goal.Custom.String;
+            if(goal.Custom.Valid) $(`[name=custom]:last`).val(ta.value).trigger('change');
+        default:
+            break;
+    }
+}
+
+function addGoals(group) {
+    $('body').append('<script src=/script/goals_'+group+'.js></script>');
 }
