@@ -45,3 +45,7 @@ input[name="act"] {
 .checklabel > input{
     margin: 5px;
 }
+
+br~button {
+    margin-top: 1em;
+}
