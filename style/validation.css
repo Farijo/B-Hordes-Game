@@ -123,7 +123,7 @@ div.timeline {
     -webkit-transform: translateX(42px);
 }
 .radio:checked ~ .content {
-    max-height: 500px;
+    max-height: none;
     border-color: #7e4d2a;
     margin-right: 20px;
     -webkit-transform: translateX(20px);
