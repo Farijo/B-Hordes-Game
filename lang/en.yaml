@@ -116,3 +116,8 @@ created-challenge: Created challenge
 challenge-as: Challenge as
 previous: Previous
 current: Current
+import: Import
+export: Export
+copied-toast: Copied !
+predefined: Predefined
+load: Load

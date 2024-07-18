@@ -40,7 +40,16 @@
                 <td>
                     <label>@@{goals}</label>
                     <br>
-                    <button type="button" onclick="addGoals('test')">Lucha</button>
+                    <button type="button" onclick="document.querySelector('dialog').showModal()">@@{import}</button>
+                    <button type="button" onclick="exportGoals(this, '@@{export}', '@@{copied-toast}')">@@{export}</button>
+                    <dialog style="text-align: start;">
+                        <span>@@{predefined}</span><br>
+                        <button type="button" onclick="importSpecificGoal('lucha')">Lucha de los pictos</button>
+                        <br><br><br>
+                        <span>@@{custom}</span><br>
+                        <input onclick="event.stopPropagation()">
+                        <button type="button" onclick="loadGoals(this.previousElementSibling.value)">@@{load}</button>
+                    </dialog>
                 </td>
                 <td>
                     <div id="all-goals">

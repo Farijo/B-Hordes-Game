@@ -116,3 +116,8 @@ created-challenge: Défis créés
 challenge-as: Défis en tant que
 previous: Précédent
 current: Actuel
+import: Importer
+export: Exporter
+copied-toast: Copié !
+predefined: Prédéfinis
+load: Charger
