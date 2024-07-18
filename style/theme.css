@@ -3,9 +3,14 @@
     color: #f0d79e;
 }
 
-body {
+body, dialog {
     background: #5C2B20;
     position: relative;
+}
+
+::backdrop {
+    background-color: #000;
+    opacity: 0.5;
 }
 
 body > * {

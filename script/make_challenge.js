@@ -65,6 +65,7 @@ addAGoal = function(deletable) {
 })();
 
 $('#more').on('click', addAGoal);
+$('dialog').on('click', e => e.delegateTarget.close());
 
 function bindFormValues(participation, private, goals, api) {
     $('[name=participation]').val(participation).trigger('change');
@@ -89,11 +90,11 @@ function bindGoal(goal) {
 
     switch (goal.Typ) {
         case 1: // case
-            if(goal.X.Valid) $(`[name=x]:last`).val(goal.X.Byte).trigger('change');
-            if(goal.Y.Valid) $(`[name=y]:last`).val(goal.Y.Byte).trigger('change');
+            $(`[name=x]:last`).val(goal.X.Valid ? goal.X.Byte : "").trigger('change');
+            $(`[name=y]:last`).val(goal.Y.Valid ? goal.Y.Byte : "").trigger('change');
         case 0: // picto
         case 3: // banque
-            if(goal.Amount.Valid) $(`[name=count]:last`).val(goal.Amount.Int32).trigger('change');
+            $(`[name=count]:last`).val(goal.Amount.Valid ? goal.Amount.Int32 : "").trigger('change');
         case 2: // construire
             const nval = goal.Entity;
             for (var key in pictImg[goal.Typ]) {
@@ -106,12 +107,61 @@ function bindGoal(goal) {
         case 4: // perso
             const ta = document.createElement('textarea');
             ta.innerHTML = goal.Custom.String;
-            if(goal.Custom.Valid) $(`[name=custom]:last`).val(ta.value).trigger('change');
+            $(`[name=custom]:last`).val(goal.Custom.Valid ? ta.value : "").trigger('change');
         default:
             break;
     }
 }
 
-function addGoals(group) {
+function importSpecificGoal(group) {
     $('body').append('<script src=/script/goals_'+group+'.js></script>');
+}
+
+let timeout = null;
+function exportGoals(btn, txtMain, txtPressed) {
+    const out = [];
+    for (const [name, value] of new FormData($('#all-goals').closest('form')[0])) {
+        switch (name) {
+            case "type":
+                out.push({Typ: +value});
+                break;
+            case "x":
+                out[out.length-1].X = {Valid: !!value, Byte: +value};
+                break;
+            case "y":
+                out[out.length-1].Y = {Valid: !!value, Byte: +value};
+                break;
+            case "count":
+                out[out.length-1].Amount = {Valid: !!value, Int32: +value};
+                break;
+            case "val":
+                out[out.length-1].Entity = +value;
+                break;
+            case "custom":
+                out[out.length-1].Custom = {Valid: !!value, String: value};
+                break;
+
+            default:
+                break;
+        }
+    }
+    out[out.length-1].last = true;
+    navigator.clipboard.writeText(JSON.stringify(out));
+    if (timeout) {
+        clearTimeout(timeout);
+    }
+    btn.innerText = txtPressed;
+    timeout = setTimeout(_ => {
+        btn.innerText = txtMain;
+        timeout = null;
+    }, 500);
+}
+
+function loadGoals(str) {
+    for (const goal of JSON.parse(str)) {
+        bindGoal(goal);
+        if (!goal.last) {
+            addAGoal(true);
+        }
+    }
 }
