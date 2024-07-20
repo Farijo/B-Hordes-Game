@@ -252,8 +252,22 @@ func insertMilestone(milestone *dto.Milestone) error {
 
 	// don't insert success without milestone
 	for _, success := range successes {
-		if _, err := tx.Exec(`INSERT INTO success VALUES(?, ?, UTC_TIMESTAMP(2), ?)
-		ON DUPLICATE KEY UPDATE amount = amount`, success.User, success.Goal, success.Amount); err != nil {
+		if _, err := tx.Exec(`INSERT INTO success SELECT ?, goal.id, UTC_TIMESTAMP(2), IF(goal.amount IS NULL, 
+			?,
+			LEAST(
+				?,
+				IF(goal.typ = 0,
+					IFNULL(
+						goal.amount + (SELECT amount FROM success WHERE success.goal = goal.id AND success.user = ? ORDER BY accomplished LIMIT 1),
+						?
+					),
+					goal.amount
+				)
+			)
+		)
+		FROM goal
+		WHERE goal.id = ?
+		ON DUPLICATE KEY UPDATE success.amount = success.amount`, success.User, success.Amount, success.Amount, success.User, success.Amount, success.Goal); err != nil {
 			return err
 		}
 	}
@@ -925,10 +939,23 @@ func insertSuccesses(user int, dt string, amounts map[string][]string, requestor
 
 	for goal, amount := range amounts {
 		if len(amount) > 0 && amount[0] > "" {
-			if _, err := tx.Exec(`INSERT INTO success SELECT ?, goal.id, ?, ? FROM goal
+			if _, err := tx.Exec(`INSERT INTO success SELECT ?, goal.id, ?, IF(goal.amount IS NULL, 
+				?,
+				LEAST(
+					?,
+					IF(goal.typ = 0,
+						IFNULL(
+							goal.amount + (SELECT amount FROM success WHERE success.goal = goal.id AND success.user = ? ORDER BY accomplished LIMIT 1),
+							?
+						),
+						goal.amount
+					)
+				)
+			)
+			FROM goal
 			JOIN validator ON validator.challenge = goal.challenge
 			WHERE validator.user = ?
-			AND goal.id = ?`, user, dt, amount[0], requestor, goal); err != nil {
+			AND goal.id = ?`, user, dt, amount[0], amount[0], user, amount[0], requestor, goal); err != nil {
 				return err
 			}
 		}
