@@ -149,7 +149,7 @@ func mkmap() map[int]GoalHeader {
 }
 
 func dumpMile(mile *dto.Milestone, userkey, lng string) template.HTML {
-	lngData := translations[lng]
+	lngData := getTrad(lng)
 	res := make(map[string]any, 0)
 	if mile.IsGhost.Valid {
 		res[lngData["ghost"]] = mile.IsGhost.Bool

@@ -140,6 +140,8 @@ div.timeline {
     opacity: 1;
     visibility: visible;
     text-align: left;
+    display: block;
+    box-sizing: content-box;
 }
 
 .name {

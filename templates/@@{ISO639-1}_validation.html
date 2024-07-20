@@ -39,7 +39,7 @@
                                     <tr>
                                         <td>{{ $mm.Text }}<br><img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }}</td>
                                         <td>{{ $goal.Previous.Int32 }}</td>
-                                        <td><input name="{{ $goal.ID }}" type="number" min="0" {{if $goal.Amount.Valid }}max="{{ $goal.Amount.Int32 }}"{{end}} {{if $goal.Success.Valid }}value="{{ $goal.Success.Int32 }}"{{ end }}/></td>
+                                        <td><input name="{{ $goal.ID }}" type="number" min="0" {{if $goal.Success.Valid }}value="{{ $goal.Success.Int32 }}"{{ end }}/></td>
                                     </tr>
                                 {{ end }}
                                     <tr>
