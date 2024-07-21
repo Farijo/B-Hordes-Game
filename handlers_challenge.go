@@ -314,7 +314,7 @@ func makeChannelActionString(logged bool, challenge dto.DetailedChallenge, uid i
 	if logged {
 		go func() {
 			defer close(action)
-			lngData := translations[lang]
+			lngData := getTrad(lang)
 			invited, participate := queryChallengeUserStatus(challenge.ID, uid)
 			if participate {
 				action <- []string{"x", lngData["retire"]}

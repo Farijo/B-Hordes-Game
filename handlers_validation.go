@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"html"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-sql-driver/mysql"
 )
 
 /* * * * * * * * * * * * * * * * * * * * * *
@@ -47,8 +49,15 @@ func validateGoalHandle(c *gin.Context) {
 	delete(c.Request.PostForm, "dt")
 	insertErr := insertSuccesses(mileData.User, mileData.Dt, c.Request.PostForm, c.GetInt("uid"))
 	if insertErr != nil {
-		fmt.Println(insertErr)
-		c.Status(http.StatusBadRequest)
+		switch errCasted := insertErr.(type) {
+		case *mysql.MySQLError:
+			if errCasted.Number == 1062 {
+				c.Data(http.StatusBadRequest, "text/html", []byte(html.UnescapeString("Cannot specify already reached value")))
+			}
+		default:
+			fmt.Println(insertErr)
+			c.Status(http.StatusBadRequest)
+		}
 		return
 	}
 

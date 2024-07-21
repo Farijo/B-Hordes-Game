@@ -251,25 +251,31 @@ func insertMilestone(milestone *dto.Milestone) error {
 	}
 
 	// don't insert success without milestone
-	for _, success := range successes {
-		if _, err := tx.Exec(`INSERT INTO success SELECT ?, goal.id, UTC_TIMESTAMP(2), IF(goal.amount IS NULL, 
-			?,
-			LEAST(
-				?,
-				IF(goal.typ = 0,
-					IFNULL(
-						goal.amount + (SELECT amount FROM success WHERE success.goal = goal.id AND success.user = ? ORDER BY accomplished LIMIT 1),
-						?
-					),
-					goal.amount
-				)
+	var stmtBuilder strings.Builder
+	stmtBuilder.Grow(340 + 36*len(successes) + 113)
+	stmtBuilder.WriteString(`INSERT INTO success SELECT ?, goal.id, UTC_TIMESTAMP(2), IF(goal.amount IS NULL, 
+		current,
+		LEAST(
+			current,
+			IF(goal.typ = 0,
+				IFNULL(
+					goal.amount + (SELECT amount FROM success WHERE success.goal = goal.id AND success.user = ? ORDER BY accomplished LIMIT 1),
+					current
+				),
+				goal.amount
 			)
 		)
-		FROM goal
-		WHERE goal.id = ?
-		ON DUPLICATE KEY UPDATE success.amount = success.amount`, success.User, success.Amount, success.Amount, success.User, success.Amount, success.Goal); err != nil {
-			return err
-		}
+	)
+	FROM goal JOIN (`)
+	successValues := make([]any, 0, 2+2*len(successes))
+	successValues = append(successValues, milestone.User.ID, milestone.User.ID)
+	for _, success := range successes {
+		successValues = append(successValues, success.Amount, success.Goal)
+		stmtBuilder.WriteString(`SELECT ? AS current, ? AS gid UNION `)
+	}
+	stmtBuilder.WriteString(`SELECT 0 AS current, -1 AS gid) AS input ON goal.id = gid ON DUPLICATE KEY UPDATE success.amount = success.amount`)
+	if _, err := tx.Exec(stmtBuilder.String(), successValues...); err != nil {
+		return err
 	}
 
 	return tx.Commit()
@@ -937,28 +943,35 @@ func insertSuccesses(user int, dt string, amounts map[string][]string, requestor
 		return err
 	}
 
+	var stmtBuilder strings.Builder
+	stmtBuilder.Grow(405 + 57)
+	stmtBuilder.WriteString(`INSERT INTO success SELECT ?, goal.id, ?, IF(goal.amount IS NULL, 
+		current,
+		LEAST(
+			current,
+			IF(goal.typ = 0,
+				IFNULL(
+					goal.amount + (SELECT amount FROM success WHERE success.goal = goal.id AND success.user = ? ORDER BY accomplished LIMIT 1),
+					current
+				),
+				goal.amount
+			)
+		)
+	)
+	FROM goal
+	JOIN validator ON validator.challenge = goal.challenge AND validator.user = ?
+	JOIN (`)
+	successValues := make([]any, 0, 4+2*len(amounts))
+	successValues = append(successValues, user, dt, user, requestor)
 	for goal, amount := range amounts {
 		if len(amount) > 0 && amount[0] > "" {
-			if _, err := tx.Exec(`INSERT INTO success SELECT ?, goal.id, ?, IF(goal.amount IS NULL, 
-				?,
-				LEAST(
-					?,
-					IF(goal.typ = 0,
-						IFNULL(
-							goal.amount + (SELECT amount FROM success WHERE success.goal = goal.id AND success.user = ? ORDER BY accomplished LIMIT 1),
-							?
-						),
-						goal.amount
-					)
-				)
-			)
-			FROM goal
-			JOIN validator ON validator.challenge = goal.challenge
-			WHERE validator.user = ?
-			AND goal.id = ?`, user, dt, amount[0], amount[0], user, amount[0], requestor, goal); err != nil {
-				return err
-			}
+			successValues = append(successValues, amount[0], goal)
+			stmtBuilder.WriteString(`SELECT ? AS current, ? AS gid UNION `)
 		}
+	}
+	stmtBuilder.WriteString(`SELECT 0 AS current, -1 AS gid) AS input ON goal.id = gid`)
+	if _, err := tx.Exec(stmtBuilder.String(), successValues...); err != nil {
+		return err
 	}
 
 	return tx.Commit()
