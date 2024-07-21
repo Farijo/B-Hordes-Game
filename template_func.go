@@ -4,7 +4,6 @@ import (
 	"bhordesgame/dto"
 	"encoding/json"
 	"fmt"
-	"html"
 	"html/template"
 	"io/fs"
 	"strconv"
@@ -76,9 +75,9 @@ func getRoles(lang string) []string {
 }
 
 func dumpStruct(strct *dto.Goal) template.JS {
-	rep := `"`
-	strct.Custom.String = rep + html.EscapeString(strct.Custom.String) + rep
-	return template.JS(strings.ReplaceAll(fmt.Sprintf("%+v", *strct), " ", ","))
+	var builder strings.Builder
+	json.NewEncoder(&builder).Encode(strct)
+	return template.JS(builder.String())
 }
 
 type GoalHTML struct {
@@ -240,6 +239,9 @@ func dumpMile(mile *dto.Milestone, userkey, lng string) template.HTML {
 			res[lngData["items"]] = itemMap
 		}
 	}
-	s, _ := json.MarshalIndent(res, "", "&nbsp;&nbsp;")
-	return template.HTML(strings.ReplaceAll(string(s), "\n", "<br>"))
+	var builder strings.Builder
+	enc := json.NewEncoder(&builder)
+	enc.SetIndent("<br>", "&nbsp;&nbsp;")
+	enc.Encode(res)
+	return template.HTML(builder.String())
 }

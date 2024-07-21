@@ -252,7 +252,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 
 	// don't insert success without milestone
 	var stmtBuilder strings.Builder
-	stmtBuilder.Grow(340 + 36*len(successes) + 113)
+	stmtBuilder.Grow(370 + 17*len(successes) + 83)
 	stmtBuilder.WriteString(`INSERT INTO success SELECT ?, goal.id, UTC_TIMESTAMP(2), IF(goal.amount IS NULL, 
 		current,
 		LEAST(
@@ -266,14 +266,14 @@ func insertMilestone(milestone *dto.Milestone) error {
 			)
 		)
 	)
-	FROM goal JOIN (`)
+	FROM goal JOIN (SELECT 0 AS current, -1 AS gid`)
 	successValues := make([]any, 0, 2+2*len(successes))
 	successValues = append(successValues, milestone.User.ID, milestone.User.ID)
 	for _, success := range successes {
 		successValues = append(successValues, success.Amount, success.Goal)
-		stmtBuilder.WriteString(`SELECT ? AS current, ? AS gid UNION `)
+		stmtBuilder.WriteString(` UNION SELECT ?,?`)
 	}
-	stmtBuilder.WriteString(`SELECT 0 AS current, -1 AS gid) AS input ON goal.id = gid ON DUPLICATE KEY UPDATE success.amount = success.amount`)
+	stmtBuilder.WriteString(`) AS input ON goal.id = gid ON DUPLICATE KEY UPDATE success.amount = success.amount`)
 	if _, err := tx.Exec(stmtBuilder.String(), successValues...); err != nil {
 		return err
 	}
@@ -944,7 +944,7 @@ func insertSuccesses(user int, dt string, amounts map[string][]string, requestor
 	}
 
 	var stmtBuilder strings.Builder
-	stmtBuilder.Grow(405 + 57)
+	stmtBuilder.Grow(435 + 27)
 	stmtBuilder.WriteString(`INSERT INTO success SELECT ?, goal.id, ?, IF(goal.amount IS NULL, 
 		current,
 		LEAST(
@@ -960,16 +960,16 @@ func insertSuccesses(user int, dt string, amounts map[string][]string, requestor
 	)
 	FROM goal
 	JOIN validator ON validator.challenge = goal.challenge AND validator.user = ?
-	JOIN (`)
+	JOIN (SELECT 0 AS current, -1 AS gid`)
 	successValues := make([]any, 0, 4+2*len(amounts))
 	successValues = append(successValues, user, dt, user, requestor)
 	for goal, amount := range amounts {
 		if len(amount) > 0 && amount[0] > "" {
 			successValues = append(successValues, amount[0], goal)
-			stmtBuilder.WriteString(`SELECT ? AS current, ? AS gid UNION `)
+			stmtBuilder.WriteString(` UNION SELECT ?,?`)
 		}
 	}
-	stmtBuilder.WriteString(`SELECT 0 AS current, -1 AS gid) AS input ON goal.id = gid`)
+	stmtBuilder.WriteString(`) AS input ON goal.id = gid`)
 	if _, err := tx.Exec(stmtBuilder.String(), successValues...); err != nil {
 		return err
 	}
