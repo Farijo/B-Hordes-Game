@@ -94,3 +94,24 @@ func (incoming *Milestone) CheckFieldsDifference(previous *Milestone) bool {
 
 	return hasChanges
 }
+
+func (incoming *Milestone) HasData() bool {
+	return incoming.IsGhost.Valid ||
+		incoming.PlayedMaps.Valid ||
+		incoming.Rewards.Valid ||
+		incoming.Dead.Valid ||
+		incoming.Out.Valid ||
+		incoming.Ban.Valid ||
+		incoming.BaseDef.Valid ||
+		incoming.X.Valid ||
+		incoming.Y.Valid ||
+		incoming.Job.Valid ||
+		incoming.Map.Wid.Valid ||
+		incoming.Map.Hei.Valid ||
+		incoming.Map.Days.Valid ||
+		incoming.Map.Conspiracy.Valid ||
+		incoming.Map.Custom.Valid ||
+		incoming.Map.City.Buildings.Valid ||
+		incoming.Map.City.Bank.Valid ||
+		incoming.Map.Zones.Valid
+}

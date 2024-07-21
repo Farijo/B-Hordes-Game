@@ -138,7 +138,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 	}
 	defer tx.Rollback()
 
-	rows, err := tx.Query(`SELECT goal.id,typ,entity, challenge.flags & 0x08 = 0 as api
+	rows, err := tx.Query(`SELECT goal.id,typ,entity, challenge.flags & 0x08 = 0 as api, challenge.start_date
 	FROM goal
 	JOIN challenge ON goal.challenge = challenge.id
 	JOIN participant ON challenge.id = participant.challenge AND participant.user = ?
@@ -150,14 +150,19 @@ func insertMilestone(milestone *dto.Milestone) error {
 	}
 	successes := make([]dto.Success, 0)
 	rowPresent := false
+	lastStarted := ""
 	for rows.Next() {
 		var g dto.Goal
 		var api bool
-		if err = rows.Scan(&g.ID, &g.Typ, &g.Entity, &api); err != nil {
+		var startDate sql.NullString
+		if err = rows.Scan(&g.ID, &g.Typ, &g.Entity, &api, &startDate); err != nil {
 			rows.Close()
 			return err
 		}
 		rowPresent = true
+		if startDate.Valid && startDate.String > lastStarted {
+			lastStarted = startDate.String
+		}
 		if !api {
 			continue
 		}
@@ -190,7 +195,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 		return nil
 	}
 
-	rows, err = tx.Query(`SELECT isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, custom, buildings, bank, zoneItems
+	rows, err = tx.Query(`SELECT dt, isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, custom, buildings, bank, zoneItems
 	FROM milestone WHERE user = ? ORDER BY dt ASC`, milestone.User.ID)
 	if err != nil {
 		return err
@@ -198,6 +203,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 	var previousMS dto.Milestone
 	for rows.Next() {
 		if err = rows.Scan(
+			&previousMS.Dt,
 			&previousMS.IsGhost,
 			&previousMS.PlayedMaps,
 			&previousMS.Rewards,
@@ -222,8 +228,10 @@ func insertMilestone(milestone *dto.Milestone) error {
 	}
 	rows.Close()
 
-	if !milestone.CheckFieldsDifference(&previousMS) {
+	if !milestone.CheckFieldsDifference(&previousMS) && lastStarted < previousMS.Dt {
 		// nothing has changed since last milestone
+		// AND
+		// no challenge started since last milestone
 		return tx.Commit()
 	}
 
@@ -892,10 +900,14 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 				if last.Milestone.Dt == milestone.Dt && last.Milestone.User.ID == milestone.User.ID {
 					result[challenge.ID][len(result[challenge.ID])-1].Goals = append(last.Goals, Acompletion{goal, previousAcompletion[goal.ID], successAmount})
 				} else {
-					result[challenge.ID] = append(result[challenge.ID], Verification{milestone, []Acompletion{{goal, previousAcompletion[goal.ID], successAmount}}})
+					if milestone.HasData() {
+						result[challenge.ID] = append(result[challenge.ID], Verification{milestone, []Acompletion{{goal, previousAcompletion[goal.ID], successAmount}}})
+					}
 				}
 			} else {
-				result[challenge.ID] = Verifications{{milestone, []Acompletion{{goal, previousAcompletion[goal.ID], successAmount}}}}
+				if milestone.HasData() {
+					result[challenge.ID] = Verifications{{milestone, []Acompletion{{goal, previousAcompletion[goal.ID], successAmount}}}}
+				}
 			}
 			fallthrough
 		case 2:
