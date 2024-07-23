@@ -260,7 +260,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 
 	// don't insert success without milestone
 	var stmtBuilder strings.Builder
-	stmtBuilder.Grow(370 + 17*len(successes) + 83)
+	stmtBuilder.Grow(370 + 21*len(successes) + 83)
 	stmtBuilder.WriteString(`INSERT INTO success SELECT ?, goal.id, UTC_TIMESTAMP(2), IF(goal.amount IS NULL, 
 		current,
 		LEAST(
@@ -279,7 +279,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 	successValues = append(successValues, milestone.User.ID, milestone.User.ID)
 	for _, success := range successes {
 		successValues = append(successValues, success.Amount, success.Goal)
-		stmtBuilder.WriteString(` UNION SELECT ?,?`)
+		stmtBuilder.WriteString(` UNION ALL SELECT ?,?`)
 	}
 	stmtBuilder.WriteString(`) AS input ON goal.id = gid ON DUPLICATE KEY UPDATE success.amount = success.amount`)
 	if _, err := tx.Exec(stmtBuilder.String(), successValues...); err != nil {
@@ -307,24 +307,26 @@ func queryMultipleUsers(ch chan<- *dto.DetailedUser, idents []string) {
 		return
 	}
 
-	sqlStmt := `SELECT user.id, user.name, simplified_name, avatar, COUNT(DISTINCT challenge.id), COUNT(DISTINCT participant.challenge)
+	var sqlStmt strings.Builder
+	sqlStmt.Grow(293 + 36*len(idents) + 34)
+	sqlStmt.WriteString(`SELECT user.id, user.name, simplified_name, avatar, COUNT(DISTINCT challenge.id), COUNT(DISTINCT participant.challenge)
 				FROM user
 				LEFT JOIN challenge ON user.id = challenge.creator
 				LEFT JOIN participant ON participant.user = user.id
-				WHERE user.id IN (SELECT id FROM user WHERE `
-	values := make([]any, 0, 3)
+				WHERE user.id IN (SELECT id FROM user WHERE `)
+	values := make([]any, 0, 2*len(idents))
 	for _, ident := range idents {
 		if len(ident) > 1 {
-			sqlStmt += "id = ? OR simplified_name LIKE ? OR "
+			sqlStmt.WriteString("id = ? OR simplified_name LIKE ? OR ")
 			values = append(values, ident, "%"+ident+"%")
 		}
 	}
 	if len(values) == 0 {
 		return
 	}
-	sqlStmt = sqlStmt[:len(sqlStmt)-3] + ") GROUP BY user.id, user.name"
+	sqlStmt.WriteString("FALSE) GROUP BY user.id, user.name")
 
-	rows, err := dbConn().Query(sqlStmt, values...)
+	rows, err := dbConn().Query(sqlStmt.String(), values...)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -421,6 +423,19 @@ func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, view
 	}
 }
 
+func insertGoals(challengeId int, goals []dto.Goal) (sql.Result, error) {
+	var sqlStmt strings.Builder
+	sqlStmt.Grow(71 + 23*len(goals))
+	sqlStmt.WriteString("INSERT INTO goal (challenge, typ, entity, amount, x, y, custom) VALUES ")
+	values := make([]any, 0, 3*len(goals))
+	for _, g := range goals {
+		sqlStmt.WriteString("(?, ?, ?, ?, ?, ?, ?), ")
+		values = append(values, challengeId, g.Typ, g.Entity, g.Amount, g.X, g.Y, g.Custom)
+	}
+
+	return dbConn().Exec(sqlStmt.String()[:sqlStmt.Len()-2], values...)
+}
+
 func insertChallenge(toInsert *dto.Challenge, associated *[]dto.Goal) (int, error) {
 	if len(*associated) == 0 {
 		return 0, errors.New("cannot create challenge without goals")
@@ -437,15 +452,7 @@ func insertChallenge(toInsert *dto.Challenge, associated *[]dto.Goal) (int, erro
 	}
 	challengeId := int(challengeId64)
 
-	sqlStmt := "INSERT INTO goal (challenge, typ, entity, amount, x, y, custom) VALUES "
-	values := make([]any, 0, 3*len(*associated))
-	for _, g := range *associated {
-		sqlStmt += "(?, ?, ?, ?, ?, ?, ?), "
-		values = append(values, challengeId, g.Typ, g.Entity, g.Amount, g.X, g.Y, g.Custom)
-	}
-	sqlStmt = sqlStmt[:len(sqlStmt)-2]
-
-	_, err = dbConn().Exec(sqlStmt, values...)
+	_, err = insertGoals(challengeId, *associated)
 
 	return challengeId, err
 }
@@ -490,15 +497,7 @@ func updateChallenge(toUpdate *dto.Challenge, associated *[]dto.Goal) error {
 		return err
 	}
 
-	sqlStmt := "INSERT INTO goal (challenge, typ, entity, amount, x, y, custom) VALUES "
-	values := make([]any, 0, 3*len(*associated))
-	for _, g := range *associated {
-		sqlStmt += "(?, ?, ?, ?, ?, ?, ?), "
-		values = append(values, toUpdate.ID, g.Typ, g.Entity, g.Amount, g.X, g.Y, g.Custom)
-	}
-	sqlStmt = sqlStmt[:len(sqlStmt)-2]
-
-	_, err = dbConn().Exec(sqlStmt, values...)
+	_, err = insertGoals(toUpdate.ID, *associated)
 
 	return err
 }
@@ -936,26 +935,28 @@ func insertSuccesses(user int, dt string, amounts map[string][]string, requestor
 	}
 	defer tx.Rollback()
 
-	values := make([]any, 0, 1+len(amounts))
-	placeholder := ""
+	var stmtBuilder strings.Builder
+	stmtBuilder.Grow(148 + 2*len(amounts) + 82)
+	stmtBuilder.WriteString(`DELETE success FROM success
+		JOIN goal ON goal.id = success.goal
+		JOIN validator ON validator.challenge = goal.challenge
+		WHERE success.goal IN (`)
+	values := make([]any, 0, len(amounts)+3)
 	for goal := range amounts {
 		values = append(values, goal)
-		placeholder += "?,"
+		stmtBuilder.WriteString("?,")
 	}
-	placeholder = placeholder[:len(placeholder)-1]
+	stmtBuilder.WriteString(`-1)
+		AND validator.user = ?
+		AND success.user = ?
+		AND success.accomplished = ?`)
 	values = append(values, requestor, user, dt)
 
-	if _, err := tx.Exec(`DELETE success FROM success
-	JOIN goal ON goal.id = success.goal
-	JOIN validator ON validator.challenge = goal.challenge
-	WHERE success.goal IN (`+placeholder+`)
-	AND validator.user = ?
-	AND success.user = ?
-	AND success.accomplished = ?`, values...); err != nil {
+	if _, err := tx.Exec(stmtBuilder.String(), values...); err != nil {
 		return err
 	}
 
-	var stmtBuilder strings.Builder
+	stmtBuilder.Reset()
 	stmtBuilder.Grow(435 + 27)
 	stmtBuilder.WriteString(`INSERT INTO success SELECT ?, goal.id, ?, IF(goal.amount IS NULL, 
 		current,
@@ -978,7 +979,7 @@ func insertSuccesses(user int, dt string, amounts map[string][]string, requestor
 	for goal, amount := range amounts {
 		if len(amount) > 0 && amount[0] > "" {
 			successValues = append(successValues, amount[0], goal)
-			stmtBuilder.WriteString(` UNION SELECT ?,?`)
+			stmtBuilder.WriteString(` UNION ALL SELECT ?,?`)
 		}
 	}
 	stmtBuilder.WriteString(`) AS input ON goal.id = gid`)
