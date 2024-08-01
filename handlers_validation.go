@@ -29,6 +29,23 @@ func validationHandle(c *gin.Context) {
 	})
 }
 
+func milestoneHandle(c *gin.Context) {
+	user, err := queryUser(c.GetInt("uid"))
+	if err != nil {
+		fmt.Println(err)
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_milestone.html", gin.H{
+		"faq":        wantFAQ(c.Cookie(NOFAQ)),
+		"logged":     true,
+		"name":       user.Name,
+		"avatar":     user.Avatar.String,
+		"milestones": makeChannelFor(queryMilestone, c.GetInt("uid")),
+		"userkey":    c.GetString("key"),
+	})
+}
+
 /* * * * * * * * * * * * * * * * * * * * * *
  *                   POST                  *
  * * * * * * * * * * * * * * * * * * * * * */

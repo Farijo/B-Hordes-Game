@@ -834,6 +834,7 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 	if err != nil {
 		return nil, nil, err
 	}
+	defer rows.Close()
 
 	result := make(map[int]Verifications)
 	resOrder := make([]*dto.Challenge, 0)
@@ -930,6 +931,48 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 	}
 
 	return result, resOrder, nil
+}
+
+func queryMilestone(milestoneCh chan<- *dto.Milestone, requestor int) {
+	defer close(milestoneCh)
+
+	rows, err := dbConn().Query(`SELECT * FROM milestone WHERE user = ? ORDER BY dt DESC`, requestor)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		milestone := new(dto.Milestone)
+		if err := rows.Scan(
+			&milestone.User.ID,
+			&milestone.Dt,
+			&milestone.IsGhost,
+			&milestone.PlayedMaps,
+			&milestone.Rewards,
+			&milestone.Dead,
+			&milestone.Out,
+			&milestone.Ban,
+			&milestone.BaseDef,
+			&milestone.X,
+			&milestone.Y,
+			&milestone.Job,
+			&milestone.Map.Wid,
+			&milestone.Map.Hei,
+			&milestone.Map.Days,
+			&milestone.Map.Conspiracy,
+			&milestone.Map.Custom,
+			&milestone.Map.City.Buildings,
+			&milestone.Map.City.Bank,
+			&milestone.Map.Zones); err != nil {
+			fmt.Println(err)
+			return
+		}
+		if milestone.HasData() {
+			milestoneCh <- milestone
+		}
+	}
 }
 
 func insertSuccesses(user int, dt string, amounts map[string][]string, requestor int) error {

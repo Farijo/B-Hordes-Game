@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/style/theme.css">
+    <link rel="stylesheet" href="/style/validation.css">
+</head>
+<body>
+    {{ $userkey := .userkey }}
+    {{ $username := .name }}
+    {{ $i := 0 }}
+    {{ template "@@{ISO639-1}_top-bar.html" . }}
+    <style>.circle{background: #7e4d2a center url({{.avatar}})}</style>
+    <section>
+        <ul class='timeline' style="display: inherit;">
+            {{ range $challenge := .milestones }}
+                <li class='work'>
+                    {{ $i = incr $i }}
+                    <input class='radio' id=work{{$i}} name='works' type='radio' checked>
+                    <div class="relative">
+                        <span class="recap">
+                            <label for=work{{$i}} class="name">{{ $username }}</label>
+                        </span>
+                        <span class='date'>{{ $challenge.Dt }}</span>
+                        <label for=work{{$i}} class='circle'></label>
+                    </div>
+                    <div class='content'>
+                        <p>
+                            {{ dumpMile $challenge $userkey "@@{ISO639-1}" }}
+                        </p>
+                    </div>
+                </li>
+            {{ end }}
+        </ul>
+    </section>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
+    <script>
+        $('span.date,span.utcdate').each((i, e) => {
+            const date = new Date(e.innerHTML+'Z');
+            e.innerHTML = `${date.toLocaleDateString()}<br><span style=\"font-size:80%\">${date.toLocaleTimeString()}</span>`;
+        });
+        const prev = {};
+        const miles = $('.content > p');
+        function storeDiff(dt, acc, lookup, path, mile) {
+            for (const key in lookup) {
+                const element = lookup[key];
+                if(typeof element === 'object') {
+                    if(!acc[key]) acc[key] = {};
+                    storeDiff(dt, acc[key], element, path.concat(key), mile.siblings(`span:contains("${key}")`));
+                } else {
+                    if(acc[key] && element != acc[key].value) {
+                        mile.siblings(`span:contains("${key}")`).prop('title', `${acc[key].dt} = ${acc[key].value}`);
+                    }
+                    acc[key] = {dt: dt, value: element};
+                }
+            }
+        }
+        (async function() {
+            for (let i = miles.length-1; i >= 0; i--) {
+                let mile = miles[i];
+                const curr = JSON.parse(mile.textContent.replaceAll('\xA0', ''));
+                mile = $(mile);
+                const txtDate = mile.closest('li').find('span.date').text();
+                storeDiff(txtDate.substring(0, 10) + ' ' + txtDate.substring(10), prev, curr, [], mile.find('span').first());
+            }
+            $('span[title]').on('click', e => {
+                const go = e.delegateTarget.title;
+                console.log(go)
+                const el = $(`span.date:contains("${go.substring(0,10)}"):contains("${go.substring(11,19)}")`).next()
+                el.closest('li')[0].scrollIntoView();
+                el.click();
+            });
+        })();
+    </script>
+    {{ if .faq }}
+    <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
+        new Crate({
+            server: '1253836492694880367', // B'Hordes Games
+            channel: '@@{discord-desc-validation}',
+            color: '#371a13',
+            glyph: ["/question.svg", "100%"]
+        })
+    </script>
+    {{ end }}
+</body>
+</html>

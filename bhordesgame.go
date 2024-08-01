@@ -74,6 +74,7 @@ func main() {
 		authorized.POST("/challenge/:id/scan", challengeScanHandle)
 		authorized.GET("/validation", lngHandler, validationHandle)
 		authorized.POST("/validation", validateGoalHandle)
+		authorized.GET("/milestone", lngHandler, milestoneHandle)
 	}
 
 	if gin.Mode() == gin.DebugMode {

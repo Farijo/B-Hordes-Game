@@ -241,7 +241,7 @@ func dumpMile(mile *dto.Milestone, userkey, lng string) template.HTML {
 	}
 	var builder strings.Builder
 	enc := json.NewEncoder(&builder)
-	enc.SetIndent("<br>", "&nbsp;&nbsp;")
+	enc.SetIndent("</span><br><span>", "&nbsp;&nbsp;")
 	enc.Encode(res)
-	return template.HTML(builder.String())
+	return template.HTML("<span>" + builder.String() + "</span>")
 }
