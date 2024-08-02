@@ -58,7 +58,7 @@
                 }
             }
         }
-        (async function() {
+        async function showLastValues() {
             for (let i = miles.length-1; i >= 0; i--) {
                 let mile = miles[i];
                 const curr = JSON.parse(mile.textContent.replaceAll('\xA0', ''));
@@ -73,7 +73,9 @@
                 el.closest('li')[0].scrollIntoView();
                 el.click();
             });
-        })();
+        }
+        // don't call it, too greedy
+        // showLastValues();
     </script>
     {{ if .faq }}
     <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
