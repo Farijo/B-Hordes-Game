@@ -124,4 +124,4 @@ load: Load
 milestones: Milestones
 enable-faq: Enable FAQ
 delete-last-milestone: Delete last milestone
-confirm: Confirm ?
+confirm-milestone-delete: Milestone deletion will delete any success associated, confirm ?

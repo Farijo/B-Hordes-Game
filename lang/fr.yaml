@@ -124,4 +124,4 @@ load: Charger
 milestones: Jalons
 enable-faq: Activer la FAQ
 delete-last-milestone: Supprimer le dernier jalon
-confirm: Confirmer ?
+confirm-milestone-delete: La suppression du jalon supprimera tous les succès associés, confirmer ?
