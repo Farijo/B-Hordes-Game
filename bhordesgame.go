@@ -75,6 +75,7 @@ func main() {
 		authorized.GET("/validation", lngHandler, validationHandle)
 		authorized.POST("/validation", validateGoalHandle)
 		authorized.GET("/milestone", lngHandler, milestoneHandle)
+		authorized.GET("/milestone/delete", lngHandler, milestoneDeleteHandle)
 	}
 
 	if gin.Mode() == gin.DebugMode {

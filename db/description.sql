@@ -56,7 +56,7 @@ CREATE TABLE success (
     PRIMARY KEY(user,goal,amount),
     FOREIGN KEY(goal) REFERENCES goal(id),
     FOREIGN KEY(user) REFERENCES user(id),
-    FOREIGN KEY(user,accomplished) REFERENCES milestone(user,dt)
+    FOREIGN KEY(user,accomplished) REFERENCES milestone(user,dt) ON DELETE CASCADE
 );
 CREATE TABLE milestone (
     user INT NOT NULL,

@@ -121,3 +121,7 @@ export: Exporter
 copied-toast: Copié !
 predefined: Prédéfinis
 load: Charger
+milestones: Jalons
+enable-faq: Activer la FAQ
+delete-last-milestone: Supprimer le dernier jalon
+confirm: Confirmer ?

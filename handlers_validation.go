@@ -46,6 +46,15 @@ func milestoneHandle(c *gin.Context) {
 	})
 }
 
+func milestoneDeleteHandle(c *gin.Context) {
+	if err := deleteLastMilestone(c.GetInt("uid")); err != nil {
+		fmt.Println(err)
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	c.Redirect(http.StatusFound, "/milestone")
+}
+
 /* * * * * * * * * * * * * * * * * * * * * *
  *                   POST                  *
  * * * * * * * * * * * * * * * * * * * * * */

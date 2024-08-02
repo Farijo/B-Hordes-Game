@@ -121,3 +121,7 @@ export: Export
 copied-toast: Copied !
 predefined: Predefined
 load: Load
+milestones: Milestones
+enable-faq: Enable FAQ
+delete-last-milestone: Delete last milestone
+confirm: Confirm ?

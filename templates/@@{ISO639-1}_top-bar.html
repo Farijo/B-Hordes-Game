@@ -87,7 +87,7 @@
                     </tr>
                     <tr>
                         <td colspan="4">
-                            <label for="faq">Activer la FAQ</label>
+                            <label for="faq">@@{enable-faq}</label>
                             <input id=faq type="checkbox" name="faq" value=1 onchange="$(this).closest('form').trigger('submit');" {{ if .faq }}checked{{ end }}>
                         </td>
                     </tr>
