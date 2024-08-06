@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/style/theme.css">
+    <link rel="stylesheet" href="/style/table.css">
+    <link rel="stylesheet" href="/style/recruit.css">
+    <script src="/script/sorttable.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
+    <title>β'Hordes Games</title>
+    <script>
+      const labels = [];
+      const dataset = [];
+      function intToColor(num) {
+        const hue = (num * (360 / 10)) % 360;
+        return `hsl(${hue},70%,50%)`;
+      }
+      function check(event, el) {
+        const input = el.getElementsByTagName('input')[0];
+        if(event.target != input) {
+          input.checked ^= 1;
+        }
+      }
+      rm = [];
+      function toggle(label) {
+        console.log(label, myChart.data.datasets, rm);
+        
+        const d = myChart.data.datasets.findIndex(d => d.label === label)
+        if(d >= 0) {
+          rm.push(myChart.data.datasets[d]);
+          myChart.data.datasets.splice(d, 1)
+        } else {
+          const d2 = rm.findIndex(d => d.label === label)
+          if(d2 >= 0) {
+            myChart.data.datasets.push(rm[d2]);
+          rm.splice(d2, 1);
+        }
+        }
+        myChart.update();
+      }
+    </script>
+</head>
+<body>
+    {{ template "@@{ISO639-1}_top-bar.html" . }}
+    <h2>{{ "name" }}</h2>
+    <div style="display: flex;align-items: center;gap: 1em;">
+      <table>
+        {{ $userkey := .userkey }}
+        {{ $goalHeaders := mkmap }}
+        {{ range $goal := .goals }}
+        <tr onclick="check(event, this)">
+            {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal $goalHeaders }}
+            <!-- <td>
+                {{ if $mm.Text }}
+                    {{ $mm.Text }}
+                    <img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }} 
+                {{ else }}
+                    {{ $mm.Label }}
+                {{ end }}
+            </td> -->
+            <script>labels.push("{{ $mm.Text }} {{ $mm.Label }}")</script>
+            {{ $goalHeader := index $goalHeaders $goal.ID }}
+            <td>{{ $goalHeader.Content }}</td>
+            <td>
+              <input type="checkbox">
+            </td>
+        </tr>
+        {{ end }}
+    </table>
+      <table>
+          {{ range $partic := .advancement }}
+          <tr onclick="check(event, this)">
+            <td sorttable_customkey="{{ $partic.SimplifiedName }}">
+              <a href="/user/{{ $partic.ID }}">
+                <img class="avatar" src="{{ $partic.Avatar.String }}">
+                <span class="name">{{ $partic.Name }}</span>
+              </a>
+            </td>
+            <td>
+              <input type="checkbox" onchange="toggle('{{ $partic.Name }}')">
+              <script>
+                dataset.push({
+                  label: "{{ $partic.Name }}",
+                  data:[
+                    {{ range $gid, $_ := $goalHeaders }}
+                      {{ $s := index $partic.Successes $gid }}
+                      {{ $s.Amount }},
+                    {{ end }}
+                  ],
+                  backgroundColor: intToColor(dataset.length), // Couleur de la ligne
+                  borderWidth: 1, // Épaisseur normale de la ligne
+                  borderColor: 'rgba(0, 0, 0, 1)',
+                });
+                (function(){
+                  const td = $(document.currentScript.parentElement);
+                  const idx = dataset.length-1;
+                  td.css('background-color', dataset[idx].backgroundColor);
+                  td.parent().hover(e => {                    
+                    myChart.data.datasets[idx].borderWidth = e.type === 'mouseenter' ? 2 : 1;
+                    myChart.update();
+                  })
+                })()
+              </script>
+            </td>
+          </tr>
+          {{ end }}
+      </table>
+      <div style="flex-grow: 1;">
+        <canvas id="myChart"></canvas>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: dataset
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            },
+        });
+    </script>
+    {{ if .faq }}
+    <style>body{margin-bottom: 96px;}</style>
+    <script src='https://cdn.jsdelivr.net/npm/@widgetbot/crate@3' async defer>
+        new Crate({
+            server: '1253836492694880367', // B'Hordes Games
+            channel: '@@{discord-desc-challenge}',
+            color: '#371a13',
+            glyph: ["/question.svg", "100%"]
+        })
+    </script>
+    {{ end }}
+</body>
+</html>

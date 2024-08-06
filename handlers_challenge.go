@@ -149,6 +149,22 @@ func challengeHandle(c *gin.Context) {
 	}
 }
 
+func challengeGraphHandle(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	key, _ := c.Cookie("user")
+
+	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-graph.html", gin.H{
+		"faq":         wantFAQ(c.Cookie(NOFAQ)),
+		"goals":       makeChannelFor(queryChallengeGoals, id),
+		"userkey":     key,
+		"advancement": makeChannelFor(queryChallengeAdvancements, id),
+	})
+}
+
 /* * * * * * * * * * * * * * * * * * * * * *
  *                   POST                  *
  * * * * * * * * * * * * * * * * * * * * * */
