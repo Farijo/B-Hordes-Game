@@ -19,13 +19,13 @@ out: Out
 ban: Ban
 base-def: Base defense
 job: Job
-basic: todo-Habitant
-dig: todo-Fouineur
-vest: todo-Éclaireur
-shield: todo-Gardien
-book: todo-Ermite
-tamer: todo-Apprivoiseur
-tech: todo-Technicien
+basic: Resident
+dig: Scavenger
+vest: Scrout
+shield: Guardian
+book: Survivalist
+tamer: Tamer
+tech: Technician
 map: Map
 wid: Width
 hei: Height
@@ -35,7 +35,7 @@ custom: Custom
 buildings: Buildings
 bank: Bank
 items: Items
-the-most-of: the most of
+the-most-of: The most of
 goal-stack-rewards: Stack <b>%[1]s</b> rewards
 goal-stand-x-y: Stand on <b>cell</b> [ <b>%[1]d</b> / <b>%[2]d</b> ] with <b>%[3]s</b>
 goal-stand-x: Stand on <b>line %[1]d</b> with <b>%[2]s</b>
