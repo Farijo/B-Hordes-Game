@@ -26,7 +26,7 @@ shield: Guardian
 book: Survivalist
 tamer: Tamer
 tech: Technician
-map: Map
+map: Town #from Ville in fr
 wid: Width
 hei: Height
 days: Days
@@ -47,7 +47,7 @@ creator: Creator
 participant: Participant
 guest: Guest
 candidate: Candidate
-approbator: Approbator
+approbator: Approver
 
 ISO639-1: en
 name: Name
@@ -82,17 +82,17 @@ start: Start
 end: End
 start-now: Start now
 end-now: End now
-scan-participants: Span participants
+scan-participants: Scan participants
 never-realized: Never realized
 confirm-end: Confirm challenge end
-add-approbators: Add approbators
+add-approbators: Add approvers
 send-invitations: Send invitations
 name-id: Name ID
-search-title: Enter a list of names or IDs separed with spaces
+search-title: Enter a list of names or IDs separated with spaces
 search: Search
 result: Result
-challenge-created: Challenges created
-requestor: Requestor
+challenge-created: Challenges created #plural or singular?
+requestor: Requestor #are we doing British en. or American en.? the latter is requestEr
 start-date-must-be-set: A start date must be set first
 challenge-start-warning: Challenge start will prevent any modification, except end date
 "yes": "Yes"
@@ -106,8 +106,8 @@ update: Update
 create-challenge: Create challenge
 profile: Profile
 validations: Validations
-logout: Logout
-login: Login
+logout: Log out
+login: Log in #login is your username, log in is the process of signing in
 mh-contact: MH contact
 email: E-mail
 player-not-found: Player not found
@@ -118,10 +118,10 @@ previous: Previous
 current: Current
 import: Import
 export: Export
-copied-toast: Copied !
+copied-toast: Copied!
 predefined: Predefined
 load: Load
 milestones: Milestones
 enable-faq: Enable FAQ
 delete-last-milestone: Delete last milestone
-confirm-milestone-delete: Milestone deletion will delete any success associated, confirm ?
+confirm-milestone-delete: Milestone deletion will delete any success associated, confirm?
