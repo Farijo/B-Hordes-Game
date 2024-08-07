@@ -21,7 +21,7 @@ base-def: Base defense
 job: Job
 basic: Resident
 dig: Scavenger
-vest: Scrout
+vest: Scout
 shield: Guardian
 book: Survivalist
 tamer: Tamer
