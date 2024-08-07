@@ -93,7 +93,7 @@ name-id: Name ID
 search-title: Enter a list of names or IDs separed with spaces
 search: Search
 result: Result
-challenge-created: Challenges created
+nb-created-challenges: Challenges created
 requestor: Requestor
 start-date-must-be-set: A start date must be set first
 challenge-start-warning: Challenge start will prevent any modification, except end date
@@ -114,7 +114,6 @@ mh-contact: MH contact
 email: E-mail
 player-not-found: Player not found
 player: Player
-created-challenge: Created challenge
 challenge-as: Challenge as
 previous: Previous
 current: Current

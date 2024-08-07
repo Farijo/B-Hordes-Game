@@ -91,7 +91,7 @@ name-id: Nom ID
 search-title: Entrer une liste de noms ou d'ids séparés par des espaces
 search: Chercher
 result: Résultat
-challenge-created: Défis créés
+nb-created-challenges: Défis créés
 requestor: Postulant
 start-date-must-be-set: Une date de début doit d'abord être renseignée
 challenge-start-warning: Le lancement du défi empêchera toute modification, hormis la date de fin
@@ -112,7 +112,6 @@ mh-contact: Contact MH
 email: E-mail
 player-not-found: Joueur introuvable
 player: Joueur
-created-challenge: Défi créé
 challenge-as: Défi en tant que
 previous: Précédent
 current: Actuel

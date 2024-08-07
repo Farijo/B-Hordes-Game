@@ -79,7 +79,7 @@
             <button type="submit" value="{{ index $act 0 }}" name="{{ $uid }}-participant">{{ index $act 1 }}</button>
         {{ end }}
         <table class="sortable">
-            <tr><th>@@{result}</th><th>@@{challenge-created}</th><th>@@{participations}</th></tr>
+            <tr><th>@@{result}</th><th>@@{nb-created-challenges}</th><th>@@{participations}</th></tr>
                 {{ range $result := .searchResults }}
                 <tr class="item">
                     <td sorttable_customkey="{{ $result.SimplifiedName }}">
@@ -129,7 +129,7 @@
         <table class="sortable">
 {{ end }}
 {{ $selfChall := .selfChallenge }}
-            <tr><th>@@{approbator}</th><th>@@{challenge-created}</th><th>@@{participations}</th></tr>
+            <tr><th>@@{approbator}</th><th>@@{nb-created-challenges}</th><th>@@{participations}</th></tr>
             {{ range $approb := .validators }}
                 <tr class="item">
                     <td sorttable_customkey="{{ $approb.SimplifiedName }}">
@@ -147,7 +147,7 @@
                     {{ end }}
                 </tr>
             {{ end }}
-            <tr><th>@@{participant}</th><th>@@{challenge-created}</th><th>@@{participations}</th></tr>
+            <tr><th>@@{participant}</th><th>@@{nb-created-challenges}</th><th>@@{participations}</th></tr>
             {{ range $partic := .participants }}
                 <tr class="item">
                     <td sorttable_customkey="{{ $partic.SimplifiedName }}">
