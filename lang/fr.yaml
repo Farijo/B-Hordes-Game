@@ -12,7 +12,7 @@ inscriptions: Inscriptions
 running: En cours
 over: Terminé
 ghost: Fantôme
-played-maps: Nombre d'incarnation
+played-maps: Nombre d'incarnations
 rewards: Pictos
 dead: Mort
 out: Dehors
@@ -30,7 +30,7 @@ map: Ville
 wid: Largeur
 hei: Hauteur
 days: Jours
-conspiracy: Insurection
+conspiracy: Insurrection
 custom: Custom
 buildings: Chantiers
 bank: Banque
@@ -56,7 +56,7 @@ participations: Participations
 visibility: Visibilité
 public: Public
 private: Privé
-private-desc: Les défis privés sont uniquement visible par le créateur et les participants
+private-desc: Les défis privés sont uniquement visibles par le créateur et les participants
 goals: Objectifs
 validation-modes: Modes de validation
 api: API
@@ -94,12 +94,12 @@ result: Résultat
 challenge-created: Défis créés
 requestor: Postulant
 start-date-must-be-set: Une date de début doit d'abord être renseignée
-challenge-start-warning: Le lancement du défi empechera toute modification, hormis la date de fin
+challenge-start-warning: Le lancement du défi empêchera toute modification, hormis la date de fin
 "yes": "Oui"
 "no": "Non"
 challenge: Défi
 access: Accès
-status: Status
+status: Statut
 registered: Inscrits
 home: Accueil
 update: Mise à jour
@@ -112,8 +112,8 @@ mh-contact: Contact MH
 email: E-mail
 player-not-found: Joueur introuvable
 player: Joueur
-created-challenge: Défis créés
-challenge-as: Défis en tant que
+created-challenge: Défi créé
+challenge-as: Défi en tant que
 previous: Précédent
 current: Actuel
 import: Importer
