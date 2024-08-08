@@ -4,12 +4,13 @@
 <head>
     <link rel="stylesheet" href="/style/theme.css">
     <link rel="stylesheet" href="/style/table.css">
-    <link rel="stylesheet" href="/style/recruit.css">
     <script src="/script/sorttable.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
     <title>β'Hordes Games</title>
     <script>
       const labels = [];
+      const labelsImg = [];
+      let imgs = [];
       const dataset = [];
       function intToColor(num) {
         const hue = (num * (360 / 10)) % 360;
@@ -19,12 +20,19 @@
         const input = el.getElementsByTagName('input')[0];
         if(event.target != input) {
           input.checked ^= 1;
+          refreshData();
         }
       }
       function refreshData() {
         myChart.data.datasets = structuredClone(dataset.filter((v,i) => userScale[i].checked));
+        myChart.data.labels = labels.filter((v,i) => goalScale[i].checked);
         myChart.data.datasets.forEach(d => d.data = d.data.filter((v,i) => goalScale[i].checked));
+        imgs = labelsImg.filter((v,i) => goalScale[i].checked);
         myChart.update();
+      }
+      function switchSelection(el) {
+        $(el).siblings().find('input[type=checkbox]').each((i,e) => e.checked ^= 1);
+        refreshData();
       }
     </script>
 </head>
@@ -37,35 +45,29 @@
         {{ $goalHeaders := mkmap }}
         {{ range $goal := .goals }}
         <tr onclick="check(event, this)">
-            {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal $goalHeaders }}
-            <!-- <td>
-                {{ if $mm.Text }}
-                    {{ $mm.Text }}
-                    <img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ $mm.Label }} 
-                {{ else }}
-                    {{ $mm.Label }}
-                {{ end }}
-            </td> -->
-            <script>labels.push("{{ $mm.Text }} {{ $mm.Label }}")</script>
+            {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal $goalHeaders false }}
             {{ $goalHeader := index $goalHeaders $goal.ID }}
-            <td>{{ $goalHeader.Content }}</td>
+            <script>
+              labels.push(["", "{{ $goalHeader.Content }}"]);
+              labelsImg.push("https://myhordes.eu/build/images/{{ $mm.Icon }}");
+            </script>
+            <td title="{{$mm.Text}} {{$mm.Label}}">{{ $goalHeader.Content }}<img src="https://myhordes.eu/build/images/{{ $mm.Icon }}"></td>
             <td>
-              <input type="checkbox" onchange="refreshData">
+              <input type="checkbox" onchange="refreshData()" checked>
             </td>
         </tr>
         {{ end }}
+        <tr onclick="switchSelection(this)"><th colspan="2">Inverser la selection</th></tr>
       </table>
       <table id="userScale">
           {{ range $partic := .advancement }}
           <tr onclick="check(event, this)">
             <td sorttable_customkey="{{ $partic.SimplifiedName }}">
-              <a href="/user/{{ $partic.ID }}">
                 <img class="avatar" src="{{ $partic.Avatar.String }}">
                 <span class="name">{{ $partic.Name }}</span>
-              </a>
             </td>
             <td>
-              <input type="checkbox" onchange="refreshData">
+              <input type="checkbox" onchange="refreshData()" checked>
               <script>
                 dataset.push({
                   label: "{{ $partic.Name }}",
@@ -84,15 +86,19 @@
                   const idx = dataset.length-1;
                   td.css('background-color', dataset[idx].backgroundColor);
                   td.parent().hover(e => {                    
-                    myChart.data.datasets[idx].borderWidth = e.type === 'mouseenter' ? 2 : 1;
-                    myChart.update();
+                    const d = myChart.data.datasets.find((v => v.label === dataset[idx].label));
+                    if(d) {
+                      d.borderWidth = e.type === 'mouseenter' ? 2 : 1;
+                      myChart.update();
+                    }
                   })
                 })()
               </script>
             </td>
           </tr>
           {{ end }}
-      </table>
+          <tr onclick="switchSelection(this)"><th colspan="2">Inverser la selection</th></tr>
+        </table>
       <div style="flex-grow: 1;">
         <canvas id="myChart"></canvas>
       </div>
@@ -101,8 +107,23 @@
     <script>
       const myChart = new Chart(document.getElementById('myChart'), {
         type: 'bar',
+        plugins: [{
+          afterDraw: chart => {
+              var ctx = chart.ctx;
+              var xAxis = chart.scales.x;
+              var yAxis = chart.scales.y;
+              if(xAxis) {
+                xAxis.ticks.forEach((value, index) => {
+                  var x = xAxis.getPixelForTick(index);
+                  const i = new Image();
+                  i.src = imgs[index];
+                  ctx.drawImage(i, x - 8, yAxis.bottom + 4);
+                });
+              }
+            }
+        }],
         data: {
-          labels: labels,
+          labels: [],
           datasets: []
         },
         options: {

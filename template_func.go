@@ -90,7 +90,7 @@ type GoalHeader struct {
 	Amount  uint32
 }
 
-func decodeGoal(key, lang string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML {
+func decodeGoal(key, lang string, goal *dto.Goal, l map[int]GoalHeader, withTag bool) GoalHTML {
 	lngData := getTrad(lang)
 	amountStr, header := lngData["the-most-of"], "+"
 	if goal.Amount.Valid {
@@ -102,37 +102,49 @@ func decodeGoal(key, lang string, goal *dto.Goal, l map[int]GoalHeader) GoalHTML
 	case 0:
 		out.Text = template.HTML(fmt.Sprintf(lngData["goal-stack-rewards"], amountStr))
 		out.Icon, out.Label = getServerDataKey(goal.Entity, "pictos", key, lang)
-		header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
+		if withTag {
+			header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
+		}
 	case 1:
 		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key, lang)
+		tagIcon := ""
+		if withTag {
+			tagIcon = "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
+		}
 		var txt string
 		if goal.X.Valid {
 			if goal.Y.Valid {
 				txt = fmt.Sprintf(lngData["goal-stand-x-y"], goal.X.Int16, goal.Y.Int16, amountStr)
-				header = fmt.Sprintf("[%d/%d] %s<img src=\"https://myhordes.eu/build/images/%s\">", goal.X.Int16, goal.Y.Int16, header, out.Icon)
+				header = fmt.Sprintf("[%d/%d] %s%s", goal.X.Int16, goal.Y.Int16, header, tagIcon)
 			} else {
 				txt = fmt.Sprintf(lngData["goal-stand-x"], goal.X.Int16, amountStr)
-				header = fmt.Sprintf("[%d/_] %s<img src=\"https://myhordes.eu/build/images/%s\">", goal.X.Int16, header, out.Icon)
+				header = fmt.Sprintf("[%d/_] %s%s", goal.X.Int16, header, tagIcon)
 			}
 		} else {
 			if goal.Y.Valid {
 				txt = fmt.Sprintf(lngData["goal-stand-y"], goal.Y.Int16, amountStr)
-				header = fmt.Sprintf("[_/%d] %s<img src=\"https://myhordes.eu/build/images/%s\">", goal.Y.Int16, header, out.Icon)
+				header = fmt.Sprintf("[_/%d] %s%s", goal.Y.Int16, header, tagIcon)
 			} else {
 				txt = fmt.Sprintf(lngData["goal-stand"], amountStr)
-				header = fmt.Sprintf("[_/_] %s<img src=\"https://myhordes.eu/build/images/%s\">", header, out.Icon)
+				header = fmt.Sprintf("[_/_] %s%s", header, tagIcon)
 			}
 		}
 		out.Text = template.HTML(txt)
 	case 2:
 		out.Text = template.HTML(lngData["goal-build"])
 		out.Icon, out.Label = getServerDataKey(goal.Entity, "buildings", key, lang)
-		header = "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
+		if withTag {
+			header = "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
+		} else {
+			header = ""
+		}
 		goal.Amount.Int32 = 1
 	case 3:
 		out.Text = template.HTML(fmt.Sprintf(lngData["goal-bank"], amountStr))
 		out.Icon, out.Label = getServerDataKey(goal.Entity, "items", key, lang)
-		header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
+		if withTag {
+			header += "<img src=\"https://myhordes.eu/build/images/" + out.Icon + "\">"
+		}
 	case 4:
 		out.Label = goal.Custom.String
 		header = "-"

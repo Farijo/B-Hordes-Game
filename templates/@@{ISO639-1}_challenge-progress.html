@@ -42,7 +42,7 @@
         {{ $userkey := .userkey }}
         {{ $goalHeaders := mkmap }}
         {{ range $goal := .goals }}
-            {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal $goalHeaders }}
+            {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal $goalHeaders true }}
             <div class="box">
                 {{ if $mm.Text }}
                     <div class="line1">{{ $mm.Text }}</div>

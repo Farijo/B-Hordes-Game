@@ -35,7 +35,7 @@
                                 <form action="/validation" method="post">
                                     <tr><th>@@{goals}</th><th>@@{previous}</th><th>@@{current}</th></tr>
                                 {{ range $goal := $mile.Goals }}
-                                    {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal.Goal nil }}
+                                    {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal.Goal nil true }}
                                     <tr>
                                         <td>{{ if $mm.Text }}{{ $mm.Text }}<br>{{ end }}{{ if $mm.Icon }}<img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ end }}{{ $mm.Label }}</td>
                                         <td>{{ $goal.Previous.Int32 }}</td>
