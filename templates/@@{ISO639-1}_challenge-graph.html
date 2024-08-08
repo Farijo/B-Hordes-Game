@@ -99,24 +99,24 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-    const ctx = document.getElementById('myChart').getContext('2d');
-        const myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: []
-            },
-            options: {
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            },
-        });
-        const goalScale = $('#goalScale input[type=checkbox]');
-        const userScale = $('#userScale input[type=checkbox]');
-        refreshData();
+      const ctx = document.getElementById('myChart').getContext('2d');
+      const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: []
+        },
+        options: {
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+      const goalScale = $('#goalScale input[type=checkbox]');
+      const userScale = $('#userScale input[type=checkbox]');
+      refreshData();
     </script>
     {{ if .faq }}
     <style>body{margin-bottom: 96px;}</style>
