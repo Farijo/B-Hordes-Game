@@ -13,7 +13,7 @@
       let imgs = [];
       const dataset = [];
       function intToColor(num) {
-        const hue = (num * (360 / 10)) % 360;
+        const hue = (num * 77) % 360;
         return `hsl(${hue},70%,50%)`;
       }
       function check(event, el) {
