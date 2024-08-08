@@ -24,6 +24,7 @@
         }
       }
       function refreshData() {
+        $('#myChart').parent().css('min-width', userScale.filter(':checked').length * goalScale.filter(':checked').length * 40)
         myChart.data.datasets = structuredClone(dataset.filter((v,i) => userScale[i].checked));
         myChart.data.labels = labels.filter((v,i) => goalScale[i].checked);
         myChart.data.datasets.forEach(d => d.data = d.data.filter((v,i) => goalScale[i].checked));
@@ -49,7 +50,7 @@
             {{ $goalHeader := index $goalHeaders $goal.ID }}
             <script>
               labels.push(["", "{{ $goalHeader.Content }}"]);
-              labelsImg.push("https://myhordes.eu/build/images/{{ $mm.Icon }}");
+              labelsImg.push("{{ $mm.Icon }}");
             </script>
             <td title="{{$mm.Text}} {{$mm.Label}}">{{ $goalHeader.Content }}<img src="https://myhordes.eu/build/images/{{ $mm.Icon }}"></td>
             <td>
@@ -99,7 +100,7 @@
           {{ end }}
           <tr onclick="switchSelection(this)"><th colspan="2">Inverser la selection</th></tr>
         </table>
-      <div style="flex-grow: 1;">
+      <div style="flex-grow: 1;overflow: auto;height: 85vh;">
         <canvas id="myChart"></canvas>
       </div>
     </div>
@@ -114,10 +115,12 @@
               var yAxis = chart.scales.y;
               if(xAxis) {
                 xAxis.ticks.forEach((value, index) => {
-                  var x = xAxis.getPixelForTick(index);
-                  const i = new Image();
-                  i.src = imgs[index];
-                  ctx.drawImage(i, x - 8, yAxis.bottom + 4);
+                  if(imgs[index]) {
+                    var x = xAxis.getPixelForTick(index);
+                    const i = new Image();
+                    i.src = "https://myhordes.eu/build/images/"+imgs[index];
+                    ctx.drawImage(i, x - 8, yAxis.bottom + 4);
+                  }
                 });
               }
             }
@@ -127,10 +130,17 @@
           datasets: []
         },
         options: {
+          responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: {
               display: false
-            }
+            },
+            tooltip: {
+              callbacks: {
+                  title: o => goalScale.filter(':checked')[o[0].dataIndex].parentElement.parentElement.children[1].title
+              }
+            },
           }
         }
       });
