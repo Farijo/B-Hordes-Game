@@ -87,7 +87,7 @@
                   const idx = dataset.length-1;
                   td.css('background-color', dataset[idx].backgroundColor);
                   td.parent().hover(e => {                    
-                    const d = myChart.data.datasets.find((v => v.label === dataset[idx].label));
+                    const d = myChart.data.datasets.find(v => v.label === dataset[idx].label);
                     if(d) {
                       d.borderWidth = e.type === 'mouseenter' ? 2 : 1;
                       myChart.update();
