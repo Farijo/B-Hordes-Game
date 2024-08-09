@@ -125,3 +125,5 @@ milestones: Jalons
 enable-faq: Activer la FAQ
 delete-last-milestone: Supprimer le dernier jalon
 confirm-milestone-delete: La suppression du jalon supprimera tous les succès associés, confirmer ?
+
+reverse-selection: Inverser la sélection

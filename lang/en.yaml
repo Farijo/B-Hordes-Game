@@ -125,3 +125,5 @@ milestones: Milestones
 enable-faq: Enable FAQ
 delete-last-milestone: Delete last milestone
 confirm-milestone-delete: Milestone deletion will delete any success associated, confirm?
+
+reverse-selection: Reverse selection
