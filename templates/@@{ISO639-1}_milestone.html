@@ -12,9 +12,6 @@
     <style>.circle{background: #7e4d2a center url({{.avatar}})}</style>
     <section>
         <ul class='timeline' style="display: inherit;">
-            <form method="GET" action="milestone/delete" style="float: right;" onsubmit="return confirm('@@{confirm-milestone-delete}')">
-                <input type="submit" value="@@{delete-last-milestone}">
-            </form>
             {{ range $challenge := .milestones }}
                 <li class='work'>
                     {{ $i = incr $i }}
