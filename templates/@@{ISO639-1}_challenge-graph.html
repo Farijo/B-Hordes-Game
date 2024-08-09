@@ -36,12 +36,29 @@
         refreshData();
       }
     </script>
+    <style>
+      h2 ~ div {
+        display: flex;
+        gap: 1em;
+      }
+      #goalScale, #userScale {
+        display: block;
+      }
+      td[colspan] {
+        text-align: center;
+      }
+      #myChart {
+        flex-grow: 1;
+        overflow: auto;
+        height: 85vh;
+      }
+    </style>
 </head>
 <body>
     {{ template "@@{ISO639-1}_top-bar.html" . }}
     <h2>{{ "name" }}</h2>
-    <div style="display: flex;gap: 1em;">
-      <table id="goalScale" style="display: block;">
+    <div>
+      <table id="goalScale">
         {{ $userkey := .userkey }}
         {{ $goalHeaders := mkmap }}
         <tr><th colspan="2">@@{goals}</th></tr>
@@ -61,7 +78,7 @@
         {{ end }}
         <tr><td colspan="2"><button onclick="switchSelection(this)">@@{reverse-selection}</button></td></tr>
       </table>
-      <table id="userScale" style="display: block;">
+      <table id="userScale">
         <tr><th colspan="2">@@{participant}</th></tr>
         {{ range $partic := .advancement }}
         <tr onclick="toggleCheckbox(event, this)">
@@ -102,13 +119,13 @@
         {{ end }}
         <tr><td colspan="2"><button onclick="switchSelection(this)">@@{reverse-selection}</button></td></tr>
       </table>
-      <div style="flex-grow: 1;overflow: auto;height: 85vh;">
-        <canvas id="myChart"></canvas>
+      <div id="myChart">
+        <canvas></canvas>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-      const myChart = new Chart(document.getElementById('myChart'), {
+      const myChart = new Chart(document.getElementById('myChart').children[0], {
         type: 'bar',
         plugins: [{
           afterDraw: chart => {
