@@ -12,9 +12,9 @@
       const labelsImg = [];
       let imgs = [];
       const dataset = [];
-      function intToColor(num) {
+      function intToColor(num, alpha) {
         const hue = (num * 77) % 360;
-        return `hsl(${hue},70%,50%)`;
+        return `hsl(${hue},70%,50%,${alpha})`;
       }
       function toggleCheckbox(event, el) {
         const input = el.getElementsByTagName('input')[0];
@@ -50,7 +50,7 @@
       #myChart {
         flex-grow: 1;
         overflow: auto;
-        height: 85vh;
+        height: 80vh;
       }
     </style>
 </head>
@@ -97,14 +97,14 @@
                     {{ $s.Amount }},
                   {{ end }}
                 ],
-                backgroundColor: intToColor(dataset.length), // Couleur de la ligne
+                backgroundColor: intToColor(dataset.length, 0.3), // Couleur de la ligne
                 borderWidth: 1, // Épaisseur normale de la ligne
-                borderColor: 'rgba(0, 0, 0, 1)',
+                borderColor: intToColor(dataset.length, 1),
                 });
               (function(){
                 const td = $(document.currentScript.parentElement);
                 const idx = dataset.length-1;
-                td.css('background-color', dataset[idx].backgroundColor);
+                td.css('background-color', dataset[idx].borderColor);
                 td.parent().hover(e => {                    
                   const d = myChart.data.datasets.find(v => v.label === dataset[idx].label);
                   if(d) {
@@ -125,8 +125,9 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+      const params = new URLSearchParams(window.location.search);
       const myChart = new Chart(document.getElementById('myChart').children[0], {
-        type: 'bar',
+        type: params.get('type'),
         plugins: [{
           afterDraw: chart => {
               var ctx = chart.ctx;
@@ -160,7 +161,12 @@
                   title: o => goalScale.filter(':checked')[o[0].dataIndex].parentElement.parentElement.children[1].title
               }
             },
+          },
+          scales: {
+              r: {
+                min: +params.get('min'),
           }
+          },
         }
       });
       const goalScale = $('#goalScale input[type=checkbox]');
