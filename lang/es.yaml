@@ -1,6 +1,6 @@
 #Placeholder from en file
 
-open-to-all: Abierta
+open-to-all: Abierto
 on-request: Por solicitud
 on-invite: Por invitación
 join: Unirse
@@ -11,8 +11,8 @@ accept-invite: Aceptar invitación
 creation: Creación
 proofreading: Revisión
 inscriptions: Inscripciones
-running: 
-over: 
+running: Activo
+over: Finalizado
 ghost: Fantasma
 played-maps: Mapas jugados
 rewards: Recompensas
@@ -34,17 +34,17 @@ hei: Altura
 days: Días
 conspiracy: Conspiración
 custom: Personalizado
-buildings: 
+buildings: Construcciones
 bank: Almacén
 items: Objetos
 the-most-of: the most of
-goal-stack-rewards: Stack <b>%[1]s</b> rewards
+goal-stack-rewards: Acumular <b>%[1]s</b> recompensas
 goal-stand-x-y: Stand on <b>cell</b> [ <b>%[1]d</b> / <b>%[2]d</b> ] with <b>%[3]s</b>
 goal-stand-x: Stand on <b>line %[1]d</b> with <b>%[2]s</b>
 goal-stand-y: Stand on <b>column %[1]d</b> with <b>%[2]s</b>
 goal-stand: Stand outside with <b>%[1]s</b>
 goal-build: Construir
-goal-bank: Tener <b>%[1]s</b> en el almacén
+goal-bank: Tener en el almacén <b>%[1]s</b> 
 creator: Creador
 participant: Participante
 guest: Invitado
@@ -60,7 +60,7 @@ public: Público
 private: Privado
 private-desc: Los desafíos privados sólo son visibles para el creador y los participantes
 goals: Objetivos
-validation-modes: Modos de validación
+validation-modes: Modo de validación
 api: API
 save: Guardar
 validate: Validar
@@ -81,16 +81,16 @@ delete-goal: ⚠️ Eliminar objetivo ⚠️
 with: Con
 empty-desc: "If empty: the goal is to stack the maximum"
 by: Por
-start: Iniciar
-end: Finalizar
-start-now: Start now
-end-now: End now
+start: Inicio
+end: Final
+start-now: Iniciar ahora
+end-now: Finalizar ahora
 scan-participants: Escanear participantes
 never-realized: Never realized
 confirm-end: Confirmar fin de desafío
 add-approbators: Añadir autorizadores
 send-invitations: Enviar invitaciones
-name-id: Name ID
+name-id: Nombre o ID
 search-title: Introducir una lista de nombres o IDs separados por espacios
 search: Buscar
 result: Resultado
@@ -103,9 +103,9 @@ challenge-start-warning: El inicio del desafío impedirá cualquier modificació
 challenge: Desafío
 access: Acceso
 status: Estado
-registered: Registrado
+registered: Inscripciones
 home: Inicio
-update: Actualización
+update: Actualizar
 create-challenge: Crear desafío
 profile: Perfil
 validations: Validaciones
