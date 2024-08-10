@@ -43,6 +43,7 @@ function bindUserLegend() {
 function drawChart() {
     const params = new URLSearchParams(window.location.search);
     resizeCanva = params.get('type') === 'bar';
+    polarCanva = params.get('type') === 'polarArea';
     myChart = new Chart(document.getElementById('myChart').children[3].children[0], {
       type: params.get('type'),
       plugins: [{
@@ -68,7 +69,7 @@ function drawChart() {
     
                 data.labels.forEach((label, i) => {
                     if(!imgs[i])return;
-                    const angle = r.getIndexAngle(i) - Math.PI / 2;
+                    const angle = r.getIndexAngle(i + (polarCanva ? 0.5:0)) - Math.PI / 2;
                     const x = centerX + Math.cos(angle) * radius;
                     const y = centerY + Math.sin(angle) * radius;
     
@@ -108,7 +109,7 @@ function drawChart() {
             r: {
                 pointLabels: {
                   display: true,
-                  centerPointLabels: false,
+                  centerPointLabels: polarCanva,
                 },
               min: +params.get('min'),
             }
