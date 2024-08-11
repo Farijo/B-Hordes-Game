@@ -127,3 +127,6 @@ delete-last-milestone: Supprimer le dernier jalon
 confirm-milestone-delete: La suppression du jalon supprimera tous les succès associés, confirmer ?
 
 reverse-selection: Inverser la sélection
+bar-chart: Diagramme barre
+radar-chart: Diagramme radar
+polarArea-char: Diagramme polaire

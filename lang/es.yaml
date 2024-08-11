@@ -129,3 +129,6 @@ delete-last-milestone: Delete last milestone
 confirm-milestone-delete: Milestone deletion will delete any success associated, confirm ?
 
 reverse-selection: Reverse selection
+bar-chart: Bar chart
+radar-chart: Radar chart
+polarArea-char: Polar area chart

@@ -12,7 +12,7 @@
 </head>
 <body>
     {{ template "@@{ISO639-1}_top-bar.html" . }}
-    <h2>{{ "Résultats" }}</h2>
+    <h2>@@{result}</h2>
     <div>
       <table id="goalScale">
         {{ $userkey := .userkey }}
@@ -65,9 +65,9 @@
         <tr><td colspan="2"><button onclick="switchSelection(this)">@@{reverse-selection}</button></td></tr>
       </table>
       <div id="myChart">
-        <a class="chlg-name" onclick="drawChart(this, 'bar')">Diagramme barre</a>
-        <a class="chlg-name link" onclick="drawChart(this, 'radar')">Diagramme radar</a>
-        <a class="chlg-name link" onclick="drawChart(this, 'polarArea')">Diagramme polaire</a>
+        <a class="chlg-name" onclick="drawChart(this, 'bar')">@@{bar-chart}</a>
+        <a class="chlg-name link" onclick="drawChart(this, 'radar')">@@{radar-chart}</a>
+        <a class="chlg-name link" onclick="drawChart(this, 'polarArea')">@@{polarArea-chart}</a>
         <div><canvas></canvas></div>
       </div>
     </div>
