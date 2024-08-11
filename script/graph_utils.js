@@ -28,8 +28,8 @@ function switchSelection(el) {
   $(el).closest('table').find('input[type=checkbox]').each((i, e) => e.checked ^= 1);
   refreshData();
 }
-function bindUserLegend() {
-  const td = $(document.currentScript.parentElement);
+function bindUserLegend(tdEl) {
+  const td = $(tdEl);
   const idx = dataset.length - 1;
   td.css('background-color', dataset[idx].borderColor);
   td.parent().hover(e => {
@@ -56,7 +56,7 @@ function drawChart(elSrc, type) {
   }
   isBar = type === 'bar';
   isPolar = !isBar && (type === 'polarArea');
-  myChart = new Chart(document.getElementById('myChart').children[3].children[0], {
+  myChart = new Chart(myChartChildren[3].children[0], {
     type: type,
     plugins: [{
       afterDraw: isBar ? chart => {
