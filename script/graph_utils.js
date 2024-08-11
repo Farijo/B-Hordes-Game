@@ -15,7 +15,7 @@ function toggleCheckbox(event, el) {
   }
 }
 function refreshData() {
-  if (resizeCanva) {
+  if (isBar) {
     $('#myChart').parent().css('min-width', userScale.filter(':checked').length * goalScale.filter(':checked').length * 40)
   }
   myChart.data.datasets = structuredClone(dataset.filter((v, i) => userScale[i].checked));
@@ -54,12 +54,12 @@ function drawChart(elSrc, type) {
     $('#myChart').parent().css('min-width', '');
     myChart.destroy();
   }
-  resizeCanva = type === 'bar';
-  polarCanva = type === 'polarArea';
+  isBar = type === 'bar';
+  isPolar = !isBar && (type === 'polarArea');
   myChart = new Chart(document.getElementById('myChart').children[3].children[0], {
     type: type,
     plugins: [{
-      afterDraw: resizeCanva ? chart => {
+      afterDraw: isBar ? chart => {
         const xAxis = chart.scales.x;
         if (xAxis) {
           const ctx = chart.ctx;
@@ -81,7 +81,7 @@ function drawChart(elSrc, type) {
 
         data.labels.forEach((label, i) => {
           if (!imgs[i]) return;
-          const angle = r.getIndexAngle(i + (polarCanva ? 0.5 : 0)) - Math.PI / 2;
+          const angle = r.getIndexAngle(i + (isPolar ? 0.5 : 0)) - Math.PI / 2;
           const x = centerX + Math.cos(angle) * radius;
           const y = centerY + Math.sin(angle) * radius;
 
@@ -98,7 +98,7 @@ function drawChart(elSrc, type) {
     },
     options: {
       layout: {
-        padding: resizeCanva ? null : {
+        padding: isBar ? null : {
           top: 50,    // Add padding to top
           bottom: 50, // Add padding to bottom
           left: 50,   // Add padding to left
@@ -117,11 +117,11 @@ function drawChart(elSrc, type) {
           }
         },
       },
-      scales: resizeCanva ? null : {
+      scales: isBar ? null : {
         r: {
           pointLabels: {
             display: true,
-            centerPointLabels: polarCanva,
+            centerPointLabels: isPolar,
           },
         }
       },
