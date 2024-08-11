@@ -8,6 +8,7 @@
     <script src="/script/sorttable.js"></script>
     <script src="/script/graph_utils.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>β'Hordes Games</title>
 </head>
 <body>
@@ -71,8 +72,9 @@
         <div><canvas></canvas></div>
       </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+      const goalScale = $('#goalScale input[type=checkbox]');
+      const userScale = $('#userScale input[type=checkbox]');
       const myChartChildren = document.getElementById('myChart').children;
       drawChart(myChartChildren[0], 'bar');
     </script>

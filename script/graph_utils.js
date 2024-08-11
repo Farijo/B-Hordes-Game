@@ -127,7 +127,5 @@ function drawChart(elSrc, type) {
       },
     }
   });
-  goalScale = $('#goalScale input[type=checkbox]');
-  userScale = $('#userScale input[type=checkbox]');
   refreshData();
 }
