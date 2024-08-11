@@ -40,12 +40,24 @@ function bindUserLegend() {
       }
     })
 }
-function drawChart() {
-    const params = new URLSearchParams(window.location.search);
-    resizeCanva = params.get('type') === 'bar';
-    polarCanva = params.get('type') === 'polarArea';
+function drawChart(elSrc, type) {
+  const jqEl = $(elSrc);
+    if(jqEl.prop('disabled')) {
+      return;
+    }
+    const btns = $('a.chlg-name[onclick*=drawChart]')
+    btns.prop('disabled', false);
+    btns.addClass('link');
+    jqEl.prop('disabled', true);
+    jqEl.removeClass('link');
+    if(myChart && myChart.destroy) {
+        $('#myChart').parent().css('min-width', '');
+        myChart.destroy();
+    }
+    resizeCanva = type === 'bar';
+    polarCanva = type === 'polarArea';
     myChart = new Chart(document.getElementById('myChart').children[3].children[0], {
-      type: params.get('type'),
+      type: type,
       plugins: [{
         afterDraw: resizeCanva ? chart => {
           const xAxis = chart.scales.x;
@@ -111,13 +123,11 @@ function drawChart() {
                   display: true,
                   centerPointLabels: polarCanva,
                 },
-              min: +params.get('min'),
             }
         },
       }
     });
     goalScale = $('#goalScale input[type=checkbox]');
     userScale = $('#userScale input[type=checkbox]');
-    $('a.chlg-name[href*='+params.get('type')+']').removeAttr('href', '');
     refreshData();
 }

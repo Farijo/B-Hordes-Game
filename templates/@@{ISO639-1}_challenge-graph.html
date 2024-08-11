@@ -4,37 +4,15 @@
 <head>
     <link rel="stylesheet" href="/style/theme.css">
     <link rel="stylesheet" href="/style/table.css">
+    <link rel="stylesheet" href="/style/graph.css">
     <script src="/script/sorttable.js"></script>
     <script src="/script/graph_utils.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
     <title>β'Hordes Games</title>
-    <style>
-      h2 ~ div {
-        display: flex;
-        gap: 1em;
-      }
-      #goalScale, #userScale {
-        display: block;
-      }
-      td[colspan] {
-        text-align: center;
-      }
-      #myChart {
-        flex-grow: 1;
-        text-align: left;
-      }
-      #myChart > div {
-        overflow: auto;
-        height: 80vh;
-      }
-      a.chlg-name:not([href]) {
-        color: white;
-      }
-    </style>
 </head>
 <body>
     {{ template "@@{ISO639-1}_top-bar.html" . }}
-    <h2>{{ "name" }}</h2>
+    <h2>{{ "Résultats" }}</h2>
     <div>
       <table id="goalScale">
         {{ $userkey := .userkey }}
@@ -87,15 +65,15 @@
         <tr><td colspan="2"><button onclick="switchSelection(this)">@@{reverse-selection}</button></td></tr>
       </table>
       <div id="myChart">
-        <a class="chlg-name" href="?type=bar">Barre</a>
-        <a class="chlg-name" href="?type=radar&min=0">Radar</a>
-        <a class="chlg-name" href="?type=polarArea">Polaire</a>
+        <a class="chlg-name" onclick="drawChart(this, 'bar')">Diagramme barre</a>
+        <a class="chlg-name link" onclick="drawChart(this, 'radar')">Diagramme radar</a>
+        <a class="chlg-name link" onclick="drawChart(this, 'polarArea')">Diagramme polaire</a>
         <div><canvas></canvas></div>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-      drawChart();
+      drawChart(document.getElementById('myChart').children[0], 'bar');
     </script>
     {{ if .faq }}
     <style>body{margin-bottom: 96px;}</style>
