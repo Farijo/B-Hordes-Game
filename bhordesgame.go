@@ -61,6 +61,7 @@ func main() {
 	r.GET("/user/:id", lngHandler, userHandle)
 	r.GET("/challenge/:id", lngHandler, challengeHandle)
 	r.GET("/challenge/:id/graph", lngHandler, challengeGraphHandle)
+	r.GET("/challenge/:id/history", lngHandler, challengeHistoryHandle)
 
 	authorized := r.Group("/")
 	authorized.Use(requireAuth)

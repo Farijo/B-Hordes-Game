@@ -756,6 +756,45 @@ func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
 	}
 }
 
+func queryChallengeHistory(ch chan<- *dto.UserHistory, challengeID int) {
+	defer close(ch)
+	rows, err := dbConn().Query(`SELECT user.id, user.name, user.simplified_name, user.avatar, success.goal, success.accomplished, success.amount FROM success
+	JOIN goal ON success.goal = goal.id AND goal.challenge = ?
+	JOIN user ON success.user = user.id
+	ORDER BY user.id, goal.id, success.accomplished`, challengeID)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer rows.Close()
+	cuser := new(dto.UserHistory)
+	cuser.History = make(map[int][]dto.Success)
+	for rows.Next() {
+		var user dto.User
+		var success dto.Success
+		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &success.Goal, &success.Accomplished, &success.Amount); err != nil {
+			fmt.Println(err)
+			return
+		}
+		if user.ID != cuser.ID {
+			if cuser.ID != 0 {
+				ch <- cuser
+				cuser = new(dto.UserHistory)
+				cuser.History = make(map[int][]dto.Success)
+			}
+			cuser.User = user
+		}
+		if cuser.History[success.Goal] == nil {
+			cuser.History[success.Goal] = []dto.Success{success}
+		} else {
+			cuser.History[success.Goal] = append(cuser.History[success.Goal], success)
+		}
+	}
+	if cuser.ID != 0 {
+		ch <- cuser
+	}
+}
+
 func queryChallengeParticipantsForScan(challengeID, requestorID int) (string, error) {
 	rows, err := dbConn().Query(`SELECT user FROM participant
 	WHERE challenge = ?

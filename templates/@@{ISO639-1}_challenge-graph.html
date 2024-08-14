@@ -38,7 +38,7 @@
       <table id="userScale" class="sortable">
         <tr><th colspan="2">@@{participant}</th></tr>
         {{ range $partic := .advancement }}
-        <tr class="item" onclick="toggleCheckbox(event, this)">
+        <tr class="item" onclick="toggleCheckbox(event, this)" title="{{ $partic.ID }}">
           <td sorttable_customkey="{{ $partic.SimplifiedName }}">
             <img class="avatar" src="{{ $partic.Avatar.String }}">
             <span class="name">{{ $partic.Name }}</span>
@@ -55,10 +55,9 @@
                   {{ end }}
                 ],
                 backgroundColor: intToColor(dataset.length, 0.3), // Couleur de la ligne
-                borderWidth: 1, // Épaisseur normale de la ligne
                 borderColor: intToColor(dataset.length, 1),
-                });
-                bindUserLegend(document.currentScript.parentElement);
+              });
+              bindUserLegend(document.currentScript.parentElement);
             </script>
           </td>
         </tr>
