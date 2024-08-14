@@ -58,6 +58,7 @@ func main() {
 	r.GET("/", lngHandler, indexHandle)
 	r.POST("/settings", settingsHandle)
 	r.GET("/logout", logoutHandle)
+	r.POST("/user", refreshHandle)
 	r.GET("/user/:id", lngHandler, userHandle)
 	r.GET("/challenge/:id", lngHandler, challengeHandle)
 	r.GET("/challenge/:id/graph", lngHandler, challengeGraphHandle)
@@ -66,7 +67,6 @@ func main() {
 	authorized := r.Group("/")
 	authorized.Use(requireAuth)
 	{
-		authorized.POST("/user", refreshHandle)
 		authorized.GET("/user", lngHandler, selfHandle)
 		authorized.POST("/challenge", createChallengeHandle)
 		authorized.GET("/challenge", lngHandler, challengeCreationHandle)
