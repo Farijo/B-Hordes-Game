@@ -1,8 +1,8 @@
 USE hordes_challenge;
 
 DROP TABLE IF EXISTS invitation;
-DROP TABLE IF EXISTS milestone;
 DROP TABLE IF EXISTS success;
+DROP TABLE IF EXISTS milestone;
 DROP TABLE IF EXISTS validator;
 DROP TABLE IF EXISTS goal;
 DROP TABLE IF EXISTS participant;
@@ -47,17 +47,6 @@ CREATE TABLE validator (
     PRIMARY KEY(user,challenge),
     FOREIGN KEY(challenge) REFERENCES challenge(id)
 );
-CREATE TABLE success (
-    user INT NOT NULL,
-    goal INTEGER NOT NULL,
-    accomplished DATETIME(2) NOT NULL,
-    amount INT NOT NULL,
-    UNIQUE(user,goal,accomplished),
-    PRIMARY KEY(user,goal,amount),
-    FOREIGN KEY(goal) REFERENCES goal(id),
-    FOREIGN KEY(user) REFERENCES user(id),
-    FOREIGN KEY(user,accomplished) REFERENCES milestone(user,dt)
-);
 CREATE TABLE milestone (
     user INT NOT NULL,
     dt DATETIME(2) NOT NULL,
@@ -81,6 +70,17 @@ CREATE TABLE milestone (
     zoneItems BLOB,
     PRIMARY KEY(user,dt),
     FOREIGN KEY(user) REFERENCES user(id)
+);
+CREATE TABLE success (
+    user INT NOT NULL,
+    goal INTEGER NOT NULL,
+    accomplished DATETIME(2) NOT NULL,
+    amount INT NOT NULL,
+    UNIQUE(user,goal,accomplished),
+    PRIMARY KEY(user,goal,amount),
+    FOREIGN KEY(goal) REFERENCES goal(id),
+    FOREIGN KEY(user) REFERENCES user(id),
+    FOREIGN KEY(user,accomplished) REFERENCES milestone(user,dt)
 );
 CREATE TABLE invitation (
     user INT NOT NULL,
