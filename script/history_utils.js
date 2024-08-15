@@ -20,9 +20,7 @@ function switchSelection(el) {
   refreshData();
 }
 function bindUserLegend(tdEl, startIdx) {
-  const td = $(tdEl);
-  const idx = dataset.length - 1;
-  td.css('background', `linear-gradient(to bottom, ${dataset[startIdx].borderColor} 0%, ${dataset[idx].borderColor} 100%)`);
+  $(tdEl).css('background', `linear-gradient(to bottom, ${dataset[startIdx].borderColor} 0%, ${dataset[dataset.length - 1].borderColor} 100%)`);
 }
 function drawChart() {
   luxon.Settings.defaultLocale = navigator.language
@@ -43,11 +41,11 @@ function drawChart() {
         plugins: {
             tooltip: {
                 callbacks: {
+                  beforeLabel: o => goalScale[o.datasetIndex%goalScale.length].parentElement.parentElement.children[0].title,
                 }
             },
             legend: {
-                display: true,
-                position: 'top'
+                display: false,
             }
         },
         responsive: true,

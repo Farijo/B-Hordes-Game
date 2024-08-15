@@ -23,3 +23,6 @@ a.link[onclick*=drawChart] {
     text-decoration: underline;
     cursor: pointer;
 }
+#goalScale td:first-child {
+  text-align: center;
+}
