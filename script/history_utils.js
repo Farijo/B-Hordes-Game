@@ -12,7 +12,7 @@ function toggleCheckbox(event, el) {
   }
 }
 function refreshData() {
-  myChart.data.datasets.forEach((d, i) => d.hidden = !userScale[Math.trunc(i/userScale.length)].checked || !goalScale[i%goalScale.length].checked);
+  myChart.data.datasets.forEach((d, i) => d.hidden = !userScale[Math.trunc(i/goalScale.length)].checked || !goalScale[i%goalScale.length].checked);
   myChart.update();
 }
 function switchSelection(el) {

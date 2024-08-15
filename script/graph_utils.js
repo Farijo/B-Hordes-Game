@@ -59,7 +59,7 @@ function drawChart(elSrc, type) {
   myChart = new Chart(myChartChildren[3].children[0], {
     type: type,
     plugins: [{
-      afterDraw: isBar ? chart => {
+      beforeDraw: isBar ? chart => {
         const xAxis = chart.scales.x;
         if (xAxis) {
           const ctx = chart.ctx;
@@ -113,7 +113,8 @@ function drawChart(elSrc, type) {
         },
         tooltip: {
           callbacks: {
-            title: o => goalScale.filter(':checked')[o[0].dataIndex].parentElement.parentElement.children[1].title
+            title: o => null,
+            beforeLabel: o => goalScale.filter(':checked')[o.dataIndex].parentElement.parentElement.children[1].title
           }
         },
       },
