@@ -235,8 +235,14 @@ func insertMilestone(milestone *dto.Milestone) error {
 		return tx.Commit()
 	}
 
-	if _, err = tx.Exec(`INSERT INTO milestone VALUES(?, UTC_TIMESTAMP(2), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+	var dt string
+	if err = tx.QueryRow(`SELECT UTC_TIMESTAMP(2)`).Scan(&dt); err != nil {
+		return err
+	}
+
+	if _, err = tx.Exec(`INSERT INTO milestone VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		milestone.User.ID,
+		dt,
 		milestone.IsGhost,
 		milestone.PlayedMaps,
 		milestone.Rewards,
@@ -260,8 +266,8 @@ func insertMilestone(milestone *dto.Milestone) error {
 
 	// don't insert success without milestone
 	var stmtBuilder strings.Builder
-	stmtBuilder.Grow(370 + 21*len(successes) + 83)
-	stmtBuilder.WriteString(`INSERT INTO success SELECT ?, goal.id, UTC_TIMESTAMP(2), IF(goal.amount IS NULL, 
+	stmtBuilder.Grow(355 + 21*len(successes) + 83)
+	stmtBuilder.WriteString(`INSERT INTO success SELECT ?, goal.id, ?, IF(goal.amount IS NULL, 
 		current,
 		LEAST(
 			current,
@@ -275,8 +281,8 @@ func insertMilestone(milestone *dto.Milestone) error {
 		)
 	)
 	FROM goal JOIN (SELECT 0 AS current, -1 AS gid`)
-	successValues := make([]any, 0, 2+2*len(successes))
-	successValues = append(successValues, milestone.User.ID, milestone.User.ID)
+	successValues := make([]any, 0, 3+2*len(successes))
+	successValues = append(successValues, milestone.User.ID, dt, milestone.User.ID)
 	for _, success := range successes {
 		successValues = append(successValues, success.Amount, success.Goal)
 		stmtBuilder.WriteString(` UNION ALL SELECT ?,?`)
