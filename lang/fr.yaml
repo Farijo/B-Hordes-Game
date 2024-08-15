@@ -129,5 +129,5 @@ confirm-milestone-delete: La suppression du jalon supprimera tous les succès as
 reverse-selection: Inverser la sélection
 bar-chart: Diagramme barre
 radar-chart: Diagramme radar
-polarArea-char: Diagramme polaire
+polarArea-chart: Diagramme polaire
 history: Historique

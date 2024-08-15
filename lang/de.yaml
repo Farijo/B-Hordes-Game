@@ -131,5 +131,5 @@ confirm-milestone-delete: Milestone deletion will delete any success associated,
 reverse-selection: Reverse selection
 bar-chart: Bar chart
 radar-chart: Radar chart
-polarArea-char: Polar area chart
+polarArea-chart: Polar area chart
 history: History
