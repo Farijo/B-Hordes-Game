@@ -19,10 +19,10 @@ function switchSelection(el) {
   $(el).closest('table').find('input[type=checkbox]').each((i, e) => e.checked ^= 1);
   refreshData();
 }
-function bindUserLegend(tdEl) {
+function bindUserLegend(tdEl, startIdx) {
   const td = $(tdEl);
   const idx = dataset.length - 1;
-  td.css('background-color', dataset[idx].borderColor);
+  td.css('background', `linear-gradient(to bottom, ${dataset[startIdx].borderColor} 0%, ${dataset[idx].borderColor} 100%)`);
 }
 function drawChart() {
   luxon.Settings.defaultLocale = navigator.language

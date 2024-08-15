@@ -44,6 +44,7 @@
           <td>
             <input type="checkbox" onchange="refreshData()" checked>
             <script>
+              startIdx = dataset.length;
               {{ range $gid, $_ := $goalHeaders }}
                 {{ $hist := index $partic.History $gid }}
                 sat = (dataset.length % goalScale.length) / (goalScale.length-1);
@@ -58,7 +59,7 @@
                     borderColor: intToColor({{ $i }}, sat, 1),
                 });
               {{ end }}
-              bindUserLegend(document.currentScript.parentElement);
+              bindUserLegend(document.currentScript.parentElement, startIdx);
             </script>
           </td>
         </tr>
