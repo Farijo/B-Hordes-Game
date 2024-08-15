@@ -34,7 +34,7 @@ function drawChart() {
             x: {
                 type: 'time',
                 time: {
-                    tooltipFormat: 'ff,S', // Format détaillé pour la date
+                    tooltipFormat: 'ff:s,S', // Format détaillé pour la date
                 },
             },
         },
