@@ -26,7 +26,7 @@ func Ignore[T any](t T, e error) T {
 	return t
 }
 
-var availableLangs = []language.Tag{language.English, language.French}
+var availableLangs = []language.Tag{language.English, language.French, language.Spanish, language.German}
 
 //go:embed lang templates/*
 var f embed.FS
