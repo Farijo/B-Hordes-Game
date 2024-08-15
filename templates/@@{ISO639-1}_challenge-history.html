@@ -22,12 +22,12 @@
         {{ $userkey := .userkey }}
         {{ $goalHeaders := mkmap }}
         {{ range $goal := .goals }}
-        <tr class="item" onclick="toggleCheckbox(event, this)">
-            {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal $goalHeaders false }}
-            {{ $goalHeader := index $goalHeaders $goal.ID }}
-            <td title="{{$mm.Text}} {{$mm.Label}}">{{ $goalHeader.Content }}{{ if $mm.Icon }}<img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ end }}</td>
+          {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal $goalHeaders false }}
+          {{ $goalHeader := index $goalHeaders $goal.ID }}
+          <tr class="item" onclick="toggleCheckbox(event, this)" title="{{$mm.Text}} {{$mm.Label}}">
+            <td>{{ $goalHeader.Content }}{{ if $mm.Icon }}<img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ end }}</td>
             <td><input type="checkbox" onchange="refreshData()" checked></td>
-        </tr>
+          </tr>
         {{ end }}
         <tr><td colspan="2"><button onclick="switchSelection(this)">@@{reverse-selection}</button></td></tr>
       </table>
@@ -47,7 +47,7 @@
               startIdx = dataset.length;
               {{ range $gid, $_ := $goalHeaders }}
                 {{ $hist := index $partic.History $gid }}
-                sat = (dataset.length % goalScale.length) / (goalScale.length-1);
+                sat = goalScale.length < 2 ? 1 : (dataset.length % goalScale.length) / (goalScale.length-1);
                 dataset.push({
                   label: "{{ $partic.Name }}",
                   data:[

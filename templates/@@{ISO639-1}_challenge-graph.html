@@ -20,18 +20,18 @@
         {{ $goalHeaders := mkmap }}
         <tr><th colspan="2">@@{goals}</th></tr>
         {{ range $goal := .goals }}
-        <tr class="item" onclick="toggleCheckbox(event, this)">
-            {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal $goalHeaders false }}
-            {{ $goalHeader := index $goalHeaders $goal.ID }}
+          {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal $goalHeaders false }}
+          {{ $goalHeader := index $goalHeaders $goal.ID }}
+          <tr class="item" onclick="toggleCheckbox(event, this)" title="{{$mm.Text}} {{$mm.Label}}">
             <script>
               labels.push(["", "{{ $goalHeader.Content }}"]);
               labelsImg.push("{{ $mm.Icon }}");
             </script>
-            <td title="{{$mm.Text}} {{$mm.Label}}">{{ $goalHeader.Content }}{{ if $mm.Icon }}<img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ end }}</td>
+            <td>{{ $goalHeader.Content }}{{ if $mm.Icon }}<img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ end }}</td>
             <td>
               <input type="checkbox" onchange="refreshData()" checked>
             </td>
-        </tr>
+          </tr>
         {{ end }}
         <tr><td colspan="2"><button onclick="switchSelection(this)">@@{reverse-selection}</button></td></tr>
       </table>
