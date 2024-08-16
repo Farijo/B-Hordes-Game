@@ -2,6 +2,7 @@ package main
 
 import (
 	"bhordesgame/dto"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -19,22 +20,11 @@ func challengeCreationHandle(c *gin.Context) {
 }
 
 func challengeHandle(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
-
 	key, cookieErr := c.Cookie("user")
 	uid, ok := sessions[key]
 	logged := cookieErr == nil && ok
 
-	challenge, err := queryChallenge(id, uid)
-	if err != nil {
-		logger.Println(err)
-		c.Status(http.StatusNotFound)
-		return
-	}
+	challenge := getChallenge(c)
 
 	selfChallenge := challenge.Creator.ID == uid && logged
 
@@ -150,11 +140,7 @@ func challengeHandle(c *gin.Context) {
 }
 
 func challengeGraphHandle(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
+	id := getChallenge(c).ID
 	key, _ := c.Cookie("user")
 
 	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-graph.html", gin.H{
@@ -166,11 +152,7 @@ func challengeGraphHandle(c *gin.Context) {
 }
 
 func challengeHistoryHandle(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
+	id := getChallenge(c).ID
 	key, _ := c.Cookie("user")
 
 	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-history.html", gin.H{
@@ -179,6 +161,28 @@ func challengeHistoryHandle(c *gin.Context) {
 		"userkey": key,
 		"history": makeChannelFor(queryChallengeHistory, id),
 	})
+}
+
+func challengeRawHistoryHandle(c *gin.Context) {
+	id := getChallenge(c).ID
+	chGoal := make(chan *dto.Goal)
+	go queryChallengeGoals(chGoal, id)
+	chHist := make(chan *dto.Success)
+	go queryChallengeRawHistory(chHist, id)
+
+	c.Writer.Header().Set("Content-Type", "application/json")
+	encoder := json.NewEncoder(c.Writer)
+	c.Writer.WriteString("{\"goals\":[")
+	for goal := range chGoal {
+		encoder.Encode(goal)
+		c.Writer.WriteString(",")
+	}
+	c.Writer.WriteString("null],\"successes\":[")
+	for hist := range chHist {
+		encoder.Encode(hist)
+		c.Writer.WriteString(",")
+	}
+	c.Writer.WriteString("null]}")
 }
 
 /* * * * * * * * * * * * * * * * * * * * * *
@@ -339,9 +343,36 @@ func challengeScanHandle(c *gin.Context) {
 }
 
 /* * * * * * * * * * * * * * * * * * * * * *
+ *                MIDDLEWARE               *
+ * * * * * * * * * * * * * * * * * * * * * */
+func restrictedChallenge(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		logger.Println(err)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	key, _ := c.Cookie("user")
+	challenge, err := queryChallenge(id, sessions[key])
+	if err != nil {
+		logger.Println(err)
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	c.Set("challenge", &challenge)
+}
+
+func getChallenge(c *gin.Context) *dto.DetailedChallenge {
+	chal, _ := c.Get("challenge")
+	return chal.(*dto.DetailedChallenge)
+}
+
+/* * * * * * * * * * * * * * * * * * * * * *
  *                  OTHER                  *
  * * * * * * * * * * * * * * * * * * * * * */
-func makeChannelActionString(logged bool, challenge dto.DetailedChallenge, uid int, lang string) <-chan []string {
+func makeChannelActionString(logged bool, challenge *dto.DetailedChallenge, uid int, lang string) <-chan []string {
 	action := make(chan []string)
 	if logged {
 		go func() {

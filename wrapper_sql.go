@@ -97,12 +97,12 @@ func queryChallenge(id, requestor int) (challenge dto.DetailedChallenge, err err
 	, TIMEDIFF(start_date,UTC_TIMESTAMP()) as rem_start, TIMEDIFF(end_date,UTC_TIMESTAMP()) as rem_end
 	 FROM challenge
 	 WHERE id=?
-	 AND (flags & 0x04 = 0
+	 AND (flags & 0x04 = 0 AND flags & 0x30 = 0x20
 	   OR creator = ?
 	   OR EXISTS (SELECT 1 FROM participant WHERE user = ? AND challenge = ?)
 	   OR EXISTS (SELECT 1 FROM validator WHERE user = ? AND challenge = ?)
 	   OR EXISTS (SELECT 1 FROM invitation WHERE user = ? AND challenge = ?)
-	)`, id, requestor, id, requestor, id, requestor, id, requestor)
+	)`, id, requestor, requestor, id, requestor, id, requestor, id)
 
 	if err = row.Scan(&challenge.Name, &challenge.Creator.ID, &challenge.Flags, &challenge.StartDate, &challenge.EndDate, &untilStart, &untilEnd); err != nil {
 		return
@@ -584,7 +584,7 @@ func queryChallengeInvitations(ch chan<- *dto.DetailedUser, challengeId int) {
 }
 
 func queryChallengeUserStatus(challengeId, userId int) (invited, participate bool) {
-	rows, err := dbConn().Query(`select 0 from invitation where challenge=? and user=? union select 1 from participant where challenge=? and user=?`,
+	rows, err := dbConn().Query(`SELECT 0 FROM invitation WHERE challenge=? AND user=? UNION SELECT 1 FROM participant WHERE challenge=? AND user=?`,
 		challengeId, userId, challengeId, userId)
 	if err != nil {
 		logger.Println(err)
@@ -808,6 +808,26 @@ func queryChallengeHistory(ch chan<- *dto.UserHistory, challengeID int) {
 	}
 	if cuser.ID != 0 {
 		ch <- cuser
+	}
+}
+
+func queryChallengeRawHistory(ch chan<- *dto.Success, challengeID int) {
+	defer close(ch)
+	rows, err := dbConn().Query(`SELECT success.user, success.goal, success.accomplished, success.amount FROM success
+	JOIN goal ON success.goal = goal.id AND goal.challenge = ?
+	ORDER BY success.accomplished`, challengeID)
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var success dto.Success
+		if err := rows.Scan(&success.User, &success.Goal, &success.Accomplished, &success.Amount); err != nil {
+			logger.Println(err)
+			return
+		}
+		ch <- &success
 	}
 }
 

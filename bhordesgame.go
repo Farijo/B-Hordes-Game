@@ -65,9 +65,15 @@ func main() {
 	r.GET("/logout", logoutHandle)
 	r.POST("/user", refreshHandle)
 	r.GET("/user/:id", lngHandler, userHandle)
-	r.GET("/challenge/:id", lngHandler, challengeHandle)
-	r.GET("/challenge/:id/graph", lngHandler, challengeGraphHandle)
-	r.GET("/challenge/:id/history", lngHandler, challengeHistoryHandle)
+
+	restricted := r.Group("/challenge/:id")
+	restricted.Use(restrictedChallenge)
+	{
+		restricted.GET("", lngHandler, challengeHandle)
+		restricted.GET("/graph", lngHandler, challengeGraphHandle)
+		restricted.GET("/history", lngHandler, challengeHistoryHandle)
+		restricted.GET("/data", lngHandler, challengeRawHistoryHandle)
+	}
 
 	authorized := r.Group("/")
 	authorized.Use(requireAuth)
