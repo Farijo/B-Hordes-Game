@@ -41,7 +41,7 @@ function drawChart() {
         plugins: {
             tooltip: {
                 callbacks: {
-                  beforeLabel: o => goalScale[o.datasetIndex%goalScale.length].parentElement.parentElement.children[0].title,
+                  beforeLabel: o => goalScale[o.datasetIndex%goalScale.length].parentElement.parentElement.title,
                 }
             },
             legend: {

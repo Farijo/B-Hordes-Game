@@ -114,7 +114,7 @@ function drawChart(elSrc, type) {
         tooltip: {
           callbacks: {
             title: o => null,
-            beforeLabel: o => goalScale.filter(':checked')[o.dataIndex].parentElement.parentElement.children[1].title
+            beforeLabel: o => goalScale.filter(':checked')[o.dataIndex].parentElement.parentElement.title
           }
         },
       },
