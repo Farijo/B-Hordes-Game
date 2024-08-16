@@ -171,13 +171,14 @@ func challengeRawHistoryHandle(c *gin.Context) {
 	go queryChallengeRawHistory(chHist, id)
 
 	c.Writer.Header().Set("Content-Type", "application/json")
+	c.Writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"challenge_%d.json\"", id))
 	encoder := json.NewEncoder(c.Writer)
-	c.Writer.WriteString("{\"goals\":[")
+	c.Writer.WriteString("{\"Goals\":[")
 	for goal := range chGoal {
 		encoder.Encode(goal)
 		c.Writer.WriteString(",")
 	}
-	c.Writer.WriteString("null],\"successes\":[")
+	c.Writer.WriteString("null],\"Successes\":[")
 	for hist := range chHist {
 		encoder.Encode(hist)
 		c.Writer.WriteString(",")
