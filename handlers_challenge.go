@@ -31,7 +31,7 @@ func challengeHandle(c *gin.Context) {
 
 	challenge, err := queryChallenge(id, uid)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		c.Status(http.StatusNotFound)
 		return
 	}
@@ -77,10 +77,10 @@ func challengeHandle(c *gin.Context) {
 				// 	if len(realIds) > 0 {
 				// 		if users, err := requestMultipleUsers(key, realIds); err == nil {
 				// 			if err := insertMultipleUsers(users); err != nil {
-				// 				fmt.Println(err)
+				// 				logger.Println(err)
 				// 			}
 				// 		} else {
-				// 			fmt.Println(err)
+				// 			logger.Println(err)
 				// 		}
 				// 	}
 				// }
@@ -193,7 +193,7 @@ func createChallengeHandle(c *gin.Context) {
 
 	id, err := insertChallenge(challenge, goals)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -210,7 +210,7 @@ func updateChallengeHandle(c *gin.Context) {
 
 	var formChallenge FormChallenge
 	if bindErr := c.Bind(&formChallenge); bindErr != nil {
-		fmt.Println(bindErr)
+		logger.Println(bindErr)
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -229,7 +229,7 @@ func updateChallengeHandle(c *gin.Context) {
 	}
 
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -304,7 +304,7 @@ func challengeScanHandle(c *gin.Context) {
 	}
 	userIDs, err := queryChallengeParticipantsForScan(id, c.GetInt("uid"))
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		c.Status(http.StatusForbidden)
 		return
 	}
@@ -314,7 +314,7 @@ func challengeScanHandle(c *gin.Context) {
 	}
 	milestones, err := requestMultipleUsers(c.GetString("key"), userIDs)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		if err.Error() == "too many request" {
 			c.Status(http.StatusTooManyRequests)
 		} else {
@@ -328,7 +328,7 @@ func challengeScanHandle(c *gin.Context) {
 	for i := range milestones {
 		go func(milestone *dto.Milestone, wg *sync.WaitGroup) {
 			if err := insertMilestone(milestone); err != nil {
-				fmt.Println(err)
+				logger.Println(err)
 			}
 			wg.Done()
 		}(&milestones[i], &wg)

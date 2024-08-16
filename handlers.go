@@ -2,7 +2,6 @@ package main
 
 import (
 	"bhordesgame/dto"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +31,7 @@ func settingsHandle(c *gin.Context) {
 		Source string `form:"source"`
 	}
 	if err := c.Bind(&settings); err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		c.Status(http.StatusBadRequest)
 		return
 	}

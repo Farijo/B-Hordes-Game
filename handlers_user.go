@@ -60,13 +60,13 @@ func refreshHandle(c *gin.Context) {
 		var err error
 		key, err = c.Cookie("user")
 		if err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			c.Status(http.StatusBadRequest)
 			return
 		}
 	}
 	if err := refreshData(key); err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		if err.Error() == "too many request" {
 			c.Status(http.StatusTooManyRequests)
 			return

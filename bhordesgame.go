@@ -3,6 +3,8 @@ package main
 import (
 	"embed"
 	"html/template"
+	"log"
+	"os"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -30,8 +32,11 @@ var availableLangs = []language.Tag{language.English, language.French, language.
 
 //go:embed lang templates/*
 var f embed.FS
+var logger *log.Logger
 
 func main() {
+	logger = log.New(os.Stderr, "[BHG] ", log.Ldate|log.Ltime|log.Llongfile)
+
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.SetHTMLTemplate(Must(template.New("").Funcs(template.FuncMap{

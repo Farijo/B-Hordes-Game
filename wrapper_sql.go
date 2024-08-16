@@ -4,7 +4,6 @@ import (
 	"bhordesgame/dto"
 	"database/sql"
 	"errors"
-	"fmt"
 	"os"
 	"sort"
 	"strconv"
@@ -63,7 +62,7 @@ func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 	 GROUP BY challenge.id, challenge.name, challenge.end_date
 	 ORDER BY ended, started`)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -84,7 +83,7 @@ func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 			&detailedChall.ParticipantCount,
 			&Started,
 			&Ended); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		detailedChall.UpdateDetailedProperties(Started.Bool, Ended.Bool)
@@ -334,7 +333,7 @@ func queryMultipleUsers(ch chan<- *dto.DetailedUser, idents []string) {
 
 	rows, err := dbConn().Query(sqlStmt.String(), values...)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -347,7 +346,7 @@ func queryMultipleUsers(ch chan<- *dto.DetailedUser, idents []string) {
 			&user.Avatar,
 			&user.CreationCount,
 			&user.ParticipationCount); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		ch <- &user
@@ -377,7 +376,7 @@ func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, view
 	 GROUP BY challenge.id, challenge.name, challenge.end_date, created, participate, validate, invited
 	 ORDER BY ended, started, challenge.flags & 0x30`, userId, userId, userId, userId, userId, viewer, userId, viewer)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -403,7 +402,7 @@ func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, view
 			&participate,
 			&validate,
 			&invited); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		detailedChall.UpdateDetailedProperties(Started.Bool, Ended.Bool)
@@ -468,7 +467,7 @@ func queryChallengeGoals(ch chan<- *dto.Goal, challengeId int) {
 
 	rows, err := dbConn().Query(`SELECT id, typ, entity, amount, x, y, custom FROM goal WHERE challenge=?`, challengeId)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -476,7 +475,7 @@ func queryChallengeGoals(ch chan<- *dto.Goal, challengeId int) {
 		var goal dto.Goal
 		goal.Challenge = challengeId
 		if err := rows.Scan(&goal.ID, &goal.Typ, &goal.Entity, &goal.Amount, &goal.X, &goal.Y, &goal.Custom); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		ch <- &goal
@@ -518,14 +517,14 @@ func queryChallengeParticipants(ch chan<- *dto.DetailedUser, challengeId int) {
 								 WHERE u.id IN (SELECT user FROM participant WHERE challenge=?)
 								 GROUP BY u.id, u.name`, challengeId)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var user dto.DetailedUser
 		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &user.CreationCount, &user.ParticipationCount); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		ch <- &user
@@ -542,14 +541,14 @@ func queryChallengeValidators(ch chan<- *dto.DetailedUser, challengeId int) {
 								 WHERE u.id IN (SELECT user FROM validator WHERE challenge=?)
 								 GROUP BY u.id, u.name`, challengeId)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var user dto.DetailedUser
 		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &user.CreationCount, &user.ParticipationCount); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		ch <- &user
@@ -570,14 +569,14 @@ func queryChallengeInvitations(ch chan<- *dto.DetailedUser, challengeId int) {
 												WHERE invitation.challenge=?)
 								 GROUP BY u.id, u.name`, challengeId)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var user dto.DetailedUser
 		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &user.CreationCount, &user.ParticipationCount); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		ch <- &user
@@ -588,14 +587,14 @@ func queryChallengeUserStatus(challengeId, userId int) (invited, participate boo
 	rows, err := dbConn().Query(`select 0 from invitation where challenge=? and user=? union select 1 from participant where challenge=? and user=?`,
 		challengeId, userId, challengeId, userId)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var r int
 		if err := rows.Scan(&r); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		switch r {
@@ -734,7 +733,7 @@ func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
 		JOIN user on user.id = p.user
 		ORDER BY id`, challengeID, challengeID)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -744,7 +743,7 @@ func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
 		var user dto.User
 		var success dto.Success
 		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &success.Goal, &success.Accomplished, &success.Amount); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		if user.ID != cuser.ID {
@@ -770,7 +769,7 @@ func queryChallengeHistory(ch chan<- *dto.UserHistory, challengeID int) {
 	JOIN user ON success.user = user.id
 	ORDER BY user.id, goal.id, success.accomplished`, challengeID)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -783,7 +782,7 @@ func queryChallengeHistory(ch chan<- *dto.UserHistory, challengeID int) {
 		var user dto.User
 		var success dto.Success
 		if err := rows.Scan(&startDate, &user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &picto, &success.Goal, &success.Accomplished, &success.Amount); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		if user.ID != cuser.ID {
@@ -994,7 +993,7 @@ func queryMilestone(milestoneCh chan<- *dto.Milestone, requestor int) {
 
 	rows, err := dbConn().Query(`SELECT * FROM milestone WHERE user = ? ORDER BY dt DESC`, requestor)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -1022,7 +1021,7 @@ func queryMilestone(milestoneCh chan<- *dto.Milestone, requestor int) {
 			&milestone.Map.City.Buildings,
 			&milestone.Map.City.Bank,
 			&milestone.Map.Zones); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		if milestone.HasData() {

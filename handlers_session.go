@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,9 +28,9 @@ func connectionHandle(c *gin.Context) {
 	if key := c.PostForm("key"); key > "" {
 		c.SetCookie("user", key, 24*60*60, "/", domain, false, true)
 		if err := refreshData(key); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			if err.Error() == "too many request" {
-				fmt.Println(key)
+				logger.Println(key)
 				c.Status(http.StatusTooManyRequests)
 				return
 			}

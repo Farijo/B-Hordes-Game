@@ -22,13 +22,13 @@ func loadTranslations(fs fs.FS, langs []language.Tag) {
 		translations[lng] = make(map[string]string)
 		f, err := fs.Open("lang/" + lng + ".yaml")
 		if err != nil {
-			fmt.Println("loadTranslations ", err)
+			logger.Println("loadTranslations ", err)
 		} else {
 			if err := yaml.NewDecoder(f).Decode(translations[lng]); err != nil {
-				fmt.Println("loadTranslations ", err)
+				logger.Println("loadTranslations ", err)
 			}
 			if err := f.Close(); err != nil {
-				fmt.Println("loadTranslations ", err)
+				logger.Println("loadTranslations ", err)
 			}
 		}
 	}
