@@ -38,11 +38,11 @@ INSERT INTO participant VALUES(1254, 3);
 INSERT INTO participant VALUES(1255, 3);
 INSERT INTO participant VALUES(1255, 2);
 
-INSERT INTO validator VALUES(1251, 2);
-INSERT INTO validator VALUES(1251, 3);
-INSERT INTO validator VALUES(1251, 4);
-INSERT INTO validator VALUES(1255, 2);
-INSERT INTO validator VALUES(1255, 4);
+INSERT INTO validator VALUES(1251, 2, 0);
+INSERT INTO validator VALUES(1251, 3, 0);
+INSERT INTO validator VALUES(1251, 4, 0);
+INSERT INTO validator VALUES(1255, 2, 0);
+INSERT INTO validator VALUES(1255, 4, 0);
 
 INSERT INTO goal(challenge, typ, entity) VALUES(2, 1, 0);
 INSERT INTO goal(challenge, typ, entity) VALUES(2, 1, 3);

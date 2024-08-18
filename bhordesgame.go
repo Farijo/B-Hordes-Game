@@ -87,8 +87,8 @@ func main() {
 		authorized.POST("/challenge/:id/scan", challengeScanHandle)
 		authorized.GET("/validation", lngHandler, validationHandle)
 		authorized.POST("/validation", validateGoalHandle)
+		authorized.POST("/validation/archive", archiveValidationHandle)
 		authorized.GET("/milestone", lngHandler, milestoneHandle)
-		authorized.GET("/milestone/delete", lngHandler, milestoneDeleteHandle)
 	}
 
 	if gin.Mode() == gin.DebugMode {

@@ -44,6 +44,7 @@ CREATE TABLE goal (
 CREATE TABLE validator (
     user INT NOT NULL,
     challenge INTEGER NOT NULL,
+    archived BOOLEAN NOT NULL,
     PRIMARY KEY(user,challenge),
     FOREIGN KEY(challenge) REFERENCES challenge(id)
 );
@@ -80,7 +81,6 @@ CREATE TABLE success (
     PRIMARY KEY(user,goal,amount),
     FOREIGN KEY(goal) REFERENCES goal(id),
     FOREIGN KEY(user) REFERENCES user(id),
-    FOREIGN KEY(user,accomplished) REFERENCES milestone(user,dt)
 );
 CREATE TABLE invitation (
     user INT NOT NULL,

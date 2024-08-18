@@ -3,6 +3,7 @@ package main
 import (
 	"html"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
@@ -45,15 +46,6 @@ func milestoneHandle(c *gin.Context) {
 	})
 }
 
-func milestoneDeleteHandle(c *gin.Context) {
-	if err := deleteLastMilestone(c.GetInt("uid")); err != nil {
-		logger.Println(err)
-		c.Status(http.StatusBadRequest)
-		return
-	}
-	c.Redirect(http.StatusFound, "/milestone")
-}
-
 /* * * * * * * * * * * * * * * * * * * * * *
  *                   POST                  *
  * * * * * * * * * * * * * * * * * * * * * */
@@ -83,6 +75,22 @@ func validateGoalHandle(c *gin.Context) {
 			logger.Println(insertErr)
 			c.Status(http.StatusBadRequest)
 		}
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/validation")
+}
+
+func archiveValidationHandle(c *gin.Context) {
+	challengeID, atoiErr := strconv.Atoi(c.PostForm("challenge"))
+	if atoiErr != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	if err := archiveChallengeValidation(challengeID, c.GetInt("uid")); err != nil {
+		logger.Println(err)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 

@@ -14,7 +14,17 @@
         <section>
             <h2><a class="chlg-name" href="/challenge/{{ $challenge.ID }}">{{ $challenge.Name }}</a></h2>
             <button>⟱ ⟱ ⟱</button>
-            <div class="timeline">{{ if $challenge.EndDate.Valid }}@@{end} : <span class="utcdate">{{ $challenge.EndDate.String }}</span>{{ else }}@@{running}{{ end }}</div>
+            <form class="timeline" method="post" action="/validation/archive">
+                {{ if $challenge.EndDate.Valid }}
+                    @@{end} : <span class="utcdate">{{ $challenge.EndDate.String }}</span>
+                    {{ if eq $challenge.Flags 1 }}
+                        <input type="hidden" name="challenge" value="{{ $challenge.ID }}">
+                        <input type="submit" value="Archiver">
+                    {{ end }}
+                {{ else }}
+                    @@{running}
+                {{ end }}
+            </form>
             <ul class='timeline'>
                 {{ range $mile := $verif }}
                     <li class='work'>

@@ -234,14 +234,13 @@ func insertMilestone(milestone *dto.Milestone) error {
 		return tx.Commit()
 	}
 
-	var dt string
-	if err = tx.QueryRow(`SELECT UTC_TIMESTAMP(2)`).Scan(&dt); err != nil {
+	if err = tx.QueryRow(`SELECT UTC_TIMESTAMP(2)`).Scan(&milestone.Dt); err != nil {
 		return err
 	}
 
 	if _, err = tx.Exec(`INSERT INTO milestone VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		milestone.User.ID,
-		dt,
+		milestone.Dt,
 		milestone.IsGhost,
 		milestone.PlayedMaps,
 		milestone.Rewards,
@@ -281,7 +280,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 	)
 	FROM goal JOIN (SELECT 0 AS current, -1 AS gid`)
 	successValues := make([]any, 0, 3+2*len(successes))
-	successValues = append(successValues, milestone.User.ID, dt, milestone.User.ID)
+	successValues = append(successValues, milestone.User.ID, milestone.Dt, milestone.User.ID)
 	for _, success := range successes {
 		successValues = append(successValues, success.Amount, success.Goal)
 		stmtBuilder.WriteString(` UNION ALL SELECT ?,?`)
@@ -612,7 +611,7 @@ func insertOrDeleteChallengeMember(challengeId, requestorId, userId int, validat
 	var stmt string
 	if validator {
 		if add {
-			stmt = "INSERT INTO validator SELECT ?,id FROM challenge WHERE id=? AND creator=?"
+			stmt = "INSERT INTO validator SELECT ?,id,0 FROM challenge WHERE id=? AND creator=?"
 		} else {
 			stmt = "DELETE t FROM validator t LEFT JOIN challenge c ON t.challenge=c.id WHERE t.user=? AND c.id=? AND c.creator=?"
 		}
@@ -903,9 +902,9 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 	) AS m
 	JOIN user ON user.id = m.user
 	JOIN goal ON goal.challenge = m.id
-	JOIN validator ON validator.challenge = m.id AND validator.user = ?
+	JOIN validator ON validator.challenge = m.id AND validator.user = ? AND validator.archived = 0
 	LEFT JOIN success ON success.user = m.user AND success.accomplished = m.dt AND success.goal = goal.id
-	ORDER BY rem IS NULL OR rem < 0 DESC, rem DESC, m.id, m.user, m.dt, m.bef, goal.id`, userID)
+	ORDER BY rem IS NULL OR rem < 0 DESC, rem IS NULL, ABS(rem), m.id, m.user, m.dt, m.bef, goal.id`, userID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -922,7 +921,7 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 		var challenge dto.Challenge
 		var goal dto.Goal
 		var successAmount sql.NullInt32
-		var aux any
+		var rem sql.NullInt64
 		if err := rows.Scan(
 			&milestone.User.ID,
 			&milestone.Dt,
@@ -958,7 +957,7 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 			&goal.Custom,
 			&goal.Amount,
 			&successAmount,
-			&aux); err != nil {
+			&rem); err != nil {
 			return nil, nil, err
 		}
 		if goal.Typ == 2 {
@@ -973,6 +972,9 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 
 		addedChallenge := len(resOrder)
 		if addedChallenge == 0 || resOrder[addedChallenge-1].ID != challenge.ID {
+			if rem.Valid && rem.Int64 > 0 {
+				challenge.Flags = 1
+			}
 			resOrder = append(resOrder, &challenge)
 		}
 
@@ -1119,4 +1121,12 @@ func insertSuccesses(user int, dt string, amounts map[string][]string, requestor
 	}
 
 	return tx.Commit()
+}
+
+func archiveChallengeValidation(challenge, requestor int) error {
+	if _, err := dbConn().Exec(`UPDATE validator SET archived = 1 WHERE user = ? AND challenge = ?`, requestor, challenge); err != nil {
+		return err
+	}
+	// remove participant milestone who became useless
+	return nil
 }
