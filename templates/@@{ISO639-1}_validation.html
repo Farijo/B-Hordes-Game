@@ -19,7 +19,7 @@
                     @@{end} : <span class="utcdate">{{ $challenge.EndDate.String }}</span>
                     {{ if eq $challenge.Flags 1 }}
                         <input type="hidden" name="challenge" value="{{ $challenge.ID }}">
-                        <input type="submit" value="Archiver">
+                        &nbsp;<input type="submit" value="@@{archive}">
                     {{ end }}
                 {{ else }}
                     @@{running}
