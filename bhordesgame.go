@@ -57,6 +57,7 @@ func main() {
 
 	loadTranslations(f, availableLangs)
 	lngHandler := languageSelector(availableLangs)
+	_ = lngHandler
 	lngHandler = func(ctx *gin.Context) { ctx.Set(LNG_KEY, "@@{ISO639-1}") }
 
 	r.POST("/", connectionHandle)

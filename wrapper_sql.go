@@ -1052,11 +1052,6 @@ func queryMilestone(milestoneCh chan<- *dto.Milestone, requestor int) {
 	}
 }
 
-func deleteLastMilestone(user int) error {
-	_, err := dbConn().Exec("DELETE FROM milestone WHERE user = ? ORDER BY dt DESC LIMIT 1", user)
-	return err
-}
-
 func insertSuccesses(user int, dt string, amounts map[string][]string, requestor int) error {
 	if len(amounts) == 0 {
 		return nil
