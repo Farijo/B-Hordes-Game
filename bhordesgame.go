@@ -56,9 +56,7 @@ func main() {
 	r.StaticFile("/gear.svg", "asset/gear.svg")
 
 	loadTranslations(f, availableLangs)
-	lngHandler := languageSelector(availableLangs)
-	_ = lngHandler
-	lngHandler = func(ctx *gin.Context) { ctx.Set(LNG_KEY, "@@{ISO639-1}") }
+	lngHandler := func(ctx *gin.Context) { ctx.Set(LNG_KEY, "@@{ISO639-1}") }
 
 	r.POST("/", connectionHandle)
 	r.GET("/", lngHandler, indexHandle)
