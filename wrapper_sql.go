@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"unicode"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -841,6 +842,7 @@ func queryChallengeParticipantsForScan(challengeID, requestorID int) (string, er
 	if err != nil {
 		return "", err
 	}
+	defer rows.Close()
 
 	var builder strings.Builder
 
@@ -1123,5 +1125,118 @@ func archiveChallengeValidation(challenge, requestor int) error {
 		return err
 	}
 	// remove participant milestone who became useless
+
+	/*
+		for all participants of challenge
+		retrieve earliest non archived challenge start date
+		rebuild milestone from begining to 1st milestone before challenge start_date
+		update milestone
+		delete milestones anterior to 1st milestone before challenge start_date
+	*/
+
+	rows, err := dbConn().Query(`SELECT p1.user, MIN(start_date)
+	FROM participant p1
+	JOIN participant p2 ON p1.user = p2.user AND p1.challenge = ?
+	JOIN challenge ON p2.challenge = challenge.id
+	GROUP BY p1.user`, challenge)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	for rows.Next() {
+		var milestone dto.Milestone
+		if err := rows.Scan(&milestone.User.ID, &milestone.Dt); err != nil {
+			wg.Done()
+			return err
+		}
+		go func(m *dto.Milestone) {
+			wg.Wait()
+			tx, err := dbConn().Begin()
+			if err != nil {
+				logger.Println(err)
+				return
+			}
+			defer tx.Rollback()
+
+			rows, err := tx.Query(`SELECT dt, isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, custom, buildings, bank, zoneItems
+			FROM milestone WHERE user = ? AND dt < ? ORDER BY dt ASC`, milestone.User.ID, milestone.Dt)
+			if err != nil {
+				logger.Println(err)
+				return
+			}
+
+			for rows.Next() {
+				if err = rows.Scan(
+					&milestone.Dt,
+					&milestone.IsGhost,
+					&milestone.PlayedMaps,
+					&milestone.Rewards,
+					&milestone.Dead,
+					&milestone.Out,
+					&milestone.Ban,
+					&milestone.BaseDef,
+					&milestone.X,
+					&milestone.Y,
+					&milestone.Job,
+					&milestone.Map.Wid,
+					&milestone.Map.Hei,
+					&milestone.Map.Days,
+					&milestone.Map.Conspiracy,
+					&milestone.Map.Custom,
+					&milestone.Map.City.Buildings,
+					&milestone.Map.City.Bank,
+					&milestone.Map.Zones); err != nil {
+					rows.Close()
+					logger.Println(err)
+					return
+				}
+			}
+			rows.Close()
+
+			// populate sql fields
+			milestone.CheckFieldsDifference(new(dto.Milestone))
+
+			if _, err := tx.Exec(`DELETE FROM milestone WHERE user = ? AND dt < ?`, milestone.User.ID, milestone.Dt); err != nil {
+				logger.Println(err)
+				return
+			}
+
+			if _, err = tx.Exec(`UPDATE milestone SET isGhost = ?, playedMaps = ?, rewards = ?, dead = ?, isOut = ?, ban = ?, baseDef = ?, x = ?, y = ?, job = ?, mapWid = ?, mapHei = ?, mapDays = ?, conspiracy = ?, custom = ?, buildings = ?, bank = ?, zoneItems = ?
+			WHERE user = ? AND dt = ?`,
+				milestone.IsGhost,
+				milestone.PlayedMaps,
+				milestone.Rewards,
+				milestone.Dead,
+				milestone.Out,
+				milestone.Ban,
+				milestone.BaseDef,
+				milestone.X,
+				milestone.Y,
+				milestone.Job,
+				milestone.Map.Wid,
+				milestone.Map.Hei,
+				milestone.Map.Days,
+				milestone.Map.Conspiracy,
+				milestone.Map.Custom,
+				milestone.Map.City.Buildings,
+				milestone.Map.City.Bank,
+				milestone.Map.Zones,
+				milestone.User.ID,
+				milestone.Dt); err != nil {
+				logger.Println(err)
+				return
+			}
+
+			if err := tx.Commit(); err != nil {
+				logger.Println(err)
+			}
+
+		}(&milestone)
+	}
+	wg.Done()
+
 	return nil
 }
