@@ -80,7 +80,7 @@ CREATE TABLE success (
     UNIQUE(user,goal,accomplished),
     PRIMARY KEY(user,goal,amount),
     FOREIGN KEY(goal) REFERENCES goal(id),
-    FOREIGN KEY(user) REFERENCES user(id),
+    FOREIGN KEY(user) REFERENCES user(id)
 );
 CREATE TABLE invitation (
     user INT NOT NULL,
