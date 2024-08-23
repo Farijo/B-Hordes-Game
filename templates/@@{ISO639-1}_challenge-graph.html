@@ -13,7 +13,13 @@
 </head>
 <body>
     {{ template "@@{ISO639-1}_top-bar.html" . }}
-    <h2>@@{result}</h2>
+    <h2>{{ .challenge.Name }}</h2>
+    <h5>
+        <a class="chlg-name" href="/challenge/{{ .challenge.ID }}">@@{general}</a>
+        <span>@@{graph}</span>
+        <a class="chlg-name" href="/challenge/{{ .challenge.ID }}/history">@@{history}</a>
+        <a class="chlg-name" href="/challenge/{{ .challenge.ID }}/data">@@{data}</a>
+    </h5>
     <div>
       <table id="goalScale" class="sortable">
         {{ $userkey := .userkey }}

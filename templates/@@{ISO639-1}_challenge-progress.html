@@ -11,6 +11,12 @@
 <body>
     {{ template "@@{ISO639-1}_top-bar.html" . }}
     <h2>{{ .challenge.Name }}</h2>
+    <h5>
+        <span>@@{general}</span>
+        <a class="chlg-name" href="/challenge/{{ .challenge.ID }}/graph">@@{graph}</a>
+        <a class="chlg-name" href="/challenge/{{ .challenge.ID }}/history">@@{history}</a>
+        <a class="chlg-name" href="/challenge/{{ .challenge.ID }}/data">@@{data}</a>
+    </h5>
     <div class="container">
         <a class="box" href="/user/{{ .challenge.Creator.ID }}">
             <div class="line1">@@{by}</div>

@@ -1207,11 +1207,6 @@ func mergeMilestonesOlderThan(milestone *dto.Milestone, threshold int) {
 	// populate sql fields
 	milestone.CheckFieldsDifference(new(dto.Milestone))
 
-	if _, err := tx.Exec(`DELETE FROM milestone WHERE user = ? AND dt < ?`, milestone.User.ID, milestone.Dt); err != nil {
-		logger.Println(err)
-		return
-	}
-
 	if _, err = tx.Exec(`UPDATE milestone SET isGhost = ?, playedMaps = ?, rewards = ?, dead = ?, isOut = ?, ban = ?, baseDef = ?, x = ?, y = ?, job = ?, mapWid = ?, mapHei = ?, mapDays = ?, conspiracy = ?, custom = ?, buildings = ?, bank = ?, zoneItems = ?
 	WHERE user = ? AND dt = ?`,
 		milestone.IsGhost,
@@ -1234,6 +1229,11 @@ func mergeMilestonesOlderThan(milestone *dto.Milestone, threshold int) {
 		milestone.Map.Zones,
 		milestone.User.ID,
 		milestone.Dt); err != nil {
+		logger.Println(err)
+		return
+	}
+
+	if _, err := tx.Exec(`DELETE FROM milestone WHERE user = ? AND dt < ?`, milestone.User.ID, milestone.Dt); err != nil {
 		logger.Println(err)
 		return
 	}

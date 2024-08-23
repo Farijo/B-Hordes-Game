@@ -140,30 +140,32 @@ func challengeHandle(c *gin.Context) {
 }
 
 func challengeGraphHandle(c *gin.Context) {
-	id := getChallenge(c).ID
+	challenge := getChallenge(c)
 	key, cookieErr := c.Cookie("user")
 	logged := (cookieErr == nil) && (sessions[key] > 0)
 
 	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-graph.html", gin.H{
 		"faq":         wantFAQ(c.Cookie(NOFAQ)),
 		"logged":      logged,
-		"goals":       makeChannelFor(queryChallengeGoals, id),
+		"challenge":   challenge,
+		"goals":       makeChannelFor(queryChallengeGoals, challenge.ID),
 		"userkey":     key,
-		"advancement": makeChannelFor(queryChallengeAdvancements, id),
+		"advancement": makeChannelFor(queryChallengeAdvancements, challenge.ID),
 	})
 }
 
 func challengeHistoryHandle(c *gin.Context) {
-	id := getChallenge(c).ID
+	challenge := getChallenge(c)
 	key, cookieErr := c.Cookie("user")
 	logged := (cookieErr == nil) && (sessions[key] > 0)
 
 	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-history.html", gin.H{
-		"faq":     wantFAQ(c.Cookie(NOFAQ)),
-		"logged":  logged,
-		"goals":   makeChannelFor(queryChallengeGoals, id),
-		"userkey": key,
-		"history": makeChannelFor(queryChallengeHistory, id),
+		"faq":       wantFAQ(c.Cookie(NOFAQ)),
+		"logged":    logged,
+		"challenge": challenge,
+		"goals":     makeChannelFor(queryChallengeGoals, challenge.ID),
+		"userkey":   key,
+		"history":   makeChannelFor(queryChallengeHistory, challenge.ID),
 	})
 }
 
