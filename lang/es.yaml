@@ -52,85 +52,85 @@ candidate: Candidato
 approbator: Aprobador
 
 ISO639-1: es
-name: Name
-participation: Participation
-participations: Participations
-visibility: Visibility
-public: Public
-private: Private
-private-desc: Private challenges are only visible by creator and participants
-goals: Goals
-validation-modes: Validation modes
+name: Nombre
+participation: Participación
+participations: Participaciones
+visibility: Visibilidad
+public: Público
+private: Privado
+private-desc: Los desafíos privados solo son visibles para el creador y los participantes.
+goals: Objetivos
+validation-modes: Modos de validación
 api: API
-save: Save
-validate: Validate
-modify: Modify
-open-inscriptions: Open inscriptions
+save: Ahorrar
+validate: Validar
+modify: Modificar
+open-inscriptions: Inscripciones abiertas
 discord-create-challenge: "1254732352161316905"
 discord-desc-challenge: "1254191205332418701"
 discord-desc-invite: "1254732301867417703"
 discord-main: "1254191087883649137"
 discord-desc-validation: "1254191235653042256"
 discord-desc-milestone: "1270311364165898280"
-stack-picto: Stack pictos
-be-on: Stand on place
-build: Build
-have-in-bank: Have in bank
-custom-goal: Personnalized
-delete-goal: ⚠️ Delete this goal ⚠️
-with: With
-empty-desc: "If empty: the goal is to stack the maximum"
-by: By
-start: Start
-end: End
-start-now: Start now
-end-now: End now
-scan-participants: Span participants
-never-realized: Never realized
-confirm-end: Confirm challenge end
-add-approbators: Add approbators
-send-invitations: Send invitations
-name-id: Name ID
-search-title: Enter a list of names or IDs separed with spaces
-search: Search
-result: Result
-nb-created-challenges: Challenges created
-requestor: Requestor
-start-date-must-be-set: A start date must be set first
-challenge-start-warning: Challenge start will prevent any modification, except end date
-"yes": "Yes"
+stack-picto: Acumular los distinciónes
+be-on: Estar en el lugar
+build: Construir
+have-in-bank: Tener en el almacén
+custom-goal: Costumbre
+delete-goal: ⚠️ Eliminar este objetivo ⚠️
+with: Con
+empty-desc: "Si está vacío: el objetivo es apilar el máximo"
+by: De
+start: Comienzo
+end: FIN
+start-now: Empezar ahora
+end-now: Terminar ahora
+scan-participants: Escanear participantes
+never-realized: Nunca hecho
+confirm-end: Confirma el final del desafío
+add-approbators: Agregar aprobadores
+send-invitations: Enviar invitaciones
+name-id: Nombre ID
+search-title: Ingrese una lista de nombres o identificadores separados por espacios
+search: Buscar
+result: Resultado
+nb-created-challenges: Retos creados
+requestor: Solicitante
+start-date-must-be-set: Primero se debe ingresar una fecha de inicio
+challenge-start-warning: El lanzamiento del desafío impedirá cualquier modificación, salvo la fecha de finalización
+"yes": "Si"
 "no": "No"
-challenge: Challenge
-access: Access
-status: Status
-registered: Registered
-home: Home
-update: Update
-create-challenge: Create challenge
-profile: Profile
-validations: Validations
-logout: Logout
-login: Login
-mh-contact: MH contact
+challenge: Desafío
+access: Acceso
+status: Estado
+registered: Registrado
+home: Inicio
+update: Actualizar
+create-challenge: Crea un desafío
+profile: Perfil
+validations: Validaciones
+logout: Desconectar
+login: Conexión
+mh-contact: Contacto MH
 email: E-mail
-player-not-found: Player not found
-player: Player
-challenge-as: Challenge as
-previous: Previous
-current: Current
-import: Import
-export: Export
-copied-toast: Copied !
-predefined: Predefined
-load: Load
-milestones: Milestones
-enable-faq: Enable FAQ
-delete-last-milestone: Delete last milestone
-confirm-milestone-delete: Milestone deletion will delete any success associated, confirm ?
+player-not-found: Jugador no encontrado
+player: Jugador
+challenge-as: Desafío como
+previous: Anterior
+current: Actual
+import: Importar
+export: Exportar
+copied-toast: Copiado!
+predefined: Predefinido
+load: Carga
+milestones: Hitos
+enable-faq: Activar preguntas frecuentes
+delete-last-milestone: Eliminar el último hito
+confirm-milestone-delete: Al eliminar el hito se eliminarán todos los logros asociados, ¿confirmar?
 
-reverse-selection: Reverse selection
-bar-chart: Bar chart
-radar-chart: Radar chart
-polarArea-chart: Polar area chart
-history: History
-archive: Archive
+reverse-selection: Selección inversa
+bar-chart: Diagrama de barras
+radar-chart: Diagrama de radar
+polarArea-chart: Diagrama polar
+history: Histórico
+archive: Archivo
