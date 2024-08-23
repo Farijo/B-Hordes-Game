@@ -1,55 +1,55 @@
 #Placeholder from en file
 
-open-to-all: Open to all
-on-request: On request
-on-invite: By invitation
-join: Join
-retire: Retire
-cancel-request: Cancel request
-send-request: Send a request
-accept-invite: Accept invitation
-creation: Creation
-proofreading: Proofreading
-inscriptions: Inscriptions
-running: Running
-over: Over
-ghost: Ghost
-played-maps: Played maps
-rewards: Rewards
-dead: Dead
-out: Out
-ban: Ban
-base-def: Base defense
-job: Job
-basic: todo-Habitant
-dig: todo-Fouineur
-vest: todo-Éclaireur
-shield: todo-Gardien
-book: todo-Ermite
-tamer: todo-Apprivoiseur
-tech: todo-Technicien
-map: Map
-wid: Width
-hei: Height
-days: Days
-conspiracy: Conspiracy
+open-to-all: Abierto a todos
+on-request: A solicitud
+on-invite: Por invitación
+join: Unirse
+retire: Retirar
+cancel-request: Cancelar solicitud
+send-request: Enviar una solicitud
+accept-invite: Aceptar la invitación
+creation: Creación
+proofreading: Revisión
+inscriptions: Inscripciones
+running: En curso
+over: Finalizado
+ghost: Fantasma
+played-maps: Número de encarnaciones
+rewards: Distinciónes
+dead: Muerto
+out: Afuera
+ban: Desterrado
+base-def: Defensa de la casa
+job: Oficio
+basic:  Habitante
+dig: Excavador
+vest:  Explorador
+shield: Guardián
+book: Ermitaño
+tamer: Domador
+tech: Técnico
+map: Pueblo
+wid: Ancho
+hei: Altura
+days: Días
+conspiracy: Insurrección
 custom: Custom
-buildings: Buildings
-bank: Bank
-items: Items
-the-most-of: the most of
-goal-stack-rewards: Stack <b>%[1]s</b> rewards
-goal-stand-x-y: Stand on <b>cell</b> [ <b>%[1]d</b> / <b>%[2]d</b> ] with <b>%[3]s</b>
-goal-stand-x: Stand on <b>line %[1]d</b> with <b>%[2]s</b>
-goal-stand-y: Stand on <b>column %[1]d</b> with <b>%[2]s</b>
-goal-stand: Stand outside with <b>%[1]s</b>
-goal-build: Build
-goal-bank: Have in bank <b>%[1]s</b>
-creator: Creator
+buildings: Edificios
+bank: Almacén
+items: Recursos
+the-most-of: La mayor cantidad de
+goal-stack-rewards: Acumular <b>%[1]s</b> distinciónes
+goal-stand-x-y: Estar en el <b>cuadrado</b> [ <b>%[1]d</b> / <b>%[2]d</b> ] con <b>%[3]s</b>
+goal-stand-x: Estar en la <b>línea %[1]d</b> con <b>%[2]s</b>
+goal-stand-y: Estar en la <b>columna %[1]d</b> con <b>%[2]s</b>
+goal-stand: estar afuera con <b>%[1]s</b>
+goal-build: Construir
+goal-bank: Tener en el almacén <b>%[1]s</b>
+creator: Creador
 participant: Participant
-guest: Guest
-candidate: Candidate
-approbator: Approbator
+guest: Huésped
+candidate: Candidato
+approbator: Aprobador
 
 ISO639-1: es
 name: Name
