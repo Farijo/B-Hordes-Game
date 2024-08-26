@@ -7,13 +7,20 @@
     <option value="5">@@{delete-goal}</option>
 </select>
 <div style="margin:0.4em 0 1em 0">
-    <input class="eslc" type="number" name="x" placeholder="X" min="-25" max="25" step="1" style="margin-bottom:0.4rem"/>
-    <input class="eslc" type="number" name="y" placeholder="Y" min="-25" max="25" step="1"/> 
-    <span  class="eslc" style="vertical-align:sub">@@{with}</span>
-    <br    class="eslc">
-    <input class="alp eslc aeb" type="number" name="count" min="1" step="1" title="@@{empty-desc}"/>
-    &nbsp;<img   class="alp eslc c aeb" id="goal-img"/>&nbsp;
-    <select class="alp eslc c aeb goal-list" style="width:11em"></select>
-    <input class="alp eslc c aeb" id="goal-value" type="hidden" name="val"/>
+    <span  class="eslc" style="vertical-align:sub">
+        <input type="number" name="x" placeholder="X" min="-25" max="25" step="1" style="margin-bottom:0.4rem"/>
+        <input type="number" name="y" placeholder="Y" min="-25" max="25" step="1"/> 
+        &nbsp;@@{with}
+        <br>
+    </span>
+    <span  class="alp eslc aeb">
+        <input type="number" name="count" min="1" step="1" title="@@{empty-desc}"/>
+        &nbsp;
+    </span>
+    <span  class="alp eslc c aeb">
+        <img id="goal-img"/>&nbsp;
+        <select id="goal-list" style="width:11em"></select>
+        <input id="goal-value" type="hidden" name="val"/>
+    </span>
     <input class="p" type="text" name="custom" maxlength="128"/>
 </div>
