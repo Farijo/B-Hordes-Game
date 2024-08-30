@@ -361,19 +361,19 @@ func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, view
 	, challenge.start_date <= UTC_TIMESTAMP() AS started
 	, challenge.end_date < UTC_TIMESTAMP() AS ended
 	, challenge.creator=? AS created
-	, participant.user IS NOT NULL as participate
+	, IFNULL(SUM(participant.user),0) > 0 as participate
 	, validator.user IS NOT NULL as validate
 	, invitation.user IS NOT NULL as invited
 	 FROM challenge
 	 LEFT JOIN user        ON challenge.creator = user.id
-	 LEFT JOIN participant ON challenge.id = participant.challenge AND participant.user = ?
+	 LEFT JOIN participant ON challenge.id = participant.challenge
 	 LEFT JOIN validator   ON challenge.id = validator.challenge AND validator.user = ?
 	 LEFT JOIN invitation  ON challenge.id = invitation.challenge AND invitation.user = ? AND participant.user IS NULL
 	 WHERE ? IN (challenge.creator, participant.user, validator.user, invitation.user)
 	 AND (challenge.flags & 0x04 = 0 OR ? in (challenge.creator, participant.user, validator.user, invitation.user))
 	 AND (?=? OR (challenge.flags & 0x30) = 0x20 AND challenge.flags & 0x03 < 2)
-	 GROUP BY challenge.id, challenge.name, challenge.end_date, created, participate, validate, invited
-	 ORDER BY ended, started, challenge.flags & 0x30`, userId, userId, userId, userId, userId, viewer, userId, viewer)
+	 GROUP BY challenge.id, challenge.name, challenge.end_date, created, validate, invited
+	 ORDER BY ended, started, challenge.flags & 0x30`, userId, userId, userId, userId, viewer, userId, viewer)
 	if err != nil {
 		logger.Println(err)
 		return
