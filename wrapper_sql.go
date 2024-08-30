@@ -60,7 +60,7 @@ func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 	 AND (challenge.flags & 0x04) = 0
 	 AND (challenge.flags & 0x30) = 0x20
 	 GROUP BY challenge.id, challenge.name, challenge.end_date
-	 ORDER BY ended, started`)
+	 ORDER BY IFNULL(ended, 0), IFNULL(started,0)`)
 	if err != nil {
 		logger.Println(err)
 		return
