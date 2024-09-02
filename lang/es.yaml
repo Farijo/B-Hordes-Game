@@ -15,19 +15,19 @@ running: Activo
 over: Finalizado
 ghost: Fantasma
 played-maps: Mapas jugados
-rewards: Recompensas
+rewards: Distinciones
 dead: Muerto
-out: 
-ban: 
+out: Afuera
+ban: Desterrado
 base-def: Defensa de base
-job: Profesión
-basic: todo-Habitant
-dig: todo-Fouineur
-vest: todo-Éclaireur
-shield: todo-Gardien
-book: todo-Ermite
-tamer: todo-Apprivoiseur
-tech: todo-Technicien
+job: Oficio
+basic: Habitante
+dig: Excavador
+vest: Explorador
+shield: Guardián
+book: Ermitaño
+tamer: Domador
+tech: Técnico
 map: Mapa
 wid: Ancho
 hei: Altura
@@ -37,22 +37,22 @@ custom: Personalizado
 buildings: Construcciones
 bank: Almacén
 items: Objetos
-the-most-of: the most of
-goal-stack-rewards: Acumular <b>%[1]s</b> recompensas
-goal-stand-x-y: Stand on <b>cell</b> [ <b>%[1]d</b> / <b>%[2]d</b> ] with <b>%[3]s</b>
-goal-stand-x: Stand on <b>line %[1]d</b> with <b>%[2]s</b>
-goal-stand-y: Stand on <b>column %[1]d</b> with <b>%[2]s</b>
-goal-stand: Stand outside with <b>%[1]s</b>
+the-most-of: La mayor cantidad de
+goal-stack-rewards: Acumular <b>%[1]s</b> distinciones
+goal-stand-x-y: Estar en la <b>zona</b> [ <b>%[1]d</b> / <b>%[2]d</b> ] con <b>%[3]s</b>
+goal-stand-x: Estar en la <b>línea %[1]d</b> con <b>%[2]s</b>
+goal-stand-y: Estar en la <b>columna %[1]d</b> con <b>%[2]s</b>
+goal-stand: Estar afuera con <b>%[1]s</b>
 goal-build: Construir
 goal-bank: Tener en el almacén <b>%[1]s</b> 
 creator: Creador
 participant: Participante
 guest: Invitado
 candidate: Candidato
-approbator: Autorizador
+approbator: Aprobador
 
-ISO639-1: en
-name: Nombre
+ISO639-1: es
+name: Nombre del desafío
 participation: Participación
 participations: Participaciones
 visibility: Visibilidad
@@ -73,22 +73,22 @@ discord-main: "1254191087883649137"
 discord-desc-validation: "1254191235653042256"
 discord-desc-milestone: "1270311364165898280"
 stack-picto: Acumular distinciones
-be-on: Stand on place
+be-on: Estar en la zona
 build: Construir
 have-in-bank: Tener en almacén
 custom-goal: Personalizado
 delete-goal: ⚠️ Eliminar objetivo ⚠️
 with: Con
-empty-desc: "If empty: the goal is to stack the maximum"
+empty-desc: "Si el campo está vacío, el objetivo será recolectar el máximo"
 by: Por
 start: Inicio
 end: Final
 start-now: Iniciar ahora
 end-now: Finalizar ahora
 scan-participants: Escanear participantes
-never-realized: Never realized
+never-realized: No obtenido
 confirm-end: Confirmar fin de desafío
-add-approbators: Añadir autorizadores
+add-approbators: Añadir aprobadores
 send-invitations: Enviar invitaciones
 name-id: Nombre o ID
 search-title: Introducir una lista de nombres o IDs separados por espacios
@@ -115,7 +115,7 @@ mh-contact: Contacto MH
 email: E-mail
 player-not-found: No se ha encontrado el jugador
 player: Jugador
-challenge-as: Challenge as
+challenge-as: Participación como
 previous: Anterior
 current: Actual
 import: Importar
