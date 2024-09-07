@@ -1,70 +1,70 @@
 #Placeholder from en file
 
-open-to-all: Abierto a todos
-on-request: A solicitud
+open-to-all: Abierto
+on-request: Por solicitud
 on-invite: Por invitación
 join: Unirse
-retire: Retirar
+retire: Abandonar
 cancel-request: Cancelar solicitud
-send-request: Enviar una solicitud
-accept-invite: Aceptar la invitación
+send-request: Enviar solicitud
+accept-invite: Aceptar invitación
 creation: Creación
 proofreading: Revisión
 inscriptions: Inscripciones
-running: En curso
+running: Activo
 over: Finalizado
 ghost: Fantasma
-played-maps: Número de encarnaciones
-rewards: Distinciónes
+played-maps: Mapas jugados
+rewards: Distinciones
 dead: Muerto
 out: Afuera
 ban: Desterrado
-base-def: Defensa de la casa
+base-def: Defensa de base
 job: Oficio
-basic:  Habitante
+basic: Habitante
 dig: Excavador
-vest:  Explorador
+vest: Explorador
 shield: Guardián
 book: Ermitaño
 tamer: Domador
 tech: Técnico
-map: Pueblo
+map: Mapa
 wid: Ancho
 hei: Altura
 days: Días
-conspiracy: Insurrección
-custom: Custom
-buildings: Edificios
+conspiracy: Conspiración
+custom: Personalizado
+buildings: Construcciones
 bank: Almacén
-items: Recursos
+items: Objetos
 the-most-of: La mayor cantidad de
-goal-stack-rewards: Acumular <b>%[1]s</b> distinciónes
-goal-stand-x-y: Estar en el <b>cuadrado</b> [ <b>%[1]d</b> / <b>%[2]d</b> ] con <b>%[3]s</b>
+goal-stack-rewards: Acumular <b>%[1]s</b> distinciones
+goal-stand-x-y: Estar en la <b>zona</b> [ <b>%[1]d</b> / <b>%[2]d</b> ] con <b>%[3]s</b>
 goal-stand-x: Estar en la <b>línea %[1]d</b> con <b>%[2]s</b>
 goal-stand-y: Estar en la <b>columna %[1]d</b> con <b>%[2]s</b>
-goal-stand: estar afuera con <b>%[1]s</b>
+goal-stand: Estar afuera con <b>%[1]s</b>
 goal-build: Construir
-goal-bank: Tener en el almacén <b>%[1]s</b>
+goal-bank: Tener en el almacén <b>%[1]s</b> 
 creator: Creador
-participant: Participant
-guest: Huésped
+participant: Participante
+guest: Invitado
 candidate: Candidato
 approbator: Aprobador
 
 ISO639-1: es
-name: Nombre
+name: Nombre del desafío
 participation: Participación
 participations: Participaciones
 visibility: Visibilidad
 public: Público
 private: Privado
-private-desc: Los desafíos privados solo son visibles para el creador y los participantes.
+private-desc: Los desafíos privados sólo son visibles para el creador y los participantes
 goals: Objetivos
-validation-modes: Modos de validación
+validation-modes: Modo de validación
 api: API
-save: Ahorrar
+save: Guardar
 validate: Validar
-modify: Modificar
+modify: Editar
 open-inscriptions: Inscripciones abiertas
 discord-create-challenge: "1254732352161316905"
 discord-desc-challenge: "1254191205332418701"
@@ -72,63 +72,63 @@ discord-desc-invite: "1254732301867417703"
 discord-main: "1254191087883649137"
 discord-desc-validation: "1254191235653042256"
 discord-desc-milestone: "1270311364165898280"
-stack-picto: Acumular los distinciónes
-be-on: Estar en el lugar
+stack-picto: Acumular distinciones
+be-on: Estar en la zona
 build: Construir
-have-in-bank: Tener en el almacén
-custom-goal: Costumbre
-delete-goal: ⚠️ Eliminar este objetivo ⚠️
+have-in-bank: Tener en almacén
+custom-goal: Personalizado
+delete-goal: ⚠️ Eliminar objetivo ⚠️
 with: Con
-empty-desc: "Si está vacío: el objetivo es apilar el máximo"
-by: De
-start: Comienzo
-end: FIN
-start-now: Empezar ahora
-end-now: Terminar ahora
+empty-desc: "Si el campo está vacío, el objetivo será recolectar el máximo"
+by: Por
+start: Inicio
+end: Final
+start-now: Iniciar ahora
+end-now: Finalizar ahora
 scan-participants: Escanear participantes
-never-realized: Nunca hecho
-confirm-end: Confirma el final del desafío
-add-approbators: Agregar aprobadores
+never-realized: No obtenido
+confirm-end: Confirmar fin de desafío
+add-approbators: Añadir aprobadores
 send-invitations: Enviar invitaciones
-name-id: Nombre ID
-search-title: Ingrese una lista de nombres o identificadores separados por espacios
+name-id: Nombre o ID
+search-title: Introducir una lista de nombres o IDs separados por espacios
 search: Buscar
 result: Resultado
-nb-created-challenges: Retos creados
+nb-created-challenges: Desafíos creados
 requestor: Solicitante
-start-date-must-be-set: Primero se debe ingresar una fecha de inicio
-challenge-start-warning: El lanzamiento del desafío impedirá cualquier modificación, salvo la fecha de finalización
-"yes": "Si"
+start-date-must-be-set: Primero debe fijarse una fecha de inicio
+challenge-start-warning: El inicio del desafío impedirá cualquier modificación, excepto el de la fecha de finalización
+"yes": "Sí"
 "no": "No"
 challenge: Desafío
 access: Acceso
 status: Estado
-registered: Registrado
+registered: Inscripciones
 home: Inicio
 update: Actualizar
-create-challenge: Crea un desafío
+create-challenge: Crear desafío
 profile: Perfil
 validations: Validaciones
-logout: Desconectar
-login: Conexión
+logout: Cerrar sesión
+login: Iniciar sesión
 mh-contact: Contacto MH
 email: E-mail
-player-not-found: Jugador no encontrado
+player-not-found: No se ha encontrado el jugador
 player: Jugador
-challenge-as: Desafío como
+challenge-as: Participación como
 previous: Anterior
 current: Actual
 import: Importar
 export: Exportar
-copied-toast: Copiado!
+copied-toast: Copiado
 predefined: Predefinido
-load: Carga
-milestones: Hitos
-enable-faq: Activar preguntas frecuentes
-delete-last-milestone: Eliminar el último hito
-confirm-milestone-delete: Al eliminar el hito se eliminarán todos los logros asociados, ¿confirmar?
+load: Cargar
+milestones: Logros
+enable-faq: Activar Preguntas Frecuentes
+delete-last-milestone: Suprimir último logro
+confirm-milestone-delete: La supresión de logros eliminará cualquier triunfo asociado. ¿Aceptar?
+reverse-selection: Invertir selección
 
-reverse-selection: Selección inversa
 bar-chart: Diagrama de barras
 radar-chart: Diagrama de radar
 polarArea-chart: Diagrama polar
