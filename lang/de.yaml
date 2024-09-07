@@ -51,7 +51,7 @@ guest: Guest
 candidate: Candidate
 approbator: Approbator
 
-ISO639-1: en
+ISO639-1: de
 name: Name
 participation: Participation
 participations: Participations
@@ -129,3 +129,11 @@ delete-last-milestone: Delete last milestone
 confirm-milestone-delete: Milestone deletion will delete any success associated, confirm ?
 
 reverse-selection: Reverse selection
+bar-chart: Bar chart
+radar-chart: Radar chart
+polarArea-chart: Polar area chart
+history: History
+archive: Archive
+general: General
+graph: Graph
+data: Data

@@ -120,17 +120,17 @@ func requestMultipleUsers(userkey, ids string) ([]dto.Milestone, error) {
 func requestServerData(endpoint, userkey string) map[string]SrvData {
 	resp, err := http.Get(BASE_URL + endpoint + "?fields=id,img,name" + buildAuthQuery(userkey))
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return nil
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println(resp.StatusCode)
+		logger.Println(resp.StatusCode)
 		return nil
 	}
 	datares := make(map[string]SrvData, 100)
 	if err := json.NewDecoder(resp.Body).Decode(&datares); err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return nil
 	}
 

@@ -4,7 +4,6 @@ import (
 	"bhordesgame/dto"
 	"database/sql"
 	"errors"
-	"fmt"
 	"os"
 	"sort"
 	"strconv"
@@ -61,9 +60,9 @@ func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 	 AND (challenge.flags & 0x04) = 0
 	 AND (challenge.flags & 0x30) = 0x20
 	 GROUP BY challenge.id, challenge.name, challenge.end_date
-	 ORDER BY ended, started`)
+	 ORDER BY IFNULL(ended, 0), IFNULL(started,0)`)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -84,7 +83,7 @@ func queryPublicChallenges(ch chan<- *dto.DetailedChallenge) {
 			&detailedChall.ParticipantCount,
 			&Started,
 			&Ended); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		detailedChall.UpdateDetailedProperties(Started.Bool, Ended.Bool)
@@ -98,12 +97,12 @@ func queryChallenge(id, requestor int) (challenge dto.DetailedChallenge, err err
 	, TIMEDIFF(start_date,UTC_TIMESTAMP()) as rem_start, TIMEDIFF(end_date,UTC_TIMESTAMP()) as rem_end
 	 FROM challenge
 	 WHERE id=?
-	 AND (flags & 0x04 = 0
+	 AND (flags & 0x04 = 0 AND flags & 0x30 = 0x20
 	   OR creator = ?
 	   OR EXISTS (SELECT 1 FROM participant WHERE user = ? AND challenge = ?)
 	   OR EXISTS (SELECT 1 FROM validator WHERE user = ? AND challenge = ?)
 	   OR EXISTS (SELECT 1 FROM invitation WHERE user = ? AND challenge = ?)
-	)`, id, requestor, id, requestor, id, requestor, id, requestor)
+	)`, id, requestor, requestor, id, requestor, id, requestor, id)
 
 	if err = row.Scan(&challenge.Name, &challenge.Creator.ID, &challenge.Flags, &challenge.StartDate, &challenge.EndDate, &untilStart, &untilEnd); err != nil {
 		return
@@ -235,8 +234,13 @@ func insertMilestone(milestone *dto.Milestone) error {
 		return tx.Commit()
 	}
 
-	if _, err = tx.Exec(`INSERT INTO milestone VALUES(?, UTC_TIMESTAMP(2), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+	if err = tx.QueryRow(`SELECT UTC_TIMESTAMP(2)`).Scan(&milestone.Dt); err != nil {
+		return err
+	}
+
+	if _, err = tx.Exec(`INSERT INTO milestone VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		milestone.User.ID,
+		milestone.Dt,
 		milestone.IsGhost,
 		milestone.PlayedMaps,
 		milestone.Rewards,
@@ -260,8 +264,8 @@ func insertMilestone(milestone *dto.Milestone) error {
 
 	// don't insert success without milestone
 	var stmtBuilder strings.Builder
-	stmtBuilder.Grow(370 + 21*len(successes) + 83)
-	stmtBuilder.WriteString(`INSERT INTO success SELECT ?, goal.id, UTC_TIMESTAMP(2), IF(goal.amount IS NULL, 
+	stmtBuilder.Grow(355 + 21*len(successes) + 83)
+	stmtBuilder.WriteString(`INSERT INTO success SELECT ?, goal.id, ?, IF(goal.amount IS NULL, 
 		current,
 		LEAST(
 			current,
@@ -275,8 +279,8 @@ func insertMilestone(milestone *dto.Milestone) error {
 		)
 	)
 	FROM goal JOIN (SELECT 0 AS current, -1 AS gid`)
-	successValues := make([]any, 0, 2+2*len(successes))
-	successValues = append(successValues, milestone.User.ID, milestone.User.ID)
+	successValues := make([]any, 0, 3+2*len(successes))
+	successValues = append(successValues, milestone.User.ID, milestone.Dt, milestone.User.ID)
 	for _, success := range successes {
 		successValues = append(successValues, success.Amount, success.Goal)
 		stmtBuilder.WriteString(` UNION ALL SELECT ?,?`)
@@ -328,7 +332,7 @@ func queryMultipleUsers(ch chan<- *dto.DetailedUser, idents []string) {
 
 	rows, err := dbConn().Query(sqlStmt.String(), values...)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -341,7 +345,7 @@ func queryMultipleUsers(ch chan<- *dto.DetailedUser, idents []string) {
 			&user.Avatar,
 			&user.CreationCount,
 			&user.ParticipationCount); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		ch <- &user
@@ -357,21 +361,21 @@ func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, view
 	, challenge.start_date <= UTC_TIMESTAMP() AS started
 	, challenge.end_date < UTC_TIMESTAMP() AS ended
 	, challenge.creator=? AS created
-	, participant.user IS NOT NULL as participate
+	, IFNULL(SUM(participant.user),0) > 0 as participate
 	, validator.user IS NOT NULL as validate
 	, invitation.user IS NOT NULL as invited
 	 FROM challenge
 	 LEFT JOIN user        ON challenge.creator = user.id
-	 LEFT JOIN participant ON challenge.id = participant.challenge AND participant.user = ?
+	 LEFT JOIN participant ON challenge.id = participant.challenge
 	 LEFT JOIN validator   ON challenge.id = validator.challenge AND validator.user = ?
 	 LEFT JOIN invitation  ON challenge.id = invitation.challenge AND invitation.user = ? AND participant.user IS NULL
 	 WHERE ? IN (challenge.creator, participant.user, validator.user, invitation.user)
 	 AND (challenge.flags & 0x04 = 0 OR ? in (challenge.creator, participant.user, validator.user, invitation.user))
 	 AND (?=? OR (challenge.flags & 0x30) = 0x20 AND challenge.flags & 0x03 < 2)
-	 GROUP BY challenge.id, challenge.name, challenge.end_date, created, participate, validate, invited
-	 ORDER BY ended, started, challenge.flags & 0x30`, userId, userId, userId, userId, userId, viewer, userId, viewer)
+	 GROUP BY challenge.id, challenge.name, challenge.end_date, created, validate, invited
+	 ORDER BY ended, started, challenge.flags & 0x30`, userId, userId, userId, userId, viewer, userId, viewer)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -397,7 +401,7 @@ func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, view
 			&participate,
 			&validate,
 			&invited); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		detailedChall.UpdateDetailedProperties(Started.Bool, Ended.Bool)
@@ -462,7 +466,7 @@ func queryChallengeGoals(ch chan<- *dto.Goal, challengeId int) {
 
 	rows, err := dbConn().Query(`SELECT id, typ, entity, amount, x, y, custom FROM goal WHERE challenge=?`, challengeId)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -470,7 +474,7 @@ func queryChallengeGoals(ch chan<- *dto.Goal, challengeId int) {
 		var goal dto.Goal
 		goal.Challenge = challengeId
 		if err := rows.Scan(&goal.ID, &goal.Typ, &goal.Entity, &goal.Amount, &goal.X, &goal.Y, &goal.Custom); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		ch <- &goal
@@ -512,14 +516,14 @@ func queryChallengeParticipants(ch chan<- *dto.DetailedUser, challengeId int) {
 								 WHERE u.id IN (SELECT user FROM participant WHERE challenge=?)
 								 GROUP BY u.id, u.name`, challengeId)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var user dto.DetailedUser
 		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &user.CreationCount, &user.ParticipationCount); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		ch <- &user
@@ -536,14 +540,14 @@ func queryChallengeValidators(ch chan<- *dto.DetailedUser, challengeId int) {
 								 WHERE u.id IN (SELECT user FROM validator WHERE challenge=?)
 								 GROUP BY u.id, u.name`, challengeId)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var user dto.DetailedUser
 		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &user.CreationCount, &user.ParticipationCount); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		ch <- &user
@@ -564,14 +568,14 @@ func queryChallengeInvitations(ch chan<- *dto.DetailedUser, challengeId int) {
 												WHERE invitation.challenge=?)
 								 GROUP BY u.id, u.name`, challengeId)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var user dto.DetailedUser
 		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &user.CreationCount, &user.ParticipationCount); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		ch <- &user
@@ -579,17 +583,17 @@ func queryChallengeInvitations(ch chan<- *dto.DetailedUser, challengeId int) {
 }
 
 func queryChallengeUserStatus(challengeId, userId int) (invited, participate bool) {
-	rows, err := dbConn().Query(`select 0 from invitation where challenge=? and user=? union select 1 from participant where challenge=? and user=?`,
+	rows, err := dbConn().Query(`SELECT 0 FROM invitation WHERE challenge=? AND user=? UNION SELECT 1 FROM participant WHERE challenge=? AND user=?`,
 		challengeId, userId, challengeId, userId)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var r int
 		if err := rows.Scan(&r); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		switch r {
@@ -607,7 +611,7 @@ func insertOrDeleteChallengeMember(challengeId, requestorId, userId int, validat
 	var stmt string
 	if validator {
 		if add {
-			stmt = "INSERT INTO validator SELECT ?,id FROM challenge WHERE id=? AND creator=?"
+			stmt = "INSERT INTO validator SELECT ?,id,0 FROM challenge WHERE id=? AND creator=?"
 		} else {
 			stmt = "DELETE t FROM validator t LEFT JOIN challenge c ON t.challenge=c.id WHERE t.user=? AND c.id=? AND c.creator=?"
 		}
@@ -728,7 +732,7 @@ func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
 		JOIN user on user.id = p.user
 		ORDER BY id`, challengeID, challengeID)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -738,7 +742,7 @@ func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
 		var user dto.User
 		var success dto.Success
 		if err := rows.Scan(&user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &success.Goal, &success.Accomplished, &success.Amount); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		if user.ID != cuser.ID {
@@ -756,6 +760,76 @@ func queryChallengeAdvancements(ch chan<- *dto.UserAdvance, challengeID int) {
 	}
 }
 
+func queryChallengeHistory(ch chan<- *dto.UserHistory, challengeID int) {
+	defer close(ch)
+	rows, err := dbConn().Query(`SELECT challenge.start_date, user.id, user.name, user.simplified_name, user.avatar, goal.typ = 0, success.goal, success.accomplished, success.amount FROM success
+	JOIN goal ON success.goal = goal.id AND goal.challenge = ?
+	JOIN challenge ON goal.challenge = challenge.ID
+	JOIN user ON success.user = user.id
+	ORDER BY user.id, goal.id, success.accomplished`, challengeID)
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+	defer rows.Close()
+	cuser := new(dto.UserHistory)
+	cuser.History = make(map[int][]dto.Success)
+	firstPictAmount := uint32(0)
+	for rows.Next() {
+		picto := false
+		var startDate string
+		var user dto.User
+		var success dto.Success
+		if err := rows.Scan(&startDate, &user.ID, &user.Name, &user.SimplifiedName, &user.Avatar, &picto, &success.Goal, &success.Accomplished, &success.Amount); err != nil {
+			logger.Println(err)
+			return
+		}
+		if user.ID != cuser.ID {
+			if cuser.ID != 0 {
+				ch <- cuser
+				cuser = new(dto.UserHistory)
+				cuser.History = make(map[int][]dto.Success)
+			}
+			cuser.User = user
+		}
+		if cuser.History[success.Goal] == nil {
+			if picto {
+				firstPictAmount = success.Amount
+				success.Amount = 0
+			}
+			cuser.History[success.Goal] = []dto.Success{{User: success.User, Goal: success.Goal, Accomplished: startDate, Amount: 0}, success}
+		} else {
+			if picto {
+				success.Amount = success.Amount - firstPictAmount
+			}
+			cuser.History[success.Goal] = append(cuser.History[success.Goal], success)
+		}
+	}
+	if cuser.ID != 0 {
+		ch <- cuser
+	}
+}
+
+func queryChallengeRawHistory(ch chan<- *dto.Success, challengeID int) {
+	defer close(ch)
+	rows, err := dbConn().Query(`SELECT success.user, success.goal, success.accomplished, success.amount FROM success
+	JOIN goal ON success.goal = goal.id AND goal.challenge = ?
+	ORDER BY success.accomplished`, challengeID)
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var success dto.Success
+		if err := rows.Scan(&success.User, &success.Goal, &success.Accomplished, &success.Amount); err != nil {
+			logger.Println(err)
+			return
+		}
+		ch <- &success
+	}
+}
+
 func queryChallengeParticipantsForScan(challengeID, requestorID int) (string, error) {
 	rows, err := dbConn().Query(`SELECT user FROM participant
 	WHERE challenge = ?
@@ -767,6 +841,7 @@ func queryChallengeParticipantsForScan(challengeID, requestorID int) (string, er
 	if err != nil {
 		return "", err
 	}
+	defer rows.Close()
 
 	var builder strings.Builder
 
@@ -828,9 +903,9 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 	) AS m
 	JOIN user ON user.id = m.user
 	JOIN goal ON goal.challenge = m.id
-	JOIN validator ON validator.challenge = m.id AND validator.user = ?
+	JOIN validator ON validator.challenge = m.id AND validator.user = ? AND validator.archived = 0
 	LEFT JOIN success ON success.user = m.user AND success.accomplished = m.dt AND success.goal = goal.id
-	ORDER BY rem IS NULL OR rem < 0 DESC, rem DESC, m.id, m.user, m.dt, m.bef, goal.id`, userID)
+	ORDER BY rem IS NULL OR rem < 0 DESC, rem IS NULL, ABS(rem), m.id, m.user, m.dt, m.bef, goal.id`, userID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -847,7 +922,7 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 		var challenge dto.Challenge
 		var goal dto.Goal
 		var successAmount sql.NullInt32
-		var aux any
+		var rem sql.NullInt64
 		if err := rows.Scan(
 			&milestone.User.ID,
 			&milestone.Dt,
@@ -883,7 +958,7 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 			&goal.Custom,
 			&goal.Amount,
 			&successAmount,
-			&aux); err != nil {
+			&rem); err != nil {
 			return nil, nil, err
 		}
 		if goal.Typ == 2 {
@@ -898,6 +973,9 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 
 		addedChallenge := len(resOrder)
 		if addedChallenge == 0 || resOrder[addedChallenge-1].ID != challenge.ID {
+			if rem.Valid && rem.Int64 > 0 {
+				challenge.Flags = 1
+			}
 			resOrder = append(resOrder, &challenge)
 		}
 
@@ -938,7 +1016,7 @@ func queryMilestone(milestoneCh chan<- *dto.Milestone, requestor int) {
 
 	rows, err := dbConn().Query(`SELECT * FROM milestone WHERE user = ? ORDER BY dt DESC`, requestor)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -966,18 +1044,13 @@ func queryMilestone(milestoneCh chan<- *dto.Milestone, requestor int) {
 			&milestone.Map.City.Buildings,
 			&milestone.Map.City.Bank,
 			&milestone.Map.Zones); err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			return
 		}
 		if milestone.HasData() {
 			milestoneCh <- milestone
 		}
 	}
-}
-
-func deleteLastMilestone(user int) error {
-	_, err := dbConn().Exec("DELETE FROM milestone WHERE user = ? ORDER BY dt DESC LIMIT 1", user)
-	return err
 }
 
 func insertSuccesses(user int, dt string, amounts map[string][]string, requestor int) error {
@@ -1044,4 +1117,128 @@ func insertSuccesses(user int, dt string, amounts map[string][]string, requestor
 	}
 
 	return tx.Commit()
+}
+
+func archiveChallengeValidation(challenge, requestor int) error {
+	if _, err := dbConn().Exec(`UPDATE validator SET archived = 1 WHERE user = ? AND challenge = ?`, requestor, challenge); err != nil {
+		return err
+	}
+	// remove participant milestone who became useless
+
+	/*
+		for all participants of challenge
+		retrieve earliest non archived challenge start date
+		rebuild milestone from begining to 1st milestone before challenge start_date
+		update milestone
+		delete milestones anterior to 1st milestone before challenge start_date
+	*/
+
+	rows, err := dbConn().Query(`SELECT p1.user, MIN(start_date)
+	FROM challenge
+	JOIN participant p1 ON p1.challenge = ?
+	JOIN participant p2 ON p1.user = p2.user AND challenge.id = p2.challenge
+	JOIN validator ON p2.challenge = validator.challenge AND validator.archived = 0
+	GROUP BY p1.user`, challenge)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var milestone dto.Milestone
+		if err := rows.Scan(&milestone.User.ID, &milestone.Dt); err != nil {
+			return err
+		}
+		go mergeMilestonesOlderThan(&milestone, 5)
+	}
+
+	return nil
+}
+
+func mergeMilestonesOlderThan(milestone *dto.Milestone, threshold int) {
+	tx, err := dbConn().Begin()
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+	defer tx.Rollback()
+
+	rows, err := tx.Query(`SELECT dt, isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, custom, buildings, bank, zoneItems
+	FROM milestone WHERE user = ? AND dt < ? ORDER BY dt ASC`, milestone.User.ID, milestone.Dt)
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+
+	i := 0
+	for rows.Next() {
+		if err = rows.Scan(
+			&milestone.Dt,
+			&milestone.IsGhost,
+			&milestone.PlayedMaps,
+			&milestone.Rewards,
+			&milestone.Dead,
+			&milestone.Out,
+			&milestone.Ban,
+			&milestone.BaseDef,
+			&milestone.X,
+			&milestone.Y,
+			&milestone.Job,
+			&milestone.Map.Wid,
+			&milestone.Map.Hei,
+			&milestone.Map.Days,
+			&milestone.Map.Conspiracy,
+			&milestone.Map.Custom,
+			&milestone.Map.City.Buildings,
+			&milestone.Map.City.Bank,
+			&milestone.Map.Zones); err != nil {
+			rows.Close()
+			logger.Println(err)
+			return
+		}
+		i += 1
+	}
+	rows.Close()
+
+	if i < threshold {
+		return
+	}
+
+	// populate sql fields
+	milestone.CheckFieldsDifference(new(dto.Milestone))
+
+	if _, err = tx.Exec(`UPDATE milestone SET isGhost = ?, playedMaps = ?, rewards = ?, dead = ?, isOut = ?, ban = ?, baseDef = ?, x = ?, y = ?, job = ?, mapWid = ?, mapHei = ?, mapDays = ?, conspiracy = ?, custom = ?, buildings = ?, bank = ?, zoneItems = ?
+	WHERE user = ? AND dt = ?`,
+		milestone.IsGhost,
+		milestone.PlayedMaps,
+		milestone.Rewards,
+		milestone.Dead,
+		milestone.Out,
+		milestone.Ban,
+		milestone.BaseDef,
+		milestone.X,
+		milestone.Y,
+		milestone.Job,
+		milestone.Map.Wid,
+		milestone.Map.Hei,
+		milestone.Map.Days,
+		milestone.Map.Conspiracy,
+		milestone.Map.Custom,
+		milestone.Map.City.Buildings,
+		milestone.Map.City.Bank,
+		milestone.Map.Zones,
+		milestone.User.ID,
+		milestone.Dt); err != nil {
+		logger.Println(err)
+		return
+	}
+
+	if _, err := tx.Exec(`DELETE FROM milestone WHERE user = ? AND dt < ?`, milestone.User.ID, milestone.Dt); err != nil {
+		logger.Println(err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		logger.Println(err)
+	}
 }

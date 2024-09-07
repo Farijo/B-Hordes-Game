@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"html"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
@@ -16,7 +16,7 @@ import (
 func validationHandle(c *gin.Context) {
 	mustValidate, order, err := queryValidations(c.GetInt("uid"))
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -32,7 +32,7 @@ func validationHandle(c *gin.Context) {
 func milestoneHandle(c *gin.Context) {
 	user, err := queryUser(c.GetInt("uid"))
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -46,15 +46,6 @@ func milestoneHandle(c *gin.Context) {
 	})
 }
 
-func milestoneDeleteHandle(c *gin.Context) {
-	if err := deleteLastMilestone(c.GetInt("uid")); err != nil {
-		fmt.Println(err)
-		c.Status(http.StatusBadRequest)
-		return
-	}
-	c.Redirect(http.StatusFound, "/milestone")
-}
-
 /* * * * * * * * * * * * * * * * * * * * * *
  *                   POST                  *
  * * * * * * * * * * * * * * * * * * * * * */
@@ -66,7 +57,7 @@ func validateGoalHandle(c *gin.Context) {
 	}
 	bindErr := c.Bind(&mileData)
 	if bindErr != nil {
-		fmt.Println(bindErr)
+		logger.Println(bindErr)
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -81,9 +72,25 @@ func validateGoalHandle(c *gin.Context) {
 				c.Data(http.StatusBadRequest, "text/html", []byte(html.UnescapeString("Cannot specify already reached value")))
 			}
 		default:
-			fmt.Println(insertErr)
+			logger.Println(insertErr)
 			c.Status(http.StatusBadRequest)
 		}
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/validation")
+}
+
+func archiveValidationHandle(c *gin.Context) {
+	challengeID, atoiErr := strconv.Atoi(c.PostForm("challenge"))
+	if atoiErr != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	if err := archiveChallengeValidation(challengeID, c.GetInt("uid")); err != nil {
+		logger.Println(err)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 

@@ -33,9 +33,9 @@ addAGoal = function(deletable) {
     const agoal = $(goalhtml);
     const goalTypes = $(agoal[0]);
 
-    const target = agoal.children('#goal-img');
-    const selectList = agoal.children('.goal-list');
-    const selectValue = agoal.children('#goal-value');
+    const target = agoal.find('#goal-img');
+    const selectList = agoal.find('#goal-list');
+    const selectValue = agoal.find('#goal-value');
     selectList.append(selectOpt);
     selectList.on('change', function() {
         if(goalTypes.val() >= pictImg.length) return;

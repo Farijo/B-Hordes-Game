@@ -22,13 +22,13 @@ func loadTranslations(fs fs.FS, langs []language.Tag) {
 		translations[lng] = make(map[string]string)
 		f, err := fs.Open("lang/" + lng + ".yaml")
 		if err != nil {
-			fmt.Println("loadTranslations ", err)
+			logger.Println("loadTranslations ", err)
 		} else {
 			if err := yaml.NewDecoder(f).Decode(translations[lng]); err != nil {
-				fmt.Println("loadTranslations ", err)
+				logger.Println("loadTranslations ", err)
 			}
 			if err := f.Close(); err != nil {
-				fmt.Println("loadTranslations ", err)
+				logger.Println("loadTranslations ", err)
 			}
 		}
 	}
@@ -218,11 +218,10 @@ func dumpMile(mile *dto.Milestone, userkey, lng string) template.HTML {
 		res[lngData["custom"]] = mile.Map.Custom.Bool
 	}
 	if mile.Map.City.Buildings.Valid {
-		buildingsMap := make([]string, len(mile.Map.City.Buildings.Data))
-		i := 0
-		for k := range mile.Map.City.Buildings.Data {
-			_, buildingsMap[i] = getServerDataKey(k, "buildings", userkey, lng)
-			i++
+		buildingsMap := make(map[string]bool, len(mile.Map.City.Buildings.Data))
+		for buildingKey, isBuilt := range mile.Map.City.Buildings.Data {
+			_, name := getServerDataKey(buildingKey, "buildings", userkey, lng)
+			buildingsMap[name] = isBuilt
 		}
 		if len(buildingsMap) > 0 {
 			res[lngData["buildings"]] = buildingsMap

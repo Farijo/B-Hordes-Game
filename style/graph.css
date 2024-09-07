@@ -1,0 +1,28 @@
+h2 ~ div {
+  display: flex;
+  gap: 1em;
+}
+#goalScale, #userScale {
+  display: block;
+}
+td[colspan] {
+  text-align: center;
+}
+#myChart {
+  flex-grow: 1;
+  text-align: left;
+}
+#myChart > div {
+  overflow: auto;
+  height: 80vh;
+}
+a[onclick*=drawChart]:not(.link) {
+    color: white;
+}
+a.link[onclick*=drawChart] {
+    text-decoration: underline;
+    cursor: pointer;
+}
+#goalScale td:first-child {
+  text-align: center;
+}

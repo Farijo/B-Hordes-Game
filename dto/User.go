@@ -17,3 +17,8 @@ type UserAdvance struct {
 	User
 	Successes map[int]Success
 }
+
+type UserHistory struct {
+	User
+	History map[int][]Success
+}

@@ -6,9 +6,11 @@
     <link rel="stylesheet" href="/style/table.css">
     <link rel="stylesheet" href="/style/graph.css">
     <script src="/script/sorttable.js"></script>
-    <script src="/script/graph_utils.js"></script>
+    <script src="/script/history_utils.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@2/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1"></script>
     <title>β'Hordes Games</title>
 </head>
 <body>
@@ -16,34 +18,30 @@
     <h2>{{ .challenge.Name }}</h2>
     <h5>
         <a class="chlg-name" href="/challenge/{{ .challenge.ID }}">@@{general}</a>
-        <span>@@{graph}</span>
-        <a class="chlg-name" href="/challenge/{{ .challenge.ID }}/history">@@{history}</a>
+        <a class="chlg-name" href="/challenge/{{ .challenge.ID }}/graph">@@{graph}</a>
+        <span>@@{history}</span>
         <a class="chlg-name" href="/challenge/{{ .challenge.ID }}/data">@@{data}</a>
     </h5>
     <div>
       <table id="goalScale" class="sortable">
+        <tr><th colspan="2">@@{goals}</th></tr>
         {{ $userkey := .userkey }}
         {{ $goalHeaders := mkmap }}
-        <tr><th colspan="2">@@{goals}</th></tr>
         {{ range $goal := .goals }}
           {{ $mm := decodeGoal $userkey "@@{ISO639-1}" $goal $goalHeaders false }}
           {{ $goalHeader := index $goalHeaders $goal.ID }}
           <tr class="item" onclick="toggleCheckbox(event, this)" title="{{$mm.Text}} {{$mm.Label}}">
-            <script>
-              labels.push(["", "{{ $goalHeader.Content }}"]);
-              labelsImg.push("{{ $mm.Icon }}");
-            </script>
             <td>{{ $goalHeader.Content }}{{ if $mm.Icon }}<img src="https://myhordes.eu/build/images/{{ $mm.Icon }}">{{ end }}</td>
-            <td>
-              <input type="checkbox" onchange="refreshData()" checked>
-            </td>
+            <td><input type="checkbox" onchange="refreshData()" checked></td>
           </tr>
         {{ end }}
         <tr><td colspan="2"><button onclick="switchSelection(this)">@@{reverse-selection}</button></td></tr>
       </table>
+      <script>const goalScale = $('#goalScale input[type=checkbox]');</script>
       <table id="userScale" class="sortable">
         <tr><th colspan="2">@@{participant}</th></tr>
-        {{ range $partic := .advancement }}
+        {{ $i := 0 }}
+        {{ range $partic := .history }}
         <tr class="item" onclick="toggleCheckbox(event, this)" title="{{ $partic.ID }}">
           <td sorttable_customkey="{{ $partic.SimplifiedName }}">
             <img class="avatar" src="{{ $partic.Avatar.String }}">
@@ -52,37 +50,37 @@
           <td>
             <input type="checkbox" onchange="refreshData()" checked>
             <script>
-              dataset.push({
-                label: "{{ $partic.Name }}",
-                data:[
-                  {{ range $gid, $_ := $goalHeaders }}
-                    {{ $s := index $partic.Successes $gid }}
-                    {{ $s.Amount }},
-                  {{ end }}
-                ],
-                backgroundColor: intToColor(dataset.length, 0.3), // Couleur de la ligne
-                borderWidth: 1,
-                borderColor: intToColor(dataset.length, 1),
-              });
-              bindUserLegend(document.currentScript.parentElement);
+              startIdx = dataset.length;
+              {{ range $gid, $_ := $goalHeaders }}
+                {{ $hist := index $partic.History $gid }}
+                sat = goalScale.length < 2 ? 1 : (dataset.length % goalScale.length) / (goalScale.length-1);
+                dataset.push({
+                  label: "{{ $partic.Name }}",
+                  data:[
+                      {{ range $s := $hist }}
+                        {x: new Date("{{ $s.Accomplished }}Z"), y:{{ $s.Amount }}},
+                      {{ end }}
+                    ],
+                    backgroundColor: intToColor({{ $i }}, sat, 0.3), // Couleur de la ligne
+                    borderColor: intToColor({{ $i }}, sat, 1),
+                });
+              {{ end }}
+              bindUserLegend(document.currentScript.parentElement, startIdx);
             </script>
           </td>
         </tr>
+        {{ $i = incr $i}}
         {{ end }}
         <tr><td colspan="2"><button onclick="switchSelection(this)">@@{reverse-selection}</button></td></tr>
       </table>
       <div id="myChart">
-        <a class="chlg-name" onclick="drawChart(this, 'bar')">@@{bar-chart}</a>
-        <a class="chlg-name link" onclick="drawChart(this, 'radar')">@@{radar-chart}</a>
-        <a class="chlg-name link" onclick="drawChart(this, 'polarArea')">@@{polarArea-chart}</a>
         <div><canvas></canvas></div>
       </div>
     </div>
     <script>
-      const goalScale = $('#goalScale input[type=checkbox]');
       const userScale = $('#userScale input[type=checkbox]');
       const myChartChildren = document.getElementById('myChart').children;
-      drawChart(myChartChildren[0], 'bar');
+      drawChart();
     </script>
     {{ if .faq }}
     <style>body{margin-bottom: 96px;}</style>

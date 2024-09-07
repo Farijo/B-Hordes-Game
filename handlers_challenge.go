@@ -2,6 +2,7 @@ package main
 
 import (
 	"bhordesgame/dto"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -19,22 +20,11 @@ func challengeCreationHandle(c *gin.Context) {
 }
 
 func challengeHandle(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
-
 	key, cookieErr := c.Cookie("user")
 	uid, ok := sessions[key]
 	logged := cookieErr == nil && ok
 
-	challenge, err := queryChallenge(id, uid)
-	if err != nil {
-		fmt.Println(err)
-		c.Status(http.StatusNotFound)
-		return
-	}
+	challenge := getChallenge(c)
 
 	selfChallenge := challenge.Creator.ID == uid && logged
 
@@ -77,10 +67,10 @@ func challengeHandle(c *gin.Context) {
 				// 	if len(realIds) > 0 {
 				// 		if users, err := requestMultipleUsers(key, realIds); err == nil {
 				// 			if err := insertMultipleUsers(users); err != nil {
-				// 				fmt.Println(err)
+				// 				logger.Println(err)
 				// 			}
 				// 		} else {
-				// 			fmt.Println(err)
+				// 			logger.Println(err)
 				// 		}
 				// 	}
 				// }
@@ -150,19 +140,56 @@ func challengeHandle(c *gin.Context) {
 }
 
 func challengeGraphHandle(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
-	key, _ := c.Cookie("user")
+	challenge := getChallenge(c)
+	key, cookieErr := c.Cookie("user")
+	logged := (cookieErr == nil) && (sessions[key] > 0)
 
 	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-graph.html", gin.H{
 		"faq":         wantFAQ(c.Cookie(NOFAQ)),
-		"goals":       makeChannelFor(queryChallengeGoals, id),
+		"logged":      logged,
+		"challenge":   challenge,
+		"goals":       makeChannelFor(queryChallengeGoals, challenge.ID),
 		"userkey":     key,
-		"advancement": makeChannelFor(queryChallengeAdvancements, id),
+		"advancement": makeChannelFor(queryChallengeAdvancements, challenge.ID),
 	})
+}
+
+func challengeHistoryHandle(c *gin.Context) {
+	challenge := getChallenge(c)
+	key, cookieErr := c.Cookie("user")
+	logged := (cookieErr == nil) && (sessions[key] > 0)
+
+	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_challenge-history.html", gin.H{
+		"faq":       wantFAQ(c.Cookie(NOFAQ)),
+		"logged":    logged,
+		"challenge": challenge,
+		"goals":     makeChannelFor(queryChallengeGoals, challenge.ID),
+		"userkey":   key,
+		"history":   makeChannelFor(queryChallengeHistory, challenge.ID),
+	})
+}
+
+func challengeRawHistoryHandle(c *gin.Context) {
+	id := getChallenge(c).ID
+	chGoal := make(chan *dto.Goal)
+	go queryChallengeGoals(chGoal, id)
+	chHist := make(chan *dto.Success)
+	go queryChallengeRawHistory(chHist, id)
+
+	c.Writer.Header().Set("Content-Type", "application/json")
+	c.Writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"challenge_%d.json\"", id))
+	encoder := json.NewEncoder(c.Writer)
+	c.Writer.WriteString("{\"Goals\":[")
+	for goal := range chGoal {
+		encoder.Encode(goal)
+		c.Writer.WriteString(",")
+	}
+	c.Writer.WriteString("null],\"Successes\":[")
+	for hist := range chHist {
+		encoder.Encode(hist)
+		c.Writer.WriteString(",")
+	}
+	c.Writer.WriteString("null]}")
 }
 
 /* * * * * * * * * * * * * * * * * * * * * *
@@ -177,7 +204,7 @@ func createChallengeHandle(c *gin.Context) {
 
 	id, err := insertChallenge(challenge, goals)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -194,7 +221,7 @@ func updateChallengeHandle(c *gin.Context) {
 
 	var formChallenge FormChallenge
 	if bindErr := c.Bind(&formChallenge); bindErr != nil {
-		fmt.Println(bindErr)
+		logger.Println(bindErr)
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -213,7 +240,7 @@ func updateChallengeHandle(c *gin.Context) {
 	}
 
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -288,7 +315,7 @@ func challengeScanHandle(c *gin.Context) {
 	}
 	userIDs, err := queryChallengeParticipantsForScan(id, c.GetInt("uid"))
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		c.Status(http.StatusForbidden)
 		return
 	}
@@ -298,7 +325,7 @@ func challengeScanHandle(c *gin.Context) {
 	}
 	milestones, err := requestMultipleUsers(c.GetString("key"), userIDs)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		if err.Error() == "too many request" {
 			c.Status(http.StatusTooManyRequests)
 		} else {
@@ -312,7 +339,7 @@ func challengeScanHandle(c *gin.Context) {
 	for i := range milestones {
 		go func(milestone *dto.Milestone, wg *sync.WaitGroup) {
 			if err := insertMilestone(milestone); err != nil {
-				fmt.Println(err)
+				logger.Println(err)
 			}
 			wg.Done()
 		}(&milestones[i], &wg)
@@ -323,9 +350,36 @@ func challengeScanHandle(c *gin.Context) {
 }
 
 /* * * * * * * * * * * * * * * * * * * * * *
+ *                MIDDLEWARE               *
+ * * * * * * * * * * * * * * * * * * * * * */
+func restrictedChallenge(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		logger.Println(err)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	key, _ := c.Cookie("user")
+	challenge, err := queryChallenge(id, sessions[key])
+	if err != nil {
+		logger.Println(err)
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	c.Set("challenge", &challenge)
+}
+
+func getChallenge(c *gin.Context) *dto.DetailedChallenge {
+	chal, _ := c.Get("challenge")
+	return chal.(*dto.DetailedChallenge)
+}
+
+/* * * * * * * * * * * * * * * * * * * * * *
  *                  OTHER                  *
  * * * * * * * * * * * * * * * * * * * * * */
-func makeChannelActionString(logged bool, challenge dto.DetailedChallenge, uid int, lang string) <-chan []string {
+func makeChannelActionString(logged bool, challenge *dto.DetailedChallenge, uid int, lang string) <-chan []string {
 	action := make(chan []string)
 	if logged {
 		go func() {

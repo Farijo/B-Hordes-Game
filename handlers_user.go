@@ -55,8 +55,18 @@ func userHandle(c *gin.Context) {
  *                   POST                  *
  * * * * * * * * * * * * * * * * * * * * * */
 func refreshHandle(c *gin.Context) {
-	if err := refreshData(c.GetString("key")); err != nil {
-		fmt.Println(err)
+	key := c.PostForm("key")
+	if key == "" {
+		var err error
+		key, err = c.Cookie("user")
+		if err != nil {
+			logger.Println(err)
+			c.Status(http.StatusBadRequest)
+			return
+		}
+	}
+	if err := refreshData(key); err != nil {
+		logger.Println(err)
 		if err.Error() == "too many request" {
 			c.Status(http.StatusTooManyRequests)
 			return

@@ -30,6 +30,7 @@ func registerCall(key string) error {
 		if len(userLastCalls) < CALL_MAX_NB {
 			calls[key] = append(calls[key], now)
 		} else {
+			logger.Println(key, sessions[key])
 			return errors.New("too many request")
 		}
 	} else {

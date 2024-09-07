@@ -128,3 +128,12 @@ enable-faq: Activar Preguntas Frecuentes
 delete-last-milestone: Suprimir último logro
 confirm-milestone-delete: La supresión de logros eliminará cualquier triunfo asociado. ¿Aceptar?
 reverse-selection: Invertir selección
+
+bar-chart: Diagrama de barras
+radar-chart: Diagrama de radar
+polarArea-chart: Diagrama polar
+history: Histórico
+archive: 
+general: General
+graph: Graph
+data: Data
