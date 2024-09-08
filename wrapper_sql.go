@@ -1244,7 +1244,7 @@ func mergeMilestonesOlderThan(milestone *dto.Milestone, threshold int) {
 }
 
 func removeChallengeStart(challenge, requestor int) error {
-	_, err := dbConn().Exec(`UPDATE start_date = NULL, end_date = NULL
+	_, err := dbConn().Exec(`UPDATE challenge SET start_date = NULL, end_date = NULL
 	WHERE creator = ?
 	AND id = ?
 	AND NOT EXISTS (SELECT 1 FROM success JOIN goal ON success.goal = goal.id AND goal.challenge = ?)`, requestor, challenge, challenge)
