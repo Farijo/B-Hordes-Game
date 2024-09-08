@@ -349,6 +349,24 @@ func challengeScanHandle(c *gin.Context) {
 	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d", id))
 }
 
+func challengeCancelStartHandle(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		logger.Println(err)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	err = removeChallengeStart(id, c.GetInt("uid"))
+	if err != nil {
+		logger.Println(err)
+		c.Status(http.StatusForbidden)
+		return
+	}
+
+	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d", id))
+}
+
 /* * * * * * * * * * * * * * * * * * * * * *
  *                MIDDLEWARE               *
  * * * * * * * * * * * * * * * * * * * * * */
