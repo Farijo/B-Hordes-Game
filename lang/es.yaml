@@ -97,7 +97,7 @@ result: Resultado
 nb-created-challenges: Desafíos creados
 requestor: Solicitante
 start-date-must-be-set: Primero debe fijarse una fecha de inicio
-challenge-start-warning: El inicio del desafío impedirá cualquier modificación, excepto el de la fecha de finalización
+challenge-start-warning: El inicio del desafío impedirá que se agregue o elimine a ningún jugador
 "yes": "Sí"
 "no": "No"
 challenge: Desafío
@@ -137,3 +137,4 @@ archive:
 general: General
 graph: Graph
 data: Data
+cancel: Cancelar

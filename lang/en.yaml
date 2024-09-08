@@ -95,7 +95,7 @@ result: Result
 nb-created-challenges: Challenges created #plural
 requestor: Requestor # British en.
 start-date-must-be-set: A start date must be set first
-challenge-start-warning: Challenge start will prevent any modification, except end date
+challenge-start-warning: Challenge start will prevent any player addition or deletion
 "yes": "Yes"
 "no": "No"
 challenge: Challenge
@@ -135,3 +135,4 @@ archive: Archive
 general: General
 graph: Graph
 data: Data
+cancel: Cancel

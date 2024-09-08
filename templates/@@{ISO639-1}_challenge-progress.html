@@ -27,7 +27,7 @@
         </a>
         <form class="box" method="post" action="{{ .challenge.ID }}/back">
             <div class="line1">@@{start}</div>
-            <input type="submit">
+            {{ if .selfChallenge }}<input type="submit" value="@@{cancel}" style="margin: 0.5em;">{{ end }}
         </form>
         {{ if .selfChallenge }}
             <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onformdata="dateToISOGMT(event.formData, 'end_date')">
