@@ -27,7 +27,7 @@
         </a>
         <form class="box" method="post" action="{{ .challenge.ID }}/back">
             <div class="line1">@@{start}</div>
-            {{ if .selfChallenge }}<input type="submit" value="@@{cancel}" style="margin: 0.5em;">{{ end }}
+            {{ if or .selfChallenge .canUndo }}<input type="submit" value="@@{cancel}" id="rollback">{{ end }}
         </form>
         {{ if .selfChallenge }}
             <form class="box" method="POST" action="{{ .challenge.ID }}/date{{ .ident }}" onformdata="dateToISOGMT(event.formData, 'end_date')">
@@ -86,6 +86,8 @@
                     </td>
                 {{ end }}
             </tr>
+        {{ else }}
+            <script>document.getElementById('rollback').style.display = 'inherit';</script>
         {{ end }}
     </table>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha384-NXgwF8Kv9SSAr+jemKKcbvQsz+teULH/a5UNJvZc6kP47hZgl62M1vGnw6gHQhb1" crossorigin="anonymous"></script>

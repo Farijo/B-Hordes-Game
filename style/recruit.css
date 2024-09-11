@@ -70,3 +70,8 @@ img[on] {
 img[off] {
   content: url("data:image/gif;base64,R0lGODlhEAAQAKIGAGU+Ip0mBLVcQoAyE86Sgf///35NKgAAACH5BAEAAAYALAAAAAAQABAAAAMmaLrc/jDKSSG4V4IhQhhABAgF0YVWQHgB+gBBd4oDC2qYW+18DyUAOw==");
 }
+
+#rollback {
+  margin: 0.5em;
+  display: none;
+}

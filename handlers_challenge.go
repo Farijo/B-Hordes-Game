@@ -131,6 +131,7 @@ func challengeHandle(c *gin.Context) {
 			"faq":           wantFAQ(c.Cookie(NOFAQ)),
 			"logged":        logged,
 			"selfChallenge": false, // disable challenge action
+			"canUndo":       selfChallenge,
 			"challenge":     challenge,
 			"goals":         makeChannelFor(queryChallengeGoals, challenge.ID),
 			"userkey":       key,
