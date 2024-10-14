@@ -99,7 +99,7 @@ function bindGoal(goal) {
             const nval = goal.Entity;
             for (var key in pictImg[goal.Typ]) {
                 if (pictImg[goal.Typ][key].id == nval) {
-                    $(`.goal-list:last`).val(key).trigger('change');
+                    $(`#goal-list:last`).val(key).trigger('change');
                     break;
                 }
             }
