@@ -14,7 +14,8 @@ const (
 
 	ME     = "me?fields=id,name,avatar,isGhost,playedMaps.fields(mapId),rewards.fields(id,number),dead,out,ban,baseDef,x,y,job,map.fields(wid,hei,days,custom,conspiracy,city.fields(buildings.fields(id),bank.fields(id,count)),zones.fields(items.fields(id,count)))"
 	OTHER  = "user?id=%d&fields=id,name,avatar"
-	OTHERS = "users?ids=%s&fields=id,name,avatar,isGhost,playedMaps.fields(mapId),rewards.fields(id,number),dead,out,ban,baseDef,x,y,job,map.fields(wid,hei,days,custom,conspiracy,city.fields(buildings.fields(id),bank.fields(id,count)),zones.fields(items.fields(id,count)))"
+	OTHERS = "users?ids=%s&fields=id,name,avatar"
+	FULL   = ",isGhost,playedMaps.fields(mapId),rewards.fields(id,number),dead,out,ban,baseDef,x,y,job,map.fields(wid,hei,days,custom,conspiracy,city.fields(buildings.fields(id),bank.fields(id,count)),zones.fields(items.fields(id,count)))"
 )
 
 func buildAuthQuery(userkey string) string {
@@ -83,11 +84,30 @@ func requestUser(userkey string, id int) (*dto.User, error) {
 	return &flat.User, nil
 }
 
-func requestMultipleUsers(userkey, ids string) ([]dto.Milestone, error) {
+func requestMultipleInfo(userkey, ids string) ([]dto.User, error) {
 	if err := registerCall(userkey); err != nil {
 		return nil, err
 	}
 	resp, err := http.Get(BASE_URL + fmt.Sprintf(OTHERS, ids) + buildAuthQuery(userkey))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(resp.Status)
+	}
+
+	flat := make([]dto.User, len(ids))
+
+	return flat, json.NewDecoder(resp.Body).Decode(&flat)
+}
+
+func requestMultipleUsers(userkey, ids string) ([]dto.Milestone, error) {
+	if err := registerCall(userkey); err != nil {
+		return nil, err
+	}
+	resp, err := http.Get(BASE_URL + fmt.Sprintf(OTHERS, ids) + FULL + buildAuthQuery(userkey))
 	if err != nil {
 		return nil, err
 	}

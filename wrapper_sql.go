@@ -114,21 +114,49 @@ func queryChallenge(id, requestor int) (challenge dto.DetailedChallenge, err err
 }
 
 func insertUser(user *dto.User) error {
-	simplified, _, err := transform.String(*transformer(), user.Name)
-	user.SimplifiedName = strings.ToLower(simplified)
-	if err != nil {
-		return err
+	return insertMultipleUsers([]dto.User{*user})
+}
+func insertMultipleUsers(user []dto.User) error {
+	if len(user) < 1 {
+		return nil
 	}
-	_, err = dbConn().Exec(`INSERT INTO user (id, name, simplified_name, avatar) VALUES (?, ?, ?, ?)
-	ON DUPLICATE KEY UPDATE name=?, simplified_name=?, avatar=?`,
-		user.ID, user.Name, user.SimplifiedName, user.Avatar, user.Name, user.SimplifiedName, user.Avatar)
+
+	values := make([]any, 0)
+	sqlValues := ""
+
+	for _, u := range user {
+		simplified, _, err := transform.String(*transformer(), u.Name)
+		if err != nil {
+			return err
+		}
+		u.SimplifiedName = strings.ToLower(simplified)
+		values = append(values, u.ID, u.Name, u.SimplifiedName, u.Avatar)
+		sqlValues += ",(?, ?, ?, ?)"
+	}
+	_, err := dbConn().Exec(`INSERT INTO user (id, name, simplified_name, avatar) VALUES `+sqlValues[1:]+` AS new
+	ON DUPLICATE KEY UPDATE name = new.name, simplified_name = new.simplified_name, avatar = new.avatar`, values...)
 
 	return err
 }
 
-// func insertMultipleUsers(user []dto.User) error {
-// 	panic("not implem")
-// }
+func queryAllUsers(ch chan<- *dto.User) {
+	defer close(ch)
+
+	rows, err := dbConn().Query("SELECT id, name, avatar FROM user")
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+	for rows.Next() {
+		var user dto.User
+		err = rows.Scan(&user.ID, &user.Name, &user.Avatar)
+		if err != nil {
+			logger.Println(err)
+			return
+		}
+		ch <- &user
+	}
+}
 
 func insertMilestone(milestone *dto.Milestone) error {
 	tx, err := dbConn().Begin()

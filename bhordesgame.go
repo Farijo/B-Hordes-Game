@@ -64,6 +64,7 @@ func main() {
 	r.GET("/logout", logoutHandle)
 	r.POST("/user", refreshHandle)
 	r.GET("/user/:id", lngHandler, userHandle)
+	r.GET("/users/Pc8XGN7sXBkx5JFmGWg8UwzW7Jkd1x0sEQ6fj13pYbsH6svePUNoVZW8vXYZ", userInfoActualizerHandle)
 
 	restricted := r.Group("/challenge/:id")
 	restricted.Use(restrictedChallenge)

@@ -4,7 +4,9 @@ import (
 	"bhordesgame/dto"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -49,6 +51,45 @@ func userHandle(c *gin.Context) {
 	go queryChallengesRelatedTo(ch, id, currentUser)
 
 	c.HTML(http.StatusOK, c.GetString(LNG_KEY)+"_user.html", gin.H{"faq": wantFAQ(c.Cookie(NOFAQ)), "logged": cookieErr == nil && ok, "challenges": ch, "user": &user})
+}
+
+func userInfoActualizerHandle(c *gin.Context) {
+	defer c.Status(http.StatusNoContent)
+
+	userChan := make(chan *dto.User)
+	go queryAllUsers(userChan)
+
+	firstDone := false
+	var ids strings.Builder
+	users := make(map[int]*dto.User, 0)
+	for user := range userChan {
+		users[user.ID] = user
+		if firstDone {
+			ids.WriteRune(',')
+		} else {
+			firstDone = true
+		}
+		ids.WriteString(strconv.Itoa(user.ID))
+	}
+
+	actualizedUsers, err := requestMultipleInfo(os.Getenv("USER_KEY"), ids.String())
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+
+	toRefresh := make([]dto.User, 0)
+	for _, user := range actualizedUsers {
+		if user.ID > 0 && (users[user.ID].Name != user.Name || users[user.ID].Avatar != user.Avatar) {
+			toRefresh = append(toRefresh, user)
+		}
+	}
+
+	err = insertMultipleUsers(toRefresh)
+	if err != nil {
+		logger.Println(err)
+		return
+	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * *
