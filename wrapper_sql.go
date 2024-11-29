@@ -133,8 +133,8 @@ func insertMultipleUsers(user []dto.User) error {
 		values = append(values, u.ID, u.Name, u.SimplifiedName, u.Avatar)
 		sqlValues += ",(?, ?, ?, ?)"
 	}
-	_, err := dbConn().Exec(`INSERT INTO user (id, name, simplified_name, avatar) VALUES `+sqlValues[1:]+` AS new
-	ON DUPLICATE KEY UPDATE name = new.name, simplified_name = new.simplified_name, avatar = new.avatar`, values...)
+	_, err := dbConn().Exec(`INSERT INTO user (id, name, simplified_name, avatar) VALUES `+sqlValues[1:]+
+		`ON DUPLICATE KEY UPDATE name = VALUES(name), simplified_name = VALUES(simplified_name), avatar = VALUES(avatar)`, values...)
 
 	return err
 }
