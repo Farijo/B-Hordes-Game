@@ -82,5 +82,5 @@ func languageSelector(langs []language.Tag) func(*gin.Context) {
 }
 
 func wantFAQ(cookie string, _ error) bool {
-	return cookie != "1"
+	return cookie == "1"
 }
