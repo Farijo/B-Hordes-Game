@@ -324,7 +324,7 @@ func challengeScanHandle(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 		return
 	}
-	milestones, err := requestMultipleUsers(c.GetString("key"), userIDs)
+	milestones, err := requestMultipleMilestones(c.GetString("key"), userIDs)
 	if err != nil {
 		logger.Println(err)
 		if err.Error() == "too many request" {
@@ -336,14 +336,14 @@ func challengeScanHandle(c *gin.Context) {
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(len(milestones))
-	for i := range milestones {
+	for ms := range milestones {
+		wg.Add(1)
 		go func(milestone *dto.Milestone, wg *sync.WaitGroup) {
 			if err := insertMilestone(milestone); err != nil {
 				logger.Println(err)
 			}
 			wg.Done()
-		}(&milestones[i], &wg)
+		}(&ms.Milestone, &wg)
 	}
 	wg.Wait()
 

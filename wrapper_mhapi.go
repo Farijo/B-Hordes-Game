@@ -84,57 +84,73 @@ func requestUser(userkey string, id int) (*dto.User, error) {
 	return &flat.User, nil
 }
 
-func requestMultipleInfo(userkey, ids string) ([]dto.User, error) {
-	if err := registerCall(userkey); err != nil {
-		return nil, err
-	}
-	resp, err := http.Get(BASE_URL + fmt.Sprintf(OTHERS, ids) + buildAuthQuery(userkey))
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New(resp.Status)
-	}
-
-	flat := make([]dto.User, len(ids))
-
-	return flat, json.NewDecoder(resp.Body).Decode(&flat)
+type FlattenMilestone struct {
+	*dto.User
+	dto.Milestone
 }
 
-func requestMultipleUsers(userkey, ids string) ([]dto.Milestone, error) {
+func buildFlattenMilestone() *FlattenMilestone {
+	fm := new(FlattenMilestone)
+	fm.User = &fm.Milestone.User
+	return fm
+}
+func requestMultipleMilestones(userkey, ids string) (<-chan *FlattenMilestone, error) {
+	milestones := make(chan *FlattenMilestone)
+	return milestones, requestMultiple(userkey, OTHERS+FULL, ids, buildFlattenMilestone, milestones)
+}
+
+func requestMultipleUsers(userkey, ids string) (<-chan *dto.User, error) {
+	actualizedUsers := make(chan *dto.User)
+	return actualizedUsers, requestMultiple(userkey, OTHERS, ids, func() *dto.User { return &dto.User{} }, actualizedUsers)
+}
+
+func requestMultiple[S any](userkey, url, ids string, build func() *S, ch chan<- *S) error {
 	if err := registerCall(userkey); err != nil {
-		return nil, err
+		close(ch)
+		return err
 	}
-	resp, err := http.Get(BASE_URL + fmt.Sprintf(OTHERS, ids) + FULL + buildAuthQuery(userkey))
+	resp, err := http.Get(BASE_URL + fmt.Sprintf(url, ids) + buildAuthQuery(userkey))
 	if err != nil {
-		return nil, err
+		close(ch)
+		return err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New(resp.Status)
+		close(ch)
+		resp.Body.Close()
+		return errors.New(resp.Status)
 	}
 
-	flat := make([]struct {
-		*dto.User
-		dto.Milestone
-	}, len(ids))
-	for i := range flat {
-		flat[i].User = &flat[i].Milestone.User
-	}
+	go func(resp *http.Response, ch chan<- *S) {
+		defer resp.Body.Close()
+		defer close(ch)
+		decoder := json.NewDecoder(resp.Body)
 
-	if err := json.NewDecoder(resp.Body).Decode(&flat); err != nil {
-		return nil, err
-	}
+		// read open bracket
+		if brace, err := decoder.Token(); err != nil {
+			logger.Println(brace, err)
+			return
+		}
 
-	res := make([]dto.Milestone, len(flat))
-	for i, v := range flat {
-		res[i] = v.Milestone
-	}
+		// while the array contains values
+		for decoder.More() {
+			data := build()
 
-	return res, nil
+			if err := decoder.Decode(data); err != nil {
+				logger.Println(err)
+				return
+			}
+			ch <- data
+		}
+
+		// read closing bracket
+		if brace, err := decoder.Token(); err != nil {
+			logger.Println(brace, err)
+			return
+		}
+	}(resp, ch)
+
+	return nil
 }
 
 func requestServerData(endpoint, userkey string) map[string]SrvData {

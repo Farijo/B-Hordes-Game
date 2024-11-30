@@ -72,16 +72,16 @@ func userInfoActualizerHandle(c *gin.Context) {
 		ids.WriteString(strconv.Itoa(user.ID))
 	}
 
-	actualizedUsers, err := requestMultipleInfo(os.Getenv("USER_KEY"), ids.String())
+	actualizedUsers, err := requestMultipleUsers(os.Getenv("USER_KEY"), ids.String())
 	if err != nil {
 		logger.Println(err)
 		return
 	}
 
 	toRefresh := make([]dto.User, 0)
-	for _, user := range actualizedUsers {
+	for user := range actualizedUsers {
 		if user.ID > 0 && (users[user.ID].Name != user.Name || users[user.ID].Avatar != user.Avatar) {
-			toRefresh = append(toRefresh, user)
+			toRefresh = append(toRefresh, *user)
 		}
 	}
 
