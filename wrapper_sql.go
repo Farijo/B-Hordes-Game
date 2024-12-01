@@ -121,9 +121,13 @@ func insertMultipleUsers(user []dto.User) error {
 		return nil
 	}
 
-	values := make([]any, 0)
-	sqlValues := ""
+	var sqlStmt strings.Builder
 
+	sqlStmt.Grow(60 + len(user)*13 - 1 + 111)
+	sqlStmt.WriteString(`INSERT INTO user (id, name, simplified_name, avatar) VALUES `)
+
+	values := make([]any, 0)
+	firstDone := false
 	for _, u := range user {
 		simplified, _, err := transform.String(*transformer(), u.Name)
 		if err != nil {
@@ -131,10 +135,17 @@ func insertMultipleUsers(user []dto.User) error {
 		}
 		u.SimplifiedName = strings.ToLower(simplified)
 		values = append(values, u.ID, u.Name, u.SimplifiedName, u.Avatar)
-		sqlValues += ",(?, ?, ?, ?)"
+		if firstDone {
+			sqlStmt.WriteByte(',')
+		} else {
+			firstDone = true
+		}
+		sqlStmt.WriteString("(?, ?, ?, ?)")
 	}
-	_, err := dbConn().Exec(`INSERT INTO user (id, name, simplified_name, avatar) VALUES `+sqlValues[1:]+
-		`ON DUPLICATE KEY UPDATE name = VALUES(name), simplified_name = VALUES(simplified_name), avatar = VALUES(avatar)`, values...)
+
+	sqlStmt.WriteString(`ON DUPLICATE KEY UPDATE name = VALUES(name), simplified_name = VALUES(simplified_name), avatar = VALUES(avatar)`)
+
+	_, err := dbConn().Exec(sqlStmt.String(), values...)
 
 	return err
 }
@@ -149,8 +160,7 @@ func queryAllUsers(ch chan<- *dto.User) {
 	}
 	for rows.Next() {
 		var user dto.User
-		err = rows.Scan(&user.ID, &user.Name, &user.Avatar)
-		if err != nil {
+		if err = rows.Scan(&user.ID, &user.Name, &user.Avatar); err != nil {
 			logger.Println(err)
 			return
 		}
@@ -880,7 +890,7 @@ func queryChallengeParticipantsForScan(challengeID, requestorID int) (string, er
 			}
 			builder.WriteString(strconv.Itoa(userID))
 			if rows.Next() {
-				builder.WriteRune(',')
+				builder.WriteByte(',')
 			} else {
 				break
 			}
