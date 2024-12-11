@@ -31,8 +31,36 @@ wid: Largeur
 hei: Hauteur
 days: Jours
 conspiracy: Insurrection
+guide: Guide
+shaman: Chaman
 custom: Custom
+door: Porte
+water: Eau
+chaos: Chaos
+devast: Dévastation
+hard: Pandémonium
 buildings: Chantiers
+z: Zombies
+def: Défense
+regenDir: Régénération
+news: Gazette
+total: Total
+base: Base
+upgrades: Améliorations
+defItems: Objets de défense
+itemsMul: Multiplicateur OD
+citizenHomes: Maisons des citoyens
+citizenGuardians: Gardiens
+watchmen: Veilleurs
+souls: Âmes
+temp: Temporaires
+cadavers: Cadavres
+bonus: Bonus
+min: Minimum
+max: Maximum
+maxed: Maximisé
+estimation: Estimation
+estimationNext: Prochaine estimation
 bank: Banque
 items: Objets au sol
 the-most-of: le plus de

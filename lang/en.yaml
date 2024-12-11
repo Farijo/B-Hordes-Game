@@ -31,8 +31,36 @@ wid: Width
 hei: Height
 days: Days
 conspiracy: Conspiracy
+guide: Guide
+shaman: Shaman
 custom: Custom
+door: Door
+water: Water
+chaos: Chaos
+devast: Devastation
+hard: Hard
 buildings: Buildings
+z: Zombies
+def: Defense
+regenDir: Regeneration
+news: News
+total: Total
+base: Base
+upgrades: Upgrades
+defItems: Defense items
+itemsMul: DI Multiplier
+citizenHomes: Citizen homes
+citizenGuardians: Guardians
+watchmen: Watchmen
+souls: Souls
+temp: Temporary
+cadavers: Cadavers
+bonus: Bonus
+min: Minimum
+max: Maximum
+maxed: Maxed
+estimation: Estimation
+estimationNext: Next estimation
 bank: Bank
 items: Items
 the-most-of: The most of

@@ -21,6 +21,10 @@ type jsonNullInt16 struct {
 	sql.NullInt16
 }
 
+type jsonNullFloat struct {
+	sql.Null[float64]
+}
+
 type jsonNullString struct {
 	sql.NullString
 }
@@ -43,68 +47,51 @@ type jsonNullJob struct {
 	sql.NullByte
 }
 
+type jsonNullRegen struct {
+	sql.NullByte
+}
+
+type jsonNullAux[T any] struct {
+	V T
+}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  * * * * * * * * * * UnmarshalJSON * * * * * * * * * *
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-func (v *jsonNullBool) UnmarshalJSON(data []byte) error {
+func unmarshalGen[T any](validity *bool, value *T, data []byte) error {
 	// Unmarshalling into a pointer will let us detect null
-	var x *bool
+	var x *T
 	if err := json.Unmarshal(data, &x); err != nil {
 		return err
 	}
 	if x != nil {
-		v.Valid = true
-		v.Bool = *x
+		*validity = true
+		*value = *x
 	} else {
-		v.Valid = false
+		*validity = false
 	}
 	return nil
+}
+
+func (v *jsonNullBool) UnmarshalJSON(data []byte) error {
+	return unmarshalGen(&v.Valid, &v.Bool, data)
 }
 
 func (v *jsonNullByte) UnmarshalJSON(data []byte) error {
-	// Unmarshalling into a pointer will let us detect null
-	var x *byte
-	if err := json.Unmarshal(data, &x); err != nil {
-		return err
-	}
-	if x != nil {
-		v.Valid = true
-		v.Byte = *x
-	} else {
-		v.Valid = false
-	}
-	return nil
+	return unmarshalGen(&v.Valid, &v.Byte, data)
 }
 
 func (v *jsonNullInt16) UnmarshalJSON(data []byte) error {
-	// Unmarshalling into a pointer will let us detect null
-	var x *int16
-	if err := json.Unmarshal(data, &x); err != nil {
-		return err
-	}
-	if x != nil {
-		v.Valid = true
-		v.Int16 = *x
-	} else {
-		v.Valid = false
-	}
-	return nil
+	return unmarshalGen(&v.Valid, &v.Int16, data)
+}
+
+func (v *jsonNullFloat) UnmarshalJSON(data []byte) error {
+	return unmarshalGen(&v.Valid, &v.V, data)
 }
 
 func (v *jsonNullString) UnmarshalJSON(data []byte) error {
-	// Unmarshalling into a pointer will let us detect null
-	var x *string
-	if err := json.Unmarshal(data, &x); err != nil {
-		return err
-	}
-	if x != nil {
-		v.Valid = true
-		v.String = *x
-	} else {
-		v.Valid = false
-	}
-	return nil
+	return unmarshalGen(&v.Valid, &v.String, data)
 }
 
 func (v *jsonNullCounter) UnmarshalJSON(data []byte) error {
@@ -129,7 +116,7 @@ func (v *jsonNullDict) UnmarshalJSON(data []byte) error {
 	idx, val := uint16(0), uint32(0)
 	for token, err := decoder.Token(); err == nil; token, err = decoder.Token() {
 		switch token {
-		case "id":
+		case "id", "buildingId":
 			token, err = decoder.Token()
 			if err != nil {
 				return err
@@ -140,7 +127,7 @@ func (v *jsonNullDict) UnmarshalJSON(data []byte) error {
 			} else {
 				idx = uint16(token.(float64))
 			}
-		case "number", "count":
+		case "number", "count", "level":
 			token, err = decoder.Token()
 			if err != nil {
 				return err
@@ -226,6 +213,34 @@ func (v *jsonNullJob) UnmarshalJSON(data []byte) error {
 	return err
 }
 
+func (v *jsonNullRegen) UnmarshalJSON(data []byte) error {
+	decoder := json.NewDecoder(bytes.NewReader(data))
+
+	token, err := decoder.Token()
+
+	for ; err == nil; token, err = decoder.Token() {
+		switch token {
+		default:
+			v.Byte = 0
+			v.Valid = true
+			return nil
+		}
+	}
+
+	if err == io.EOF {
+		err = errors.New(string(data) + " = direction not recognized")
+	}
+
+	return err
+}
+
+func (v *jsonNullAux[any]) UnmarshalJSON(data []byte) error {
+	if data[0] == '[' {
+		return nil
+	}
+	return json.NewDecoder(bytes.NewReader(data)).Decode(&v.V)
+}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  * * * * * * * * * * * * Scan  * * * * * * * * * * * *
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -306,7 +321,25 @@ func (n *jsonNullInt16) Scan(value any) error {
 	return err
 }
 
+func (n *jsonNullFloat) Scan(value any) error {
+	oldB, oldV := n.V, n.Valid
+	err := n.Null.Scan(value)
+	if !n.Valid {
+		n.V, n.Valid = oldB, oldV
+	}
+	return err
+}
+
 func (n *jsonNullJob) Scan(value any) error {
+	oldB, oldV := n.Byte, n.Valid
+	err := n.NullByte.Scan(value)
+	if !n.Valid {
+		n.Byte, n.Valid = oldB, oldV
+	}
+	return err
+}
+
+func (n *jsonNullRegen) Scan(value any) error {
 	oldB, oldV := n.Byte, n.Valid
 	err := n.NullByte.Scan(value)
 	if !n.Valid {
