@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"strings"
 )
 
 type jsonNullBool struct {
@@ -219,10 +220,29 @@ func (v *jsonNullRegen) UnmarshalJSON(data []byte) error {
 	token, err := decoder.Token()
 
 	for ; err == nil; token, err = decoder.Token() {
-		switch token {
-		default:
-			v.Byte = 0
+		if strings.Contains(token.(string), "north") {
+			v.Byte = 0x20
 			v.Valid = true
+		} else if strings.Contains(token.(string), "south") {
+			v.Byte = 0x30
+			v.Valid = true
+		}
+
+		if strings.Contains(token.(string), "east") {
+			if v.Byte > 0 {
+				v.Byte |= 0x01
+			}
+			v.Valid = true
+		} else if strings.Contains(token.(string), "west") {
+			if v.Byte > 0 {
+				v.Byte |= 0x02
+			} else {
+				v.Byte = 0x10
+			}
+			v.Valid = true
+		}
+
+		if v.Valid {
 			return nil
 		}
 	}

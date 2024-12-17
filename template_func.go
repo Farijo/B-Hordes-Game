@@ -183,14 +183,12 @@ func dumpMile(mile *dto.Milestone, userkey, lng string) template.HTML {
 	}
 	if mile.Out.Valid {
 		res[lngData["out"]] = mile.Out.Bool
-		if mile.Out.Bool {
-			if mile.X.Valid {
-				res["X"] = mile.X.Int16
-			}
-			if mile.Y.Valid {
-				res["Y"] = mile.Y.Int16
-			}
-		}
+	}
+	if mile.X.Valid {
+		res["X"] = mile.X.Int16
+	}
+	if mile.Y.Valid {
+		res["Y"] = mile.Y.Int16
 	}
 	if mile.Ban.Valid {
 		res[lngData["ban"]] = mile.Ban.Bool
@@ -265,7 +263,13 @@ func dumpMile(mile *dto.Milestone, userkey, lng string) template.HTML {
 		newsMap[lngData["water"]] = mile.Map.City.News.V.Water.Int16
 	}
 	if mile.Map.City.News.V.RegenDir.Valid {
-		newsMap[lngData["regenDir"]] = mile.Map.City.News.V.RegenDir.Byte
+		newsMap[lngData["regenDir"]] = func(c1, c2 byte) string {
+			if c1 > 3 || c2 > 2 {
+				logger.Println("inconsistent direction", c1, c2)
+				return ""
+			}
+			return []string{"est", "ouest", "nord", "sud"}[c1] + []string{"", "-est", "-ouest"}[c2]
+		}(mile.Map.City.News.V.RegenDir.Byte&0xF0>>4, mile.Map.City.News.V.RegenDir.Byte&0x0F)
 	}
 	if len(newsMap) > 0 {
 		mapMap[lngData["news"]] = newsMap
@@ -320,7 +324,7 @@ func dumpMile(mile *dto.Milestone, userkey, lng string) template.HTML {
 			buildingsMap[name] = v
 		}
 		if len(buildingsMap) > 0 {
-			res[lngData["buildings"]] = buildingsMap
+			res[lngData["upgrades"]] = buildingsMap
 		}
 	}
 	estimMap := make(map[string]any)
