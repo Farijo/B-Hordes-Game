@@ -998,7 +998,7 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 		WHERE challenge.start_date <= UTC_TIMESTAMP()
 		AND (challenge.flags & 0x30) = 0x20
 		UNION
-		SELECT DISTINCT m.user, '9999-12-31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, challenge.id, challenge.name, challenge.end_date, 2 FROM milestone m
+		SELECT DISTINCT m.user, '9999-12-31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, challenge.id, challenge.name, challenge.end_date, 2 FROM milestone m
 		JOIN participant ON participant.user = m.user
 		JOIN challenge ON challenge.id = participant.challenge
 		WHERE challenge.start_date <= UTC_TIMESTAMP()
