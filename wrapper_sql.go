@@ -1117,7 +1117,7 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 func queryMilestone(milestoneCh chan<- *dto.Milestone, requestor int) {
 	defer close(milestoneCh)
 
-	rows, err := dbConn().Query(`SELECT * FROM milestone WHERE user = ? ORDER BY dt DESC`, requestor)
+	rows, err := dbConn().Query(`SELECT user, dt, isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, guide, shaman, custom, door, cityWater, chaos, devast, hard, cityX, cityY, buildings, z, def, water, regenDir, total, base, defBuildings, defUpgrades, items, itemsMul, citizenHomes, citizenGuardians, watchmen, souls, temp, cadavers, bonus, upgrades, estiMin, estiMax, estiMaxed, nextMin, nextMax, nextMaxed, bank, zoneItems FROM milestone WHERE user = ? ORDER BY dt DESC`, requestor)
 	if err != nil {
 		logger.Println(err)
 		return
