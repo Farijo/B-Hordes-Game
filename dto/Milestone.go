@@ -325,6 +325,10 @@ func MilestoneFields(prefix, suffix string) string {
 	return prefix + strings.Join(fields, suffix+","+prefix) + suffix
 }
 
+func MilestoneFieldPlaceholders(rep string) string {
+	return strings.Repeat(rep, len(fields))
+}
+
 func (milestone *Milestone) MilestoneScan() []any {
 	return []any{
 		&milestone.IsGhost,

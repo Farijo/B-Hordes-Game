@@ -259,7 +259,7 @@ func insertMilestone(milestone *dto.Milestone) error {
 		return err
 	}
 
-	if _, err = tx.Exec("INSERT INTO milestone("+dto.MilestoneFields("", "")+", user, dt) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+	if _, err = tx.Exec("INSERT INTO milestone("+dto.MilestoneFields("", "")+", user, dt) VALUES("+dto.MilestoneFieldPlaceholders("?,")+"?, ?)",
 		append(
 			milestone.MilestoneExec(),
 			milestone.User.ID,
@@ -900,7 +900,7 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 		WHERE challenge.start_date <= UTC_TIMESTAMP()
 		AND (challenge.flags & 0x30) = 0x20
 		UNION
-		SELECT DISTINCT m.user, '9999-12-31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, challenge.id, challenge.name, challenge.end_date, 2 FROM milestone m
+		SELECT DISTINCT `+dto.MilestoneFieldPlaceholders("NULL,")+`m.user, '9999-12-31', challenge.id, challenge.name, challenge.end_date, 2 FROM milestone m
 		JOIN participant ON participant.user = m.user
 		JOIN challenge ON challenge.id = participant.challenge
 		WHERE challenge.start_date <= UTC_TIMESTAMP()
