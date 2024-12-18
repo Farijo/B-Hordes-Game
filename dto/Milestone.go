@@ -1,5 +1,7 @@
 package dto
 
+import "strings"
+
 type Milestone struct {
 	User       User            `db:"user"`
 	Dt         string          `db:"dt"`
@@ -315,4 +317,120 @@ func (incoming *Milestone) HasData() bool {
 		incoming.Map.City.Buildings.Valid ||
 		incoming.Map.City.Bank.Valid ||
 		incoming.Map.Zones.Valid
+}
+
+var fields = []string{"isGhost", "playedMaps", "rewards", "dead", "isOut", "ban", "baseDef", "x", "y", "job", "mapWid", "mapHei", "mapDays", "conspiracy", "guide", "shaman", "custom", "door", "cityWater", "chaos", "devast", "hard", "cityX", "cityY", "buildings", "z", "def", "water", "regenDir", "total", "base", "defBuildings", "defUpgrades", "items", "itemsMul", "citizenHomes", "citizenGuardians", "watchmen", "souls", "temp", "cadavers", "bonus", "upgrades", "estiMin", "estiMax", "estiMaxed", "nextMin", "nextMax", "nextMaxed", "bank", "zoneItems"}
+
+func MilestoneFields(prefix, suffix string) string {
+	return prefix + strings.Join(fields, suffix+","+prefix) + suffix
+}
+
+func (milestone *Milestone) MilestoneScan() []any {
+	return []any{
+		&milestone.IsGhost,
+		&milestone.PlayedMaps,
+		&milestone.Rewards,
+		&milestone.Dead,
+		&milestone.Out,
+		&milestone.Ban,
+		&milestone.BaseDef,
+		&milestone.X,
+		&milestone.Y,
+		&milestone.Job,
+		&milestone.Map.Wid,
+		&milestone.Map.Hei,
+		&milestone.Map.Days,
+		&milestone.Map.Conspiracy,
+		&milestone.Map.Guide,
+		&milestone.Map.Shaman,
+		&milestone.Map.Custom,
+		&milestone.Map.City.Door,
+		&milestone.Map.City.Water,
+		&milestone.Map.City.Chaos,
+		&milestone.Map.City.Devast,
+		&milestone.Map.City.Hard,
+		&milestone.Map.City.X,
+		&milestone.Map.City.Y,
+		&milestone.Map.City.Buildings,
+		&milestone.Map.City.News.V.Z,
+		&milestone.Map.City.News.V.Def,
+		&milestone.Map.City.News.V.Water,
+		&milestone.Map.City.News.V.RegenDir,
+		&milestone.Map.City.Defense.Total,
+		&milestone.Map.City.Defense.Base,
+		&milestone.Map.City.Defense.Buildings,
+		&milestone.Map.City.Defense.Upgrades,
+		&milestone.Map.City.Defense.Items,
+		&milestone.Map.City.Defense.ItemsMul,
+		&milestone.Map.City.Defense.CitizenHomes,
+		&milestone.Map.City.Defense.CitizenGuardians,
+		&milestone.Map.City.Defense.Watchmen,
+		&milestone.Map.City.Defense.Souls,
+		&milestone.Map.City.Defense.Temp,
+		&milestone.Map.City.Defense.Cadavers,
+		&milestone.Map.City.Defense.Bonus,
+		&milestone.Map.City.Upgrades.V.List,
+		&milestone.Map.City.Estimations.V.Min,
+		&milestone.Map.City.Estimations.V.Max,
+		&milestone.Map.City.Estimations.V.Maxed,
+		&milestone.Map.City.EstimationsNext.V.Min,
+		&milestone.Map.City.EstimationsNext.V.Max,
+		&milestone.Map.City.EstimationsNext.V.Maxed,
+		&milestone.Map.City.Bank,
+		&milestone.Map.Zones}
+}
+
+func (milestone *Milestone) MilestoneExec() []any {
+	return []any{
+		milestone.IsGhost,
+		milestone.PlayedMaps,
+		milestone.Rewards,
+		milestone.Dead,
+		milestone.Out,
+		milestone.Ban,
+		milestone.BaseDef,
+		milestone.X,
+		milestone.Y,
+		milestone.Job,
+		milestone.Map.Wid,
+		milestone.Map.Hei,
+		milestone.Map.Days,
+		milestone.Map.Conspiracy,
+		milestone.Map.Guide,
+		milestone.Map.Shaman,
+		milestone.Map.Custom,
+		milestone.Map.City.Door,
+		milestone.Map.City.Water,
+		milestone.Map.City.Chaos,
+		milestone.Map.City.Devast,
+		milestone.Map.City.Hard,
+		milestone.Map.City.X,
+		milestone.Map.City.Y,
+		milestone.Map.City.Buildings,
+		milestone.Map.City.News.V.Z,
+		milestone.Map.City.News.V.Def,
+		milestone.Map.City.News.V.Water,
+		milestone.Map.City.News.V.RegenDir,
+		milestone.Map.City.Defense.Total,
+		milestone.Map.City.Defense.Base,
+		milestone.Map.City.Defense.Buildings,
+		milestone.Map.City.Defense.Upgrades,
+		milestone.Map.City.Defense.Items,
+		milestone.Map.City.Defense.ItemsMul,
+		milestone.Map.City.Defense.CitizenHomes,
+		milestone.Map.City.Defense.CitizenGuardians,
+		milestone.Map.City.Defense.Watchmen,
+		milestone.Map.City.Defense.Souls,
+		milestone.Map.City.Defense.Temp,
+		milestone.Map.City.Defense.Cadavers,
+		milestone.Map.City.Defense.Bonus,
+		milestone.Map.City.Upgrades.V.List,
+		milestone.Map.City.Estimations.V.Min,
+		milestone.Map.City.Estimations.V.Max,
+		milestone.Map.City.Estimations.V.Maxed,
+		milestone.Map.City.EstimationsNext.V.Min,
+		milestone.Map.City.EstimationsNext.V.Max,
+		milestone.Map.City.EstimationsNext.V.Maxed,
+		milestone.Map.City.Bank,
+		milestone.Map.Zones}
 }

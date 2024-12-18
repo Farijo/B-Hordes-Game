@@ -232,66 +232,16 @@ func insertMilestone(milestone *dto.Milestone) error {
 		return nil
 	}
 
-	rows, err = tx.Query(`SELECT dt, isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, guide, shaman, custom, door, cityWater, chaos, devast, hard, cityX, cityY, buildings, z, def, water, regenDir, total, base, defBuildings, defUpgrades, items, itemsMul, citizenHomes, citizenGuardians, watchmen, souls, temp, cadavers, bonus, upgrades, estiMin, estiMax, estiMaxed, nextMin, nextMax, nextMaxed, bank, zoneItems
-	FROM milestone WHERE user = ? ORDER BY dt ASC`, milestone.User.ID)
+	rows, err = tx.Query("SELECT "+dto.MilestoneFields("", "")+",dt FROM milestone WHERE user = ? ORDER BY dt ASC", milestone.User.ID)
 	if err != nil {
 		return err
 	}
 	var previousMS dto.Milestone
 	for rows.Next() {
-		if err = rows.Scan(
+		if err = rows.Scan(append(
+			previousMS.MilestoneScan(),
 			&previousMS.Dt,
-			&previousMS.IsGhost,
-			&previousMS.PlayedMaps,
-			&previousMS.Rewards,
-			&previousMS.Dead,
-			&previousMS.Out,
-			&previousMS.Ban,
-			&previousMS.BaseDef,
-			&previousMS.X,
-			&previousMS.Y,
-			&previousMS.Job,
-			&previousMS.Map.Wid,
-			&previousMS.Map.Hei,
-			&previousMS.Map.Days,
-			&previousMS.Map.Conspiracy,
-			&previousMS.Map.Guide,
-			&previousMS.Map.Shaman,
-			&previousMS.Map.Custom,
-			&previousMS.Map.City.Door,
-			&previousMS.Map.City.Water,
-			&previousMS.Map.City.Chaos,
-			&previousMS.Map.City.Devast,
-			&previousMS.Map.City.Hard,
-			&previousMS.Map.City.X,
-			&previousMS.Map.City.Y,
-			&previousMS.Map.City.Buildings,
-			&previousMS.Map.City.News.V.Z,
-			&previousMS.Map.City.News.V.Def,
-			&previousMS.Map.City.News.V.Water,
-			&previousMS.Map.City.News.V.RegenDir,
-			&previousMS.Map.City.Defense.Total,
-			&previousMS.Map.City.Defense.Base,
-			&previousMS.Map.City.Defense.Buildings,
-			&previousMS.Map.City.Defense.Upgrades,
-			&previousMS.Map.City.Defense.Items,
-			&previousMS.Map.City.Defense.ItemsMul,
-			&previousMS.Map.City.Defense.CitizenHomes,
-			&previousMS.Map.City.Defense.CitizenGuardians,
-			&previousMS.Map.City.Defense.Watchmen,
-			&previousMS.Map.City.Defense.Souls,
-			&previousMS.Map.City.Defense.Temp,
-			&previousMS.Map.City.Defense.Cadavers,
-			&previousMS.Map.City.Defense.Bonus,
-			&previousMS.Map.City.Upgrades.V.List,
-			&previousMS.Map.City.Estimations.V.Min,
-			&previousMS.Map.City.Estimations.V.Max,
-			&previousMS.Map.City.Estimations.V.Maxed,
-			&previousMS.Map.City.EstimationsNext.V.Min,
-			&previousMS.Map.City.EstimationsNext.V.Max,
-			&previousMS.Map.City.EstimationsNext.V.Maxed,
-			&previousMS.Map.City.Bank,
-			&previousMS.Map.Zones); err != nil {
+		)...); err != nil {
 			rows.Close()
 			return err
 		}
@@ -305,64 +255,16 @@ func insertMilestone(milestone *dto.Milestone) error {
 		return tx.Commit()
 	}
 
-	if err = tx.QueryRow(`SELECT UTC_TIMESTAMP(2)`).Scan(&milestone.Dt); err != nil {
+	if err = tx.QueryRow("SELECT UTC_TIMESTAMP(2)").Scan(&milestone.Dt); err != nil {
 		return err
 	}
 
-	if _, err = tx.Exec(`INSERT INTO milestone(user, dt, isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, guide, shaman, custom, door, cityWater, chaos, devast, hard, cityX, cityY, buildings, z, def, water, regenDir, total, base, defBuildings, defUpgrades, items, itemsMul, citizenHomes, citizenGuardians, watchmen, souls, temp, cadavers, bonus, upgrades, estiMin, estiMax, estiMaxed, nextMin, nextMax, nextMaxed, bank, zoneItems) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		milestone.User.ID,
-		milestone.Dt,
-		milestone.IsGhost,
-		milestone.PlayedMaps,
-		milestone.Rewards,
-		milestone.Dead,
-		milestone.Out,
-		milestone.Ban,
-		milestone.BaseDef,
-		milestone.X,
-		milestone.Y,
-		milestone.Job,
-		milestone.Map.Wid,
-		milestone.Map.Hei,
-		milestone.Map.Days,
-		milestone.Map.Conspiracy,
-		milestone.Map.Guide,
-		milestone.Map.Shaman,
-		milestone.Map.Custom,
-		milestone.Map.City.Door,
-		milestone.Map.City.Water,
-		milestone.Map.City.Chaos,
-		milestone.Map.City.Devast,
-		milestone.Map.City.Hard,
-		milestone.Map.City.X,
-		milestone.Map.City.Y,
-		milestone.Map.City.Buildings,
-		milestone.Map.City.News.V.Z,
-		milestone.Map.City.News.V.Def,
-		milestone.Map.City.News.V.Water,
-		milestone.Map.City.News.V.RegenDir,
-		milestone.Map.City.Defense.Total,
-		milestone.Map.City.Defense.Base,
-		milestone.Map.City.Defense.Buildings,
-		milestone.Map.City.Defense.Upgrades,
-		milestone.Map.City.Defense.Items,
-		milestone.Map.City.Defense.ItemsMul,
-		milestone.Map.City.Defense.CitizenHomes,
-		milestone.Map.City.Defense.CitizenGuardians,
-		milestone.Map.City.Defense.Watchmen,
-		milestone.Map.City.Defense.Souls,
-		milestone.Map.City.Defense.Temp,
-		milestone.Map.City.Defense.Cadavers,
-		milestone.Map.City.Defense.Bonus,
-		milestone.Map.City.Upgrades.V.List,
-		milestone.Map.City.Estimations.V.Min,
-		milestone.Map.City.Estimations.V.Max,
-		milestone.Map.City.Estimations.V.Maxed,
-		milestone.Map.City.EstimationsNext.V.Min,
-		milestone.Map.City.EstimationsNext.V.Max,
-		milestone.Map.City.EstimationsNext.V.Maxed,
-		milestone.Map.City.Bank,
-		milestone.Map.Zones); err != nil {
+	if _, err = tx.Exec("INSERT INTO milestone("+dto.MilestoneFields("", "")+", user, dt) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		append(
+			milestone.MilestoneExec(),
+			milestone.User.ID,
+			milestone.Dt,
+		)...); err != nil {
 		return err
 	}
 
@@ -990,9 +892,9 @@ func (v Verifications) Swap(i, j int) {
 }
 
 func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, error) {
-	rows, err := dbConn().Query(`SELECT m.user, m.dt, m.isGhost, m.playedMaps, m.rewards, m.dead, m.isOut, m.ban, m.baseDef, m.x, m.y, m.job, m.mapWid, m.mapHei, m.mapDays, m.conspiracy, m.guide, m.shaman, m.custom, m.door, m.cityWater, m.chaos, m.devast, m.hard, m.cityX, m.cityY, m.buildings, m.z, m.def, m.water, m.regenDir, m.total, m.base, m.defBuildings, m.defUpgrades, m.items, m.itemsMul, m.citizenHomes, m.citizenGuardians, m.watchmen, m.souls, m.temp, m.cadavers, m.bonus, m.upgrades, m.estiMin, m.estiMax, m.estiMaxed, m.nextMin, m.nextMax, m.nextMaxed, m.bank, m.zoneItems, m.id, m.name, m.end_date, m.bef, user.name, user.avatar, goal.id, goal.typ, goal.entity, goal.x, goal.y, goal.custom, goal.amount, success.amount, DATEDIFF(UTC_TIMESTAMP(), end_date) rem
+	rows, err := dbConn().Query(`SELECT `+dto.MilestoneFields("m.", "")+`, m.user, m.dt, m.id, m.name, m.end_date, m.bef, user.name, user.avatar, goal.id, goal.typ, goal.entity, goal.x, goal.y, goal.custom, goal.amount, success.amount, DATEDIFF(UTC_TIMESTAMP(), end_date) rem
 	FROM (
-		SELECT m.*, challenge.id, challenge.name, challenge.end_date, (dt >= challenge.start_date) as bef FROM milestone m
+		SELECT `+dto.MilestoneFields("m.", "")+`, m.user, m.dt, challenge.id, challenge.name, challenge.end_date, (dt >= challenge.start_date) as bef FROM milestone m
 		JOIN participant ON participant.user = m.user
 		JOIN challenge ON challenge.id = participant.challenge
 		WHERE challenge.start_date <= UTC_TIMESTAMP()
@@ -1026,60 +928,10 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 		var goal dto.Goal
 		var successAmount sql.NullInt32
 		var rem sql.NullInt64
-		if err := rows.Scan(
+		if err := rows.Scan(append(
+			milestone.MilestoneScan(),
 			&milestone.User.ID,
 			&milestone.Dt,
-			&milestone.IsGhost,
-			&milestone.PlayedMaps,
-			&milestone.Rewards,
-			&milestone.Dead,
-			&milestone.Out,
-			&milestone.Ban,
-			&milestone.BaseDef,
-			&milestone.X,
-			&milestone.Y,
-			&milestone.Job,
-			&milestone.Map.Wid,
-			&milestone.Map.Hei,
-			&milestone.Map.Days,
-			&milestone.Map.Conspiracy,
-			&milestone.Map.Guide,
-			&milestone.Map.Shaman,
-			&milestone.Map.Custom,
-			&milestone.Map.City.Door,
-			&milestone.Map.City.Water,
-			&milestone.Map.City.Chaos,
-			&milestone.Map.City.Devast,
-			&milestone.Map.City.Hard,
-			&milestone.Map.City.X,
-			&milestone.Map.City.Y,
-			&milestone.Map.City.Buildings,
-			&milestone.Map.City.News.V.Z,
-			&milestone.Map.City.News.V.Def,
-			&milestone.Map.City.News.V.Water,
-			&milestone.Map.City.News.V.RegenDir,
-			&milestone.Map.City.Defense.Total,
-			&milestone.Map.City.Defense.Base,
-			&milestone.Map.City.Defense.Buildings,
-			&milestone.Map.City.Defense.Upgrades,
-			&milestone.Map.City.Defense.Items,
-			&milestone.Map.City.Defense.ItemsMul,
-			&milestone.Map.City.Defense.CitizenHomes,
-			&milestone.Map.City.Defense.CitizenGuardians,
-			&milestone.Map.City.Defense.Watchmen,
-			&milestone.Map.City.Defense.Souls,
-			&milestone.Map.City.Defense.Temp,
-			&milestone.Map.City.Defense.Cadavers,
-			&milestone.Map.City.Defense.Bonus,
-			&milestone.Map.City.Upgrades.V.List,
-			&milestone.Map.City.Estimations.V.Min,
-			&milestone.Map.City.Estimations.V.Max,
-			&milestone.Map.City.Estimations.V.Maxed,
-			&milestone.Map.City.EstimationsNext.V.Min,
-			&milestone.Map.City.EstimationsNext.V.Max,
-			&milestone.Map.City.EstimationsNext.V.Maxed,
-			&milestone.Map.City.Bank,
-			&milestone.Map.Zones,
 			&challenge.ID,
 			&challenge.Name,
 			&challenge.EndDate,
@@ -1094,7 +946,8 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 			&goal.Custom,
 			&goal.Amount,
 			&successAmount,
-			&rem); err != nil {
+			&rem,
+		)...); err != nil {
 			return nil, nil, err
 		}
 		if goal.Typ == 2 {
@@ -1150,7 +1003,7 @@ func queryValidations(userID int) (map[int]Verifications, []*dto.Challenge, erro
 func queryMilestone(milestoneCh chan<- *dto.Milestone, requestor int) {
 	defer close(milestoneCh)
 
-	rows, err := dbConn().Query(`SELECT user, dt, isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, guide, shaman, custom, door, cityWater, chaos, devast, hard, cityX, cityY, buildings, z, def, water, regenDir, total, base, defBuildings, defUpgrades, items, itemsMul, citizenHomes, citizenGuardians, watchmen, souls, temp, cadavers, bonus, upgrades, estiMin, estiMax, estiMaxed, nextMin, nextMax, nextMaxed, bank, zoneItems FROM milestone WHERE user = ? ORDER BY dt DESC`, requestor)
+	rows, err := dbConn().Query("SELECT "+dto.MilestoneFields("", "")+", user, dt FROM milestone WHERE user = ? ORDER BY dt DESC", requestor)
 	if err != nil {
 		logger.Println(err)
 		return
@@ -1159,60 +1012,11 @@ func queryMilestone(milestoneCh chan<- *dto.Milestone, requestor int) {
 
 	for rows.Next() {
 		milestone := new(dto.Milestone)
-		if err := rows.Scan(
+		if err := rows.Scan(append(
+			milestone.MilestoneScan(),
 			&milestone.User.ID,
 			&milestone.Dt,
-			&milestone.IsGhost,
-			&milestone.PlayedMaps,
-			&milestone.Rewards,
-			&milestone.Dead,
-			&milestone.Out,
-			&milestone.Ban,
-			&milestone.BaseDef,
-			&milestone.X,
-			&milestone.Y,
-			&milestone.Job,
-			&milestone.Map.Wid,
-			&milestone.Map.Hei,
-			&milestone.Map.Days,
-			&milestone.Map.Conspiracy,
-			&milestone.Map.Guide,
-			&milestone.Map.Shaman,
-			&milestone.Map.Custom,
-			&milestone.Map.City.Door,
-			&milestone.Map.City.Water,
-			&milestone.Map.City.Chaos,
-			&milestone.Map.City.Devast,
-			&milestone.Map.City.Hard,
-			&milestone.Map.City.X,
-			&milestone.Map.City.Y,
-			&milestone.Map.City.Buildings,
-			&milestone.Map.City.News.V.Z,
-			&milestone.Map.City.News.V.Def,
-			&milestone.Map.City.News.V.Water,
-			&milestone.Map.City.News.V.RegenDir,
-			&milestone.Map.City.Defense.Total,
-			&milestone.Map.City.Defense.Base,
-			&milestone.Map.City.Defense.Buildings,
-			&milestone.Map.City.Defense.Upgrades,
-			&milestone.Map.City.Defense.Items,
-			&milestone.Map.City.Defense.ItemsMul,
-			&milestone.Map.City.Defense.CitizenHomes,
-			&milestone.Map.City.Defense.CitizenGuardians,
-			&milestone.Map.City.Defense.Watchmen,
-			&milestone.Map.City.Defense.Souls,
-			&milestone.Map.City.Defense.Temp,
-			&milestone.Map.City.Defense.Cadavers,
-			&milestone.Map.City.Defense.Bonus,
-			&milestone.Map.City.Upgrades.V.List,
-			&milestone.Map.City.Estimations.V.Min,
-			&milestone.Map.City.Estimations.V.Max,
-			&milestone.Map.City.Estimations.V.Maxed,
-			&milestone.Map.City.EstimationsNext.V.Min,
-			&milestone.Map.City.EstimationsNext.V.Max,
-			&milestone.Map.City.EstimationsNext.V.Maxed,
-			&milestone.Map.City.Bank,
-			&milestone.Map.Zones); err != nil {
+		)...); err != nil {
 			logger.Println(err)
 			return
 		}
@@ -1332,8 +1136,7 @@ func mergeMilestonesOlderThan(milestone *dto.Milestone, threshold int) {
 	}
 	defer tx.Rollback()
 
-	rows, err := tx.Query(`SELECT dt, isGhost, playedMaps, rewards, dead, isOut, ban, baseDef, x, y, job, mapWid, mapHei, mapDays, conspiracy, guide, shaman, custom, door, cityWater, chaos, devast, hard, cityX, cityY, buildings, z, def, water, regenDir, total, base, defBuildings, defUpgrades, items, itemsMul, citizenHomes, citizenGuardians, watchmen, souls, temp, cadavers, bonus, upgrades, estiMin, estiMax, estiMaxed, nextMin, nextMax, nextMaxed, bank, zoneItems
-	FROM milestone WHERE user = ? AND dt < ? ORDER BY dt ASC`, milestone.User.ID, milestone.Dt)
+	rows, err := tx.Query("SELECT "+dto.MilestoneFields("", "")+",dt FROM milestone WHERE user = ? AND dt < ? ORDER BY dt ASC", milestone.User.ID, milestone.Dt)
 	if err != nil {
 		logger.Println(err)
 		return
@@ -1341,59 +1144,10 @@ func mergeMilestonesOlderThan(milestone *dto.Milestone, threshold int) {
 
 	i := 0
 	for rows.Next() {
-		if err = rows.Scan(
+		if err = rows.Scan(append(
+			milestone.MilestoneScan(),
 			&milestone.Dt,
-			&milestone.IsGhost,
-			&milestone.PlayedMaps,
-			&milestone.Rewards,
-			&milestone.Dead,
-			&milestone.Out,
-			&milestone.Ban,
-			&milestone.BaseDef,
-			&milestone.X,
-			&milestone.Y,
-			&milestone.Job,
-			&milestone.Map.Wid,
-			&milestone.Map.Hei,
-			&milestone.Map.Days,
-			&milestone.Map.Conspiracy,
-			&milestone.Map.Guide,
-			&milestone.Map.Shaman,
-			&milestone.Map.Custom,
-			&milestone.Map.City.Door,
-			&milestone.Map.City.Water,
-			&milestone.Map.City.Chaos,
-			&milestone.Map.City.Devast,
-			&milestone.Map.City.Hard,
-			&milestone.Map.City.X,
-			&milestone.Map.City.Y,
-			&milestone.Map.City.Buildings,
-			&milestone.Map.City.News.V.Z,
-			&milestone.Map.City.News.V.Def,
-			&milestone.Map.City.News.V.Water,
-			&milestone.Map.City.News.V.RegenDir,
-			&milestone.Map.City.Defense.Total,
-			&milestone.Map.City.Defense.Base,
-			&milestone.Map.City.Defense.Buildings,
-			&milestone.Map.City.Defense.Upgrades,
-			&milestone.Map.City.Defense.Items,
-			&milestone.Map.City.Defense.ItemsMul,
-			&milestone.Map.City.Defense.CitizenHomes,
-			&milestone.Map.City.Defense.CitizenGuardians,
-			&milestone.Map.City.Defense.Watchmen,
-			&milestone.Map.City.Defense.Souls,
-			&milestone.Map.City.Defense.Temp,
-			&milestone.Map.City.Defense.Cadavers,
-			&milestone.Map.City.Defense.Bonus,
-			&milestone.Map.City.Upgrades.V.List,
-			&milestone.Map.City.Estimations.V.Min,
-			&milestone.Map.City.Estimations.V.Max,
-			&milestone.Map.City.Estimations.V.Maxed,
-			&milestone.Map.City.EstimationsNext.V.Min,
-			&milestone.Map.City.EstimationsNext.V.Max,
-			&milestone.Map.City.EstimationsNext.V.Maxed,
-			&milestone.Map.City.Bank,
-			&milestone.Map.Zones); err != nil {
+		)...); err != nil {
 			rows.Close()
 			logger.Println(err)
 			return
@@ -1409,61 +1163,11 @@ func mergeMilestonesOlderThan(milestone *dto.Milestone, threshold int) {
 	// populate sql fields
 	milestone.CheckFieldsDifference(new(dto.Milestone))
 
-	if _, err = tx.Exec(`UPDATE milestone SET isGhost = ?, playedMaps = ?, rewards = ?, dead = ?, isOut = ?, ban = ?, baseDef = ?, x = ?, y = ?, job = ?, mapWid = ?, mapHei = ?, mapDays = ?, conspiracy = ?, guide = ?, shaman = ?, custom = ?, door = ?, cityWater = ?, chaos = ?, devast = ?, hard = ?, cityX = ?, cityY = ?, buildings = ?, z = ?, def = ?, water = ?, regenDir = ?, total = ?, base = ?, defBuildings = ?, defUpgrades = ?, items = ?, itemsMul = ?, citizenHomes = ?, citizenGuardians = ?, watchmen = ?, souls = ?, temp = ?, cadavers = ?, bonus = ?, upgrades = ?, estiMin = ?, estiMax = ?, estiMaxed = ?, nextMin = ?, nextMax = ?, nextMaxed = ?, bank = ?, zoneItems = ?,
-	WHERE user = ? AND dt = ?`,
-		milestone.IsGhost,
-		milestone.PlayedMaps,
-		milestone.Rewards,
-		milestone.Dead,
-		milestone.Out,
-		milestone.Ban,
-		milestone.BaseDef,
-		milestone.X,
-		milestone.Y,
-		milestone.Job,
-		milestone.Map.Wid,
-		milestone.Map.Hei,
-		milestone.Map.Days,
-		milestone.Map.Conspiracy,
-		milestone.Map.Guide,
-		milestone.Map.Shaman,
-		milestone.Map.Custom,
-		milestone.Map.City.Door,
-		milestone.Map.City.Water,
-		milestone.Map.City.Chaos,
-		milestone.Map.City.Devast,
-		milestone.Map.City.Hard,
-		milestone.Map.City.X,
-		milestone.Map.City.Y,
-		milestone.Map.City.Buildings,
-		milestone.Map.City.News.V.Z,
-		milestone.Map.City.News.V.Def,
-		milestone.Map.City.News.V.Water,
-		milestone.Map.City.News.V.RegenDir,
-		milestone.Map.City.Defense.Total,
-		milestone.Map.City.Defense.Base,
-		milestone.Map.City.Defense.Buildings,
-		milestone.Map.City.Defense.Upgrades,
-		milestone.Map.City.Defense.Items,
-		milestone.Map.City.Defense.ItemsMul,
-		milestone.Map.City.Defense.CitizenHomes,
-		milestone.Map.City.Defense.CitizenGuardians,
-		milestone.Map.City.Defense.Watchmen,
-		milestone.Map.City.Defense.Souls,
-		milestone.Map.City.Defense.Temp,
-		milestone.Map.City.Defense.Cadavers,
-		milestone.Map.City.Defense.Bonus,
-		milestone.Map.City.Upgrades.V.List,
-		milestone.Map.City.Estimations.V.Min,
-		milestone.Map.City.Estimations.V.Max,
-		milestone.Map.City.Estimations.V.Maxed,
-		milestone.Map.City.EstimationsNext.V.Min,
-		milestone.Map.City.EstimationsNext.V.Max,
-		milestone.Map.City.EstimationsNext.V.Maxed,
-		milestone.Map.City.Bank,
-		milestone.Map.Zones,
+	if _, err = tx.Exec("UPDATE milestone SET "+dto.MilestoneFields("", "=?")+" WHERE user = ? AND dt = ?", append(
+		milestone.MilestoneExec(),
 		milestone.User.ID,
-		milestone.Dt); err != nil {
+		milestone.Dt,
+	)...); err != nil {
 		logger.Println(err)
 		return
 	}
