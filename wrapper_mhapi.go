@@ -12,7 +12,7 @@ import (
 const (
 	BASE_URL = "https://myhordes.eu/api/x/json/"
 
-	FULL   = ",isGhost,playedMaps.fields(mapId),rewards.fields(id,number),dead,out,ban,baseDef,x,y,job,map.fields(wid,hei,days,guide,shaman,custom,conspiracy,city.fields(door,water,chaos,devast,hard,x,y,buildings.fields(id),news.fields(z,def,water,regenDir),defense.fields(total,base,buildings,upgrades,items,itemsMul,citizenHomes,citizenGuardians,watchmen,souls,temp,cadavers,bonus),upgrades.fields(list.fields(buildingId,level)),estimations.fields(min,max,maxed),estimationsNext.fields(min,max,maxed),bank.fields(id,count)),zones.fields(items.fields(id,count)))"
+	FULL   = ",isGhost,playedMaps.fields(mapId),rewards.fields(id,number),dead,out,ban,baseDef,x,y,job,map.fields(wid,hei,days,guide,shaman,custom,conspiracy,city.fields(door,water,chaos,devast,hard,x,y,buildings.fields(id),news.fields(z,def,water,regenDir),defense.fields(total,base,buildings,upgrades,items,itemsMul,citizenHomes,citizenGuardians,watchmen,souls,temp,cadavers,bonus),upgrades.fields(list.fields(buildingId,level)),estimations.fields(min,max,maxed),estimationsNext.fields(min,max,maxed),bank.fields(id,count)),zones.fields(items.fields(id,count)))&languages=en"
 	ME     = "me?fields=id,name,avatar" + FULL
 	OTHER  = "user?id=%d&fields=id,name,avatar"
 	OTHERS = "users?ids=%s&fields=id,name,avatar"

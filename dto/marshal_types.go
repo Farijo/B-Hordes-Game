@@ -220,20 +220,20 @@ func (v *jsonNullRegen) UnmarshalJSON(data []byte) error {
 	token, err := decoder.Token()
 
 	for ; err == nil; token, err = decoder.Token() {
-		if strings.Contains(token.(string), "north") {
+		if strings.Contains(token.(string), "North") {
 			v.Byte = 0x20
 			v.Valid = true
-		} else if strings.Contains(token.(string), "south") {
+		} else if strings.Contains(token.(string), "South") {
 			v.Byte = 0x30
 			v.Valid = true
 		}
 
-		if strings.Contains(token.(string), "east") {
+		if strings.Contains(token.(string), "East") {
 			if v.Byte > 0 {
 				v.Byte |= 0x01
 			}
 			v.Valid = true
-		} else if strings.Contains(token.(string), "west") {
+		} else if strings.Contains(token.(string), "West") {
 			if v.Byte > 0 {
 				v.Byte |= 0x02
 			} else {
