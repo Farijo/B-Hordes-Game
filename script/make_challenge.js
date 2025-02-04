@@ -34,7 +34,7 @@ addAGoal = function(deletable) {
     const goalTypes = $(agoal[0]);
 
     const target = agoal.find('#goal-img');
-    const selectList = agoal.find('#goal-list');
+    const selectList = agoal.find('.goal-list');
     const selectValue = agoal.find('#goal-value');
     selectList.append(selectOpt);
     selectList.on('change', function() {
@@ -99,7 +99,7 @@ function bindGoal(goal) {
             const nval = goal.Entity;
             for (var key in pictImg[goal.Typ]) {
                 if (pictImg[goal.Typ][key].id == nval) {
-                    $(`#goal-list:last`).val(key).trigger('change');
+                    $(`.goal-list:last`).val(key).trigger('change');
                     break;
                 }
             }
