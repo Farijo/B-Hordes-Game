@@ -19,7 +19,12 @@
             <th>@@{participations}</th>
         </tr>
         <tr>
-            <td><img class="avatar" src="{{ .user.Avatar.String }}"><span class="name">{{ .user.Name }}</span></td>
+            <td>
+                <a href="https://myhordes.eu/jx/soul/{{ .user.ID }}" title="@@{see-on-mh}">
+                    <img class="avatar" src="{{ .user.Avatar.String }}">
+                    <span class="name">{{ .user.Name }}</span>
+                </a>
+            </td>
             <td>{{ .user.CreationCount }}</td>
             <td>{{ .user.ParticipationCount }}</td>
         </tr>

@@ -21,5 +21,8 @@
             })
         </script>
     {{ end }}
+    <script>
+        $('select:last').val('@@{running}').trigger('change')
+    </script>
 </body>
 </html>
