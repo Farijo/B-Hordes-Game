@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sync"
 )
 
 const (
@@ -109,46 +110,67 @@ func requestMultiple[S any](userkey, url, ids string, build func() *S, ch chan<-
 		close(ch)
 		return err
 	}
-	resp, err := http.Get(BASE_URL + fmt.Sprintf(url, ids) + buildAuthQuery(userkey))
-	if err != nil {
-		close(ch)
-		return err
-	}
 
-	if resp.StatusCode != http.StatusOK {
-		close(ch)
-		resp.Body.Close()
-		return errors.New(resp.Status)
-	}
+	idsLen := len(ids)
+	chunkSize := idsLen * 1000 / (idsLen + 1000)
+	start := 0
+	var wg sync.WaitGroup
 
-	go func(resp *http.Response, ch chan<- *S) {
-		defer resp.Body.Close()
-		defer close(ch)
-		decoder := json.NewDecoder(resp.Body)
-
-		// read open bracket
-		if brace, err := decoder.Token(); err != nil {
-			logger.Println(brace, err)
-			return
+	for start < idsLen {
+		end := start + chunkSize
+		for end < idsLen && ids[end] != ',' {
+			end++
 		}
+		end = min(end, idsLen)
 
-		// while the array contains values
-		for decoder.More() {
-			data := build()
-
-			if err := decoder.Decode(data); err != nil {
-				logger.Println(err)
+		wg.Add(1)
+		go func(idsChunk string, ch chan<- *S) {
+			defer wg.Done()
+			resp, err := http.Get(BASE_URL + fmt.Sprintf(url, idsChunk) + buildAuthQuery(userkey)) // batch 1500char uri
+			if err != nil {
 				return
 			}
-			ch <- data
-		}
 
-		// read closing bracket
-		if brace, err := decoder.Token(); err != nil {
-			logger.Println(brace, err)
-			return
-		}
-	}(resp, ch)
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				logger.Println(resp.StatusCode)
+				return
+			}
+
+			decoder := json.NewDecoder(resp.Body)
+
+			// read open bracket
+			if brace, err := decoder.Token(); err != nil {
+				logger.Println(brace, err)
+				return
+			}
+
+			// while the array contains values
+			for decoder.More() {
+				data := build()
+
+				if err := decoder.Decode(data); err != nil {
+					logger.Println(err)
+					return
+				}
+				ch <- data
+			}
+
+			// read closing bracket
+			if brace, err := decoder.Token(); err != nil {
+				logger.Println(brace, err)
+				return
+			}
+		}(ids[start:end], ch)
+
+		start = end + 1
+	}
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
 
 	return nil
 }

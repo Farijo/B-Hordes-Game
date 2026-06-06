@@ -59,18 +59,14 @@ func userInfoActualizerHandle(c *gin.Context) {
 	userChan := make(chan *dto.User)
 	go queryAllUsers(userChan)
 
-	firstDone := false
 	var ids strings.Builder
 	users := make(map[int]*dto.User, 0)
 	for user := range userChan {
 		users[user.ID] = user
-		if firstDone {
-			ids.WriteRune(',')
-		} else {
-			firstDone = true
-		}
 		ids.WriteString(strconv.Itoa(user.ID))
+		ids.WriteRune(',')
 	}
+	ids.WriteRune('1')
 
 	actualizedUsers, err := requestMultipleUsers(os.Getenv("USER_KEY"), ids.String())
 	if err != nil {
@@ -80,7 +76,8 @@ func userInfoActualizerHandle(c *gin.Context) {
 
 	toRefresh := make([]dto.User, 0)
 	for user := range actualizedUsers {
-		if user.ID > 0 && (users[user.ID].Name != user.Name || users[user.ID].Avatar != user.Avatar) {
+		oldUser, ok := users[user.ID]
+		if ok && (oldUser.Name != user.Name || oldUser.Avatar != user.Avatar) {
 			toRefresh = append(toRefresh, *user)
 		}
 	}

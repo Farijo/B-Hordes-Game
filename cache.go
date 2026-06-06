@@ -95,7 +95,9 @@ func getServerData(userkey string) template.JS {
 				if serverData[rsc] != nil {
 					if marsh, err := json.Marshal(serverData[rsc]); err == nil {
 						builderMtx.Lock()
-						builder.WriteString("const " + rsc + "=")
+						builder.WriteString("const ")
+						builder.WriteString(rsc)
+						builder.WriteString("=")
 						builder.Write(marsh)
 						builder.WriteByte(';')
 						builderMtx.Unlock()

@@ -40,14 +40,15 @@ func main() {
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.SetHTMLTemplate(Must(template.New("").Funcs(template.FuncMap{
-		"getAccess":  getAccess,
-		"getStatus":  getStatus,
-		"getRoles":   getRoles,
-		"dumpStruct": dumpStruct,
-		"dumpMile":   dumpMile,
-		"incr":       func(i int) int { return i + 1 },
-		"decodeGoal": decodeGoal,
-		"mkmap":      mkmap,
+		"getAccess":    getAccess,
+		"getStatus":    getStatus,
+		"getRoles":     getRoles,
+		"dumpStruct":   dumpStruct,
+		"dumpMile":     dumpMile,
+		"incr":         func(i int) int { return i + 1 },
+		"decodeGoal":   decodeGoal,
+		"mkmap":        mkmap,
+		"getAvatarURL": getAvatarURL,
 	}).ParseFS(f, "templates/*.html")))
 	r.Static("/style", "style")
 	r.Static("/script", "script")
@@ -57,6 +58,7 @@ func main() {
 
 	loadTranslations(f, availableLangs)
 	lngHandler := func(ctx *gin.Context) { ctx.Set(LNG_KEY, "@@{ISO639-1}") }
+	// lngHandler = languageSelector([]language.Tag{language.French, language.English, language.German, language.Spanish})
 
 	r.POST("/", connectionHandle)
 	r.GET("/", lngHandler, indexHandle)

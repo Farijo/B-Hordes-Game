@@ -21,7 +21,7 @@
         <a class="box" href="/user/{{ .challenge.Creator.ID }}">
             <div class="line1">@@{by}</div>
             <div class="line2">
-                <img class="avatar" src="{{ .challenge.Creator.Avatar.String }}">
+                <img class="avatar" src="{{ getAvatarURL .challenge.Creator }}">
                 <span class="name">{{ .challenge.Creator.Name }}</span>
             </div>
         </a>
@@ -70,7 +70,7 @@
             <tr class="item">
                 <td sorttable_customkey="{{ $partic.SimplifiedName }}">
                     <a href="/user/{{ $partic.ID }}">
-                    <img class="avatar" src="{{ $partic.Avatar.String }}">
+                    <img class="avatar" src="{{ getAvatarURL $partic }}">
                     <span class="name">{{ $partic.Name }}</span>
                     </a>
                 </td>
