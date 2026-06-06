@@ -383,9 +383,9 @@ func dumpMile(mile *dto.Milestone, userkey, lng string) template.HTML {
 	return template.HTML("<span>" + builder.String() + "</span>")
 }
 
-func getAvatarURL(u dto.User) string {
-	if len(u.Avatar.String) == 0 || strings.Index(u.Avatar.String, "http") == 0 {
-		return u.Avatar.String
+func getAvatarURL(url string) string {
+	if len(url) == 0 || strings.Index(url, "http") == 0 {
+		return url
 	}
-	return "https://myhordes.eu" + u.Avatar.String
+	return "https://myhordes.eu" + url
 }

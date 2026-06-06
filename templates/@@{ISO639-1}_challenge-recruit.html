@@ -15,7 +15,7 @@
         <a class="box" href="/user/{{ .challenge.Creator.ID }}">
             <div class="line1">@@{by}</div>
             <div class="line2">
-                <img class="avatar" src="{{ getAvatarURL .challenge.Creator }}">
+                <img class="avatar" src="{{ getAvatarURL .challenge.Creator.Avatar.String }}">
                 <span class="name">{{ .challenge.Creator.Name }}</span>
             </div>
         </a>
@@ -84,7 +84,7 @@
                 <tr class="item">
                     <td sorttable_customkey="{{ $result.SimplifiedName }}">
                         <a href="/user/{{ $result.ID }}">
-                        <img class="avatar" src="{{ getAvatarURL $result }}">
+                        <img class="avatar" src="{{ getAvatarURL $result.Avatar.String }}">
                         <span class="name">{{ $result.Name }}</span>
                         </a>
                     </td>
@@ -104,7 +104,7 @@
                     <tr class="item">
                         <td sorttable_customkey="{{ $invit.SimplifiedName }}">
                             <a href="/user/{{ $invit.ID }}">
-                            <img class="avatar" src="{{ getAvatarURL $invit }}">
+                            <img class="avatar" src="{{ getAvatarURL $invit.Avatar.String }}">
                             <span class="name">{{ $invit.Name }}</span>
                             </a>
                         </td>
@@ -134,7 +134,7 @@
                 <tr class="item">
                     <td sorttable_customkey="{{ $approb.SimplifiedName }}">
                         <a href="/user/{{ $approb.ID }}">
-                        <img class="avatar" src="{{ getAvatarURL $approb }}">
+                        <img class="avatar" src="{{ getAvatarURL $approb.Avatar.String }}">
                         <span class="name">{{ $approb.Name }}</span>
                         </a>
                     </td>
@@ -152,7 +152,7 @@
                 <tr class="item">
                     <td sorttable_customkey="{{ $partic.SimplifiedName }}">
                         <a href="/user/{{ $partic.ID }}">
-                        <img class="avatar" src="{{ getAvatarURL $partic }}">
+                        <img class="avatar" src="{{ getAvatarURL $partic.Avatar.String }}">
                         <span class="name">{{ $partic.Name }}</span>
                     </td>
                     <td>{{ .CreationCount }}</td>

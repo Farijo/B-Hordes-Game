@@ -46,7 +46,7 @@
         {{ range $partic := .advancement }}
         <tr class="item" onclick="toggleCheckbox(event, this)" title="{{ $partic.ID }}">
           <td sorttable_customkey="{{ $partic.SimplifiedName }}">
-            <img class="avatar" src="{{ getAvatarURL $partic }}">
+            <img class="avatar" src="{{ getAvatarURL $partic.Avatar.String }}">
             <span class="name">{{ $partic.Name }}</span>
           </td>
           <td>
