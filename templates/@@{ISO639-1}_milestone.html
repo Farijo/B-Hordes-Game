@@ -9,7 +9,7 @@
     {{ $username := .name }}
     {{ $i := 0 }}
     {{ template "@@{ISO639-1}_top-bar.html" . }}
-    <style>.circle{background: #7e4d2a center url({{.avatar}})}</style>
+    <style>.circle{background: #7e4d2a center url({{ getAvatarURL .avatar }})}</style>
     <section>
         <ul class='timeline' style="display: inherit;">
             {{ range $challenge := .milestones }}

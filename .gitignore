@@ -24,3 +24,5 @@ gen
 .vscode
 *.sh
 *.patch
+templates
+bhordesgame
