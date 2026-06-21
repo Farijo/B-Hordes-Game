@@ -377,10 +377,12 @@ func dumpMile(mile *dto.Milestone, userkey, lng string) template.HTML {
 		}
 	}
 	var builder strings.Builder
+	builder.WriteString("<span>")
 	enc := json.NewEncoder(&builder)
 	enc.SetIndent("</span><br><span>", "&nbsp;&nbsp;")
 	enc.Encode(res)
-	return template.HTML("<span>" + builder.String() + "</span>")
+	builder.WriteString("</span>")
+	return template.HTML(builder.String())
 }
 
 func getAvatarURL(url string) string {

@@ -108,6 +108,7 @@ function bindGoal(goal) {
             const ta = document.createElement('textarea');
             ta.innerHTML = goal.Custom.String;
             $(`[name=custom]:last`).val(goal.Custom.Valid ? ta.value : "").trigger('change');
+            $(`[name=count]:last`).val(goal.Amount.Valid ? goal.Amount.Int32 : "").trigger('change');
         default:
             break;
     }

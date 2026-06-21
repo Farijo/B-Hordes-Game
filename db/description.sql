@@ -39,6 +39,7 @@ CREATE TABLE goal (
     x TINYINT,
     y TINYINT,
     custom VARCHAR(128),
+    INDEX idx_goal_challenge (challenge),
     FOREIGN KEY(challenge) REFERENCES challenge(id)
 );
 CREATE TABLE validator (

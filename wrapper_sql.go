@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"unicode"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -16,10 +17,13 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-var instance *sql.DB
+var (
+	instance *sql.DB
+	once     sync.Once
+)
 
 func dbConn() (db *sql.DB) {
-	if instance == nil {
+	once.Do(func() {
 		var err error
 
 		dbDriver := "mysql"
@@ -31,7 +35,7 @@ func dbConn() (db *sql.DB) {
 		if err != nil {
 			panic(err.Error())
 		}
-	}
+	})
 	return instance
 }
 

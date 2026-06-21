@@ -55,6 +55,9 @@ func buildGoalsFromForm(types, x, y, count, val, custom []string) *[]dto.Goal {
 		case 4:
 			v.Custom.String = pop(&custom)
 			v.Custom.Valid = true
+			a, err := strconv.ParseInt(pop(&count), 10, 32)
+			v.Amount.Valid = err == nil
+			v.Amount.Int32 = int32(a)
 			continue
 		}
 		v.Entity = uint16(Ignore(strconv.ParseUint(pop(&val), 10, 16)))
