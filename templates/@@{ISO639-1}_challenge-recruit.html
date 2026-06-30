@@ -73,6 +73,12 @@
         <input style="padding:2px 5px" type="submit" value="@@{search}" />
     </form>
 
+{{ if eq $challAccess 2 }}
+    <form method="POST" action="{{ .challenge.ID }}/invite{{ .ident }}">
+        <input style="padding:2px 5px" type="submit" value="@@{invite-city}" />
+    </form>
+{{ end }}
+
     <form method="POST" action="{{ .challenge.ID }}/members{{ .ident }}" style="width: fit-content;">
         {{ $uid := .selfID }}
         {{ range $act := .action }}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
@@ -68,21 +69,18 @@ func userInfoActualizerHandle(c *gin.Context) {
 	}
 	ids.WriteRune('1')
 
-	actualizedUsers, err := requestMultipleUsers(os.Getenv("USER_KEY"), ids.String())
+	var wg sync.WaitGroup
+	actualizedUsers := make(chan *dto.User)
+	err := requestMultipleUsers(os.Getenv("USER_KEY"), ids.String(), func(u *dto.User) bool {
+		oldUser, ok := users[u.ID]
+		return ok && (oldUser.Name != u.Name || oldUser.Avatar != u.Avatar)
+	}, actualizedUsers, &wg)
 	if err != nil {
 		logger.Println(err)
 		return
 	}
 
-	toRefresh := make([]dto.User, 0)
-	for user := range actualizedUsers {
-		oldUser, ok := users[user.ID]
-		if ok && (oldUser.Name != user.Name || oldUser.Avatar != user.Avatar) {
-			toRefresh = append(toRefresh, *user)
-		}
-	}
-
-	err = insertMultipleUsers(toRefresh)
+	_, err = insertMultipleUsers(actualizedUsers)
 	if err != nil {
 		logger.Println(err)
 		return

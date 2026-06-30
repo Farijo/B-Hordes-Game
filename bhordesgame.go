@@ -88,6 +88,7 @@ func main() {
 		authorized.POST("/challenge/:id/date", challengeDateHandle)
 		authorized.POST("/challenge/:id/scan", challengeScanHandle)
 		authorized.POST("/challenge/:id/back", challengeCancelStartHandle)
+		authorized.POST("/challenge/:id/invite", challengeInviteHandle)
 		authorized.GET("/validation", lngHandler, validationHandle)
 		authorized.POST("/validation", validateGoalHandle)
 		authorized.POST("/validation/archive", archiveValidationHandle)

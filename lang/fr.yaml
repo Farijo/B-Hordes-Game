@@ -116,7 +116,7 @@ never-realized: Jamais réalisé
 confirm-end: Confirmer la fin du défi
 add-approbators: Ajouter des approbateurs
 send-invitations: Envoyer des invitations
-name-id: Nom ID
+name-id: Pseudo, ID joueur ou ID ville
 search-title: Entrer une liste de noms ou d'ids séparés par des espaces
 search: Chercher
 result: Résultat
@@ -165,3 +165,4 @@ graph: Graphique
 data: Données
 cancel: Annuler
 see-on-mh: Voir sur Myhordes
+invite-city: Inviter ma ville

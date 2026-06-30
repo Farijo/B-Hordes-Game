@@ -118,25 +118,26 @@ func queryChallenge(id, requestor int) (challenge dto.DetailedChallenge, err err
 }
 
 func insertUser(user *dto.User) error {
-	return insertMultipleUsers([]dto.User{*user})
+	ch := make(chan *dto.User, 1)
+	ch <- user
+	close(ch)
+	_, err := insertMultipleUsers(ch)
+	return err
 }
-func insertMultipleUsers(user []dto.User) error {
-	if len(user) < 1 {
-		return nil
-	}
-
+func insertMultipleUsers(user <-chan *dto.User) ([]int, error) {
 	var sqlStmt strings.Builder
 
-	sqlStmt.Grow(60 + len(user)*13 - 1 + 111)
 	sqlStmt.WriteString(`INSERT INTO user (id, name, simplified_name, avatar) VALUES `)
 
+	ids := make([]int, 0)
 	values := make([]any, 0)
 	firstDone := false
-	for _, u := range user {
+	for u := range user {
 		simplified, _, err := transform.String(*transformer(), u.Name)
 		if err != nil {
-			return err
+			return nil, err
 		}
+		ids = append(ids, u.ID)
 		u.SimplifiedName = strings.ToLower(simplified)
 		values = append(values, u.ID, u.Name, u.SimplifiedName, u.Avatar)
 		if firstDone {
@@ -146,12 +147,15 @@ func insertMultipleUsers(user []dto.User) error {
 		}
 		sqlStmt.WriteString("(?, ?, ?, ?)")
 	}
+	if !firstDone {
+		return ids, nil
+	}
 
 	sqlStmt.WriteString(`ON DUPLICATE KEY UPDATE name = VALUES(name), simplified_name = VALUES(simplified_name), avatar = VALUES(avatar)`)
 
 	_, err := dbConn().Exec(sqlStmt.String(), values...)
 
-	return err
+	return ids, err
 }
 
 func queryAllUsers(ch chan<- *dto.User) {
@@ -315,19 +319,48 @@ func queryUser(id int) (user dto.DetailedUser, err error) {
 	return
 }
 
-func queryMultipleUsers(ch chan<- *dto.DetailedUser, idents []string) {
+func queryUsers(ch chan<- *dto.DetailedUser, ids []any) (err error) {
 	defer close(ch)
+	if len(ids) == 0 {
+		return nil
+	}
+	placeholders := strings.Repeat(",?", len(ids))
+	rows, err := dbConn().Query(`SELECT user.id, user.name, simplified_name, avatar, COUNT(DISTINCT challenge.id), COUNT(DISTINCT participant.challenge)
+							  FROM user
+							  LEFT JOIN challenge ON user.id = challenge.creator
+							  LEFT JOIN participant ON participant.user = user.id
+							  WHERE user.id IN (0`+placeholders+`)
+							  GROUP BY user.id, user.name
+							  ORDER BY simplified_name`, ids...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		user := &dto.DetailedUser{}
+		if err := rows.Scan(
+			&user.ID,
+			&user.Name,
+			&user.SimplifiedName,
+			&user.Avatar,
+			&user.CreationCount,
+			&user.ParticipationCount,
+		); err != nil {
+			return err
+		}
+		ch <- user
+	}
+	return rows.Err()
+}
+
+func searchUserIDs(idents []string) []int {
 	if len(idents) == 0 {
-		return
+		return []int{}
 	}
 
 	var sqlStmt strings.Builder
-	sqlStmt.Grow(293 + 36*len(idents) + 34)
-	sqlStmt.WriteString(`SELECT user.id, user.name, simplified_name, avatar, COUNT(DISTINCT challenge.id), COUNT(DISTINCT participant.challenge)
-				FROM user
-				LEFT JOIN challenge ON user.id = challenge.creator
-				LEFT JOIN participant ON participant.user = user.id
-				WHERE user.id IN (SELECT id FROM user WHERE `)
+	sqlStmt.Grow(26 + 36*len(idents) + 6)
+	sqlStmt.WriteString(`SELECT id FROM user WHERE `)
 	values := make([]any, 0, 2*len(idents))
 	for _, ident := range idents {
 		if len(ident) > 1 {
@@ -336,30 +369,29 @@ func queryMultipleUsers(ch chan<- *dto.DetailedUser, idents []string) {
 		}
 	}
 	if len(values) == 0 {
-		return
+		return []int{}
 	}
-	sqlStmt.WriteString("FALSE) GROUP BY user.id, user.name")
+	sqlStmt.WriteString("FALSE")
 
 	rows, err := dbConn().Query(sqlStmt.String(), values...)
 	if err != nil {
 		logger.Println(err)
-		return
+		return nil
 	}
 	defer rows.Close()
+
+	res := []int{}
+
 	for rows.Next() {
-		var user dto.DetailedUser
-		if err := rows.Scan(
-			&user.ID,
-			&user.Name,
-			&user.SimplifiedName,
-			&user.Avatar,
-			&user.CreationCount,
-			&user.ParticipationCount); err != nil {
+		var id int
+		if err := rows.Scan(&id); err != nil {
 			logger.Println(err)
-			return
+			return nil
 		}
-		ch <- &user
+		res = append(res, id)
 	}
+
+	return res
 }
 
 func queryChallengesRelatedTo(ch chan<- *dto.DetailedChallenge, userId int, viewer int) {
@@ -1191,5 +1223,34 @@ func removeChallengeStart(challenge, requestor int) error {
 	WHERE creator = ?
 	AND id = ?
 	AND NOT EXISTS (SELECT 1 FROM success JOIN goal ON success.goal = goal.id AND goal.challenge = ?)`, requestor, challenge, challenge)
+	return err
+}
+
+func inviteMultipleUsers(challenge, requestor int, users []int) error {
+	if len(users) == 0 {
+		return nil
+	}
+	values := make([]any, len(users)+2)
+	var query strings.Builder
+	query.Grow(79 + len(users)*18 + 81)
+	query.WriteString(`INSERT INTO invitation
+		SELECT n.n, id
+		FROM challenge
+		CROSS JOIN ( SELECT ? AS n`)
+	for i, u := range users[1:] {
+		values[i] = u
+		query.WriteString(` UNION ALL SELECT ? `)
+	}
+	query.WriteString(` ) n
+		WHERE creator = ?
+		AND id = ?
+		AND flags & 0x33 = 0x22
+		AND start_date IS NULL
+		ON DUPLICATE KEY UPDATE user=user`)
+	values[len(users)-1] = users[0]
+	values[len(users)] = requestor
+	values[len(users)+1] = challenge
+
+	_, err := dbConn().Exec(query.String(), values...)
 	return err
 }

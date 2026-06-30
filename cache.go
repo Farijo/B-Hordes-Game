@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"html/template"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -16,6 +17,45 @@ const (
 
 var sessions map[string]int = make(map[string]int, 10)
 var calls map[string][]int64 = make(map[string][]int64, 10)
+
+const (
+	SEARCH_CACHE_TTL = 300 * time.Second
+)
+
+type searchCacheEntry struct {
+	results   []any
+	timestamp time.Time
+}
+
+var (
+	searchCache   = make(map[string]searchCacheEntry, 64)
+	searchCacheMu sync.Mutex
+)
+
+func searchCacheKey(idents []string) string {
+	sorted := make([]string, len(idents))
+	copy(sorted, idents)
+	sort.Strings(sorted)
+	return strings.Join(sorted, ",")
+}
+
+func searchCacheGet(idents []string) ([]any, bool) {
+	key := searchCacheKey(idents)
+	now := time.Now()
+	searchCacheMu.Lock()
+	defer searchCacheMu.Unlock()
+	if entry, ok := searchCache[key]; ok && now.Sub(entry.timestamp) < SEARCH_CACHE_TTL {
+		return entry.results, true
+	}
+	return nil, false
+}
+
+func searchCacheSet(idents []string, results []any) {
+	key := searchCacheKey(idents)
+	searchCacheMu.Lock()
+	defer searchCacheMu.Unlock()
+	searchCache[key] = searchCacheEntry{results: results, timestamp: time.Now()}
+}
 
 func registerCall(key string) error {
 	now := time.Now().Unix()

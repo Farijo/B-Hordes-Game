@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -54,27 +55,63 @@ func challengeHandle(c *gin.Context) {
 		if selfChallenge {
 			go func() {
 				idents := strings.FieldsFunc(c.Query("ident"), func(r rune) bool { return r == ',' || r == ' ' })
-				// Problem of this is making a request to MH on each reload with "ident" set
-				// and the request would probably be useless (ie : we already have the info)
-				//
-				// if cookieErr == nil {
-				// 	realIds := make([]string, 0)
-				// 	for _, maybeId := range idents {
-				// 		if _, err := strconv.Atoi(maybeId); err == nil {
-				// 			realIds = append(realIds, maybeId)
-				// 		}
-				// 	}
-				// 	if len(realIds) > 0 {
-				// 		if users, err := requestMultipleUsers(key, realIds); err == nil {
-				// 			if err := insertMultipleUsers(users); err != nil {
-				// 				logger.Println(err)
-				// 			}
-				// 		} else {
-				// 			logger.Println(err)
-				// 		}
-				// 	}
-				// }
-				queryMultipleUsers(searchResults, idents)
+				if len(idents) == 0 {
+					close(searchResults)
+					return
+				}
+
+				concerned, ok := searchCacheGet(idents)
+				if !ok {
+					// Étape 1 : trouver les id des user qu'on a déjà en DB
+					ids := searchUserIDs(idents)
+
+					var unknown strings.Builder
+					var wg sync.WaitGroup
+					firstDone := false
+
+					// Étape 2 : fetch les user des villes
+					userChan := make(chan *dto.User)
+					for _, ident := range idents {
+						if id, atoiErr := strconv.Atoi(ident); atoiErr == nil {
+							wg.Add(1)
+							go func() {
+								requestCity(key, id, userChan)
+								wg.Done()
+							}()
+							if !slices.Contains(ids, id) {
+								if firstDone {
+									unknown.WriteRune(',')
+								} else {
+									firstDone = true
+								}
+								unknown.WriteString(strconv.Itoa(id))
+							}
+						}
+					}
+					// Étape 3 : fetch les users qu'on a pas
+					if err := requestMultipleUsers(key, unknown.String(), nil, userChan, &wg); err != nil {
+						logger.Println(err)
+					}
+
+					// Étape 3 : insérer les users
+					newIDs, err := insertMultipleUsers(userChan)
+					if err != nil {
+						logger.Println(err)
+						return
+					}
+
+					lids := len(ids)
+					concerned = make([]any, lids+len(newIDs))
+					for i, v := range ids {
+						concerned[i] = v
+					}
+					for i, v := range newIDs {
+						concerned[i+lids] = v
+					}
+					searchCacheSet(idents, concerned)
+				}
+				// Étape 4 : SELECT final en DB sur tous les ID
+				queryUsers(searchResults, concerned)
 			}()
 			go queryChallengeInvitations(invitationResults, challenge.ID)
 		} else {
@@ -324,7 +361,10 @@ func challengeScanHandle(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 		return
 	}
-	milestones, err := requestMultipleMilestones(c.GetString("key"), userIDs)
+
+	milestones := make(chan *FlattenMilestone)
+	var wg sync.WaitGroup
+	err = requestMultipleMilestones(c.GetString("key"), userIDs, milestones, &wg)
 	if err != nil {
 		logger.Println(err)
 		if err.Error() == "too many request" {
@@ -335,7 +375,6 @@ func challengeScanHandle(c *gin.Context) {
 		return
 	}
 
-	var wg sync.WaitGroup
 	for ms := range milestones {
 		wg.Add(1)
 		go func(milestone *dto.Milestone, wg *sync.WaitGroup) {
@@ -359,6 +398,32 @@ func challengeCancelStartHandle(c *gin.Context) {
 	}
 
 	err = removeChallengeStart(id, c.GetInt("uid"))
+	if err != nil {
+		logger.Println(err)
+		c.Status(http.StatusForbidden)
+		return
+	}
+
+	c.Redirect(http.StatusFound, fmt.Sprintf("/challenge/%d", id))
+}
+
+func challengeInviteHandle(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		logger.Println(err)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	userToInsert := make(chan *dto.User)
+	go requestFellowCitizens(c.GetString("key"), userToInsert)
+	ids, err := insertMultipleUsers(userToInsert)
+	if err != nil {
+		logger.Println(err)
+		c.Status(http.StatusNotFound)
+		return
+	}
+	err = inviteMultipleUsers(id, c.GetInt("uid"), ids)
 	if err != nil {
 		logger.Println(err)
 		c.Status(http.StatusForbidden)
